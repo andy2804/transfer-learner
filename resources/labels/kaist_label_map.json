@@ -1,0 +1,26 @@
+{
+  "1": {
+    "name": "motorcycle",
+    "id": 1
+  },
+  "2": {
+    "name": "bicycle",
+    "id": 2
+  },
+  "3": {
+    "name": "person",
+    "id": 3
+  },
+  "4": {
+    "name": "truck",
+    "id": 4
+  },
+  "5": {
+    "name": "bus",
+    "id": 5
+  },
+  "6": {
+    "name": "car",
+    "id": 6
+  }
+}

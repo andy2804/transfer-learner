@@ -1,0 +1,25 @@
+# General
+.catkin_tools/
+.idea
+.metadata/
+RemoteSystemsTempFiles/
+
+# Pretrained network
+resources/nets_ckpt/
+
+# Recordings
+zauron_eye/recordings/
+rosbag_converter/credentials.json
+rosbag_converter/testing/credentials.json
+
+# Python
+__pychache__/
+*/__pychache__/
+*.pyc
+
+# CMake
+cmake-build-debug/
+cmake-build-release/
+
+# Google api credentials
+*/credentials.json
