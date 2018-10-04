@@ -8,10 +8,10 @@ from datetime import timedelta
 
 import tensorflow as tf
 
-PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
+PROJECT_ROOT = os.getcwd()[:os.getcwd().index('dataset')]
 sys.path.append(PROJECT_ROOT)
 
-from objdetection.kaist.groundtruth_generator import run
+from dataset.kaist import run
 
 flags = tf.flags
 FLAGS = flags.FLAGS

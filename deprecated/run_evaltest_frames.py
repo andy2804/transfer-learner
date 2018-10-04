@@ -7,7 +7,7 @@ from pprint import pprint
 
 import tensorflow as tf
 
-from objdetection.meta.performances import metrics_tf
+from objdetection.meta.metrics import metrics_tf
 from objdetection.meta.evaluator.evaluator import EvaluatorFrozenGraph
 
 

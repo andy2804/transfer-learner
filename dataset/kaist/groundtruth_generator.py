@@ -6,16 +6,16 @@ import tensorflow as tf
 from PIL import Image
 from matplotlib import pyplot as plt
 
-from objdetection.kaist.utils_readio import read_filenames
+from dataset.kaist.utils_readio import read_filenames
 from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
-from objdetection.meta.detector.objdet_frozengraph import DetectionGraph
+from objdetection.meta.detector.detector import Detector
 from objdetection.meta.utils_labeler.static_helper import load_labels
 from objdetection.meta.visualisation.static_helper import visualize_rgb_detections
 
 
 def run(flags):
     files = read_filenames(flags.dataset_dir)
-    detector = DetectionGraph(
+    detector = Detector(
             arch=flags.network_model,
             labels_net_arch=flags.labels_net,
             labels_output=flags.labels_out)

@@ -6,7 +6,7 @@ from pprint import pprint
 import tensorflow as tf
 
 from objdetection.rgb2events.nets import network_factory
-from objdetection.meta.performances import metrics_tf
+from objdetection.meta.metrics import metrics_tf
 
 
 def performance_update(performance, perf_out):

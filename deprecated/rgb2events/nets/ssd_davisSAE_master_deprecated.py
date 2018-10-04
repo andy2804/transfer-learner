@@ -1,109 +1,38 @@
-from collections import namedtuple
-
+"""
+author: az
+"""
 import numpy as np
 import tensorflow as tf
 
 from objdetection.rgb2events.nets import ssd_common
-from objdetection.meta.performances import metrics_tf
+from objdetection.meta.metrics import metrics_tf
+from objdetection.meta.datasets import data_augmenter_sae
 from objdetection.deprecated.encoder_tfrecord_deprecated import \
     decode_tfrecord
-
-SSDParams = namedtuple('SSDParameters', ['input_shape',
-                                         'input_format',
-                                         'num_classes',
-                                         'no_annotation_label',
-                                         'prior_scaling',
-                                         'featmap_layers',
-                                         'featmap_scales_range',
-                                         'aspectratio_bias'])
-SSDOptions = namedtuple('SSDOptions', ['iou_thresh',
-                                       'iou_neg_mining_thresh',
-                                       'neg_pos_ratio',
-                                       'weight_decay',
-                                       'loc_loss_weight',
-                                       'optimizer_name',
-                                       'learning_rate',
-                                       'minimizer_eps',
-                                       'nms_iou_thresh',
-                                       'nms_maxN',
-                                       'gt_size',
-                                       'pd_size'
-                                       ])
+from objdetection.meta.utils_generic.magic_constants import *
 
 
 # =========================================================================== #
 # SSD class definition.
 # =========================================================================== #
 class SSDNet:
-    """Implementation of the SSD for DAVIS c
-    The default features layers with 240x180 image input are:
-
-    Center offset, width and height are relative to the unitary cell of the 
-    feature map
-    featmap_layers{"name": {'size': (width, height),
-                            'dbox':[(Xcenter_offset, Ycenter_offset, width, 
-                            height),(...)]}
-                            }
+    """ Implementation of the SSD for DAVIS c
     """
-    default_params = SSDParams(
-            input_shape=(None, 180, 240, 1),
-            input_format='HWC',
-            num_classes=6 + 1,
-            no_annotation_label=0,
-            prior_scaling=(0.1, 0.1, 0.2, 0.2),
-            featmap_layers={
-                # size (W,H), dbox [(xcent_offset, y_cent_offset, w_fmscaled,
-                #  h_fmscaled),..]
-                'block4': {'size':         (19, 19),
-                           'aspect_ratio': (1, 1, 2, 3, 1 / 2, 1 / 3)
-                           },
-                'block5': {'size':         (10, 10),
-                           'aspect_ratio': (1, 1, 2, 3, 1 / 2, 1 / 3)
-                           },
-                'block6': {'size':         (5, 5),
-                           'aspect_ratio': (1, 1, 2, 3, 1 / 2, 1 / 3)
-                           },
-                'block7': {'size':         (3, 3),
-                           'aspect_ratio': (1, 1, 2, 3, 1 / 2, 1 / 3)
-                           },
-                'block8': {'size':         (1, 1),
-                           'aspect_ratio': (1, 2, 3, 1 / 2, 1 / 3)
-                           }
-            },
-            featmap_scales_range=(0.25, 0.925),
-            aspectratio_bias=240 / 180
-    )
-    default_options = SSDOptions(
-            # Encoding params
-            iou_thresh=0.5,
-            iou_neg_mining_thresh=0.5,
-            # Options for optimization
-            neg_pos_ratio=3,  # negative:positive
-            weight_decay=0.0001,
-            loc_loss_weight=3.,
-            optimizer_name='Adam',
-            minimizer_eps=1e-7,
-            learning_rate=0.0001,
-            # Class confidence threshold to count as detection
-            nms_iou_thresh=0.10,
-            nms_maxN=15,
-            # other parameters
-            gt_size=25,
-            pd_size=100
-    )
 
     def __init__(self, params=None, options=None, conf_thresh_cutoff=.5):
-        """Init the SSD net with some parameters. Use the default ones
-        if none provided.
+        """Init the SSD net with some parameters.
+        Use the default ones if none provided.
+        :param params:
+        :param options:
         """
-        if isinstance(params, SSDParams):
+        if isinstance(params, LearnParams):
             self._params = params
         else:
-            self._params = SSDNet.default_params
-        if isinstance(options, SSDOptions):
+            self._params = DEFAULT_LEARN_PARAMS
+        if isinstance(options, ObjDetParams):
             self.opt = options
         else:
-            self.opt = SSDNet.default_options
+            self.opt = DEFAULT_OBJDET_PAR
         self.conf_thresh_cutoff = conf_thresh_cutoff
 
         # ============= Some useful numbers architecture dependent
@@ -117,7 +46,7 @@ class SSDNet:
         self._predloc_tot_n = self._dboxes_tot_n * 4
         self._dboxes_lookup_dict, self._dboxes_lookup_tensor = \
             self._build_dboxes_table()
-        self.augmenter = ssd_common.DataAugSAE(
+        self.augmenter = data_augmenter_sae.DataAugSae(
                 flipX_bool=True, flip_polarity_bool=True,
                 random_quant_bool=True,
                 sample_distorted_bbox_bool=False, sample_time_axis_bool=False,
@@ -153,10 +82,11 @@ class SSDNet:
 
     # =================== Parsing functions for tensorflow records
     def parser_input_function(self, example_proto):
-        """
-        Input function to decode TFrecords and matching of dboxes.
+        """Input function to decode TFrecords and matching of dboxes.
         Data augmentation and matching with default boxes is performed.
-        :return: dictionary of elements to feed the network.
+
+        :param example_proto: single element of the batch for read in
+        :return : a dict of elements to feed the network.
         """
         frame, events, xcent, ycent, w, h, gt_labels = decode_tfrecord(
                 example_proto)
@@ -188,9 +118,7 @@ class SSDNet:
         self.events_in
         expected scaled between [-1, 1]
         :param dropout_keep_prob: dropout probability
-        :param prediction_fn: useles?!?
         :param weight_decay: default weight decay for regularization
-        :param reuse: ?!
         :param scope: scope_name
         :return: raw predictions for each default box: both classification & 
         localization
@@ -209,7 +137,7 @@ class SSDNet:
                                    activation=None, padding='SAME',
                                    name="conv_1_1")
             net = tf.layers.conv2d(net, 64, [3, 3], strides=2,
-                                   activation=tf.nn.crelu, padding='VALID',
+                                   activation=tf.nn.elu, padding='VALID',
                                    name="conv_1_2")
             net = tf.layers.max_pooling2d(net, [2, 2], strides=1,
                                           padding='VALID', name='pool1')
@@ -220,8 +148,8 @@ class SSDNet:
                                    activation=None, padding='VALID',
                                    name="conv_2_1")
             net = tf.nn.lrn(net)
-            net = tf.layers.conv2d(net, 128, [3, 3], strides=1,
-                                   activation=tf.nn.elu, padding='VALID',
+            net = tf.layers.conv2d(net, 64, [3, 3], strides=1,
+                                   activation=tf.nn.crelu, padding='VALID',
                                    name="conv_2_2")
             net = tf.layers.max_pooling2d(net, [2, 2], strides=2,
                                           padding='VALID', name='pool2')
@@ -234,7 +162,7 @@ class SSDNet:
                                    activation=None, padding='VALID',
                                    name="conv_3_1")
             net = tf.layers.conv2d(net, 128, [3, 5], strides=1,
-                                   activation=tf.nn.elu, padding='VALID',
+                                   activation=tf.nn.crelu, padding='VALID',
                                    name="conv_3_2")
             net = tf.layers.max_pooling2d(net, [2, 2], strides=2,
                                           padding='VALID', name='pool3')
@@ -286,28 +214,31 @@ class SSDNet:
             tf.summary.histogram(end_points[key].op.name + "/activations",
                                  end_points[key], collections=['training'])
         # Prediction and localisations layers.
-        predict_conf = []
-        predict_localiz = []
+        predicted_conf = []
+        predicted_localiz = []
         for lay_name, layer in sorted(self._params.featmap_layers.items()):
             with tf.variable_scope(lay_name + '_featuremap'):
-                p_conf, p_loc = self._ssd_featuremap_hook(end_points[lay_name],
-                                                          layer,
-                                                          self._params.num_classes)
-            predict_conf.append(p_conf)
-            predict_localiz.append(p_loc)
-        predict_conf = tf.concat(predict_conf, axis=1)
-        predict_localiz = tf.concat(predict_localiz, axis=1)
-        return predict_conf, predict_localiz, end_points
+                p_conf, p_loc = self._ssd_featuremap_hook(
+                        end_points[lay_name],
+                        layer,
+                        self._params.num_classes)
+            predicted_conf.append(p_conf)
+            predicted_localiz.append(p_loc)
+        predicted_conf = tf.concat(predicted_conf, axis=1)
+        predicted_localiz = tf.concat(predicted_localiz, axis=1)
+        return predicted_conf, predicted_localiz, end_points
 
     @staticmethod
     def _ssd_featuremap_hook(feature_map, fm_param, n_classes):
-        """
-        Performs dboxes classification and localization for a feature map.
+        """Performs dboxes classification and localization for a feature map.
+
         :param feature_map:
+        :type feature_map: test
         :param fm_param:
         :param n_classes:
         :return: predicted confidence, and predicted localization for the 
         feature map.
+
         """
         pred_conf = tf.layers.conv2d(feature_map, (
                 len(fm_param['aspect_ratio']) * n_classes), [3, 3],
@@ -428,14 +359,14 @@ class SSDNet:
     # =================== Functional definition of SSD Davis optimization 
     # process
     def _build_optimizer(self, ):
-        """
-        Set up the optimization routine
-        :return optimization step handle
+        """	Set up the optimization routine
+
+        @return: optimization step handle
         """
         with tf.name_scope("train"):
             learn_rate = tf.train.exponential_decay(
-                    self.opt.learning_rate, decay_rate=0.98,
-                    decay_steps=40000, global_step=self.global_step)
+                    self.opt.learning_rate, decay_rate=0.95,
+                    decay_steps=75000, global_step=self.global_step)
             # Binding loss to optimizer
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops):
@@ -456,11 +387,11 @@ class SSDNet:
 
     # =================== Utility building functions
     def _build_dboxes_table(self, ):
-        """
-        Build a look up table of all the default boxes for fast encoding and 
-        decoding.
+        """ Build a look up table of all the default boxes for fast encoding 
+        and decoding.
         It returns two different format of the same thing.
-        :return:
+
+       :returns :
             dboxes_dict['layer'] = [(x_center, y_center, w, h), (x_center, 
             y_center, w, h),...]
             dboxes_tensor = [dboxes_n, 4] with format (x_center, y_center, w, h)
@@ -515,14 +446,17 @@ class SSDNet:
     # ====== Real inference for testing, input: events -> output: image with 
     # boxes
     def _decode_predictions(self, ):
-        """
-        Takes the raw output of the network and formats it to absolute 
+        """ Takes the raw output of the network and formats it to absolute 
         coordinates
-        :return:
-        classes: tensor [batch; dboxes_n]
-        scores: tensor [batch; dboxes_n]
-        boxes: tensor [batch; dboxes_n; 4](box format [ymin, xmin, ymax, xmax])
+
+        :return classes: [batch; dboxes_n]
+        :rtype classes: tensor
+        :return scores: [batch; dboxes_n]
+        :rtype scores: tensor
+        :return boxes: [batch; dboxes_n; 4](box format [ymin, xmin, ymax, xmax])
+        :rtype boxes: tensor
         """
+        # todo check return doc for multiple items
         with tf.name_scope('decode_predictions'):
             logits = tf.reshape(self.y_pred_conf, [-1, self._dboxes_tot_n,
                                                    self._params.num_classes])
@@ -544,9 +478,9 @@ class SSDNet:
         return classes, scores, boxes
 
     def _final_inference(self, ):
-        """
-        Runs nms across batches
-        :return: events and final output of classes, scores, boxes
+        """ Runs nms across batches
+
+        :returns : events and final output of classes, scores, boxes
         """
         with tf.name_scope('final_inference'):
             def single_batch_nms(classes_in, scores_in, boxes_in):
@@ -586,9 +520,9 @@ class SSDNet:
         return events, res_cla, res_sco, res_box
 
     def _fast_inference(self, ):
-        """
-        Runs nms for a batch of dimension 1
-        :return: events and final output of classes, scores, boxes
+        """ Runs nms for a batch of dimension 1
+
+        :returns: events and final output of classes, scores, boxes
         """
         with tf.name_scope('fast_inference'):
             # todo we can still make it faster using 'ad hoc' decode predictions

@@ -7,7 +7,7 @@ import sys
 
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('operating_domain')]
 sys.path.append(PROJECT_ROOT)
-from operating_domain.day_vs_night.histogram_svm import SvmDayNight
+from objdetection.deprecated.operating_domain.day_vs_night import SvmDayNight
 
 
 def _parse_input():

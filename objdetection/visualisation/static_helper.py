@@ -305,7 +305,7 @@ def visualize_points(imgs_input, points, scale=1):
             cv2.waitKey(33)
 
 
-def visualize_rgb_detections(img, obj_detected, labels=None, agnostic_mode=False):
+def visualize_detections(img, obj_detected, labels=None, agnostic_mode=False):
     """ Visualization of the results of a detection.
     :param agnostic_mode:
     :param labels:

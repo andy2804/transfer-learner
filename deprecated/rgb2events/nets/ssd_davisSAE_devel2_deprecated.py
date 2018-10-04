@@ -4,7 +4,9 @@ import numpy as np
 import tensorflow as tf
 
 from objdetection.rgb2events.nets import ssd_common
-from objdetection.meta.performances import metrics_tf
+from objdetection.meta.metrics import metrics_tf
+from objdetection.deprecated.encoder_tfrecord_deprecated import \
+    decode_tfrecord
 
 SSDParams = namedtuple('SSDParameters', ['input_shape',
                                          'input_format',
@@ -52,7 +54,7 @@ class SSDNet:
             featmap_layers={
                 # size (W,H), dbox [(xcent_offset, y_cent_offset, w_fmscaled,
                 #  h_fmscaled),..]
-                'block4': {'size':         (22, 22),
+                'block4': {'size':         (19, 19),
                            'aspect_ratio': (1, 1, 2, 3, 1 / 2, 1 / 3)
                            },
                 'block5': {'size':         (10, 10),
@@ -68,8 +70,8 @@ class SSDNet:
                            'aspect_ratio': (1, 2, 3, 1 / 2, 1 / 3)
                            }
             },
-            featmap_scales_range=(0.225, 0.95),
-            aspectratio_bias=1
+            featmap_scales_range=(0.25, 0.925),
+            aspectratio_bias=240 / 180
     )
     default_options = SSDOptions(
             # Encoding params
@@ -77,17 +79,17 @@ class SSDNet:
             iou_neg_mining_thresh=0.5,
             # Options for optimization
             neg_pos_ratio=3,  # negative:positive
-            weight_decay=0.00005,
+            weight_decay=0.0001,
             loc_loss_weight=3.,
             optimizer_name='Adam',
             minimizer_eps=1e-7,
             learning_rate=0.0001,
             # Class confidence threshold to count as detection
-            nms_iou_thresh=0.25,
+            nms_iou_thresh=0.10,
             nms_maxN=15,
             # other parameters
             gt_size=25,
-            pd_size=50
+            pd_size=100
     )
 
     def __init__(self, params=None, options=None, conf_thresh_cutoff=.5):
@@ -118,8 +120,8 @@ class SSDNet:
         self.augmenter = ssd_common.DataAugSAE(
                 flipX_bool=True, flip_polarity_bool=True,
                 random_quant_bool=True,
-                sample_distorted_bbox_bool=True, sample_time_axis_bool=True
-        )
+                sample_distorted_bbox_bool=False, sample_time_axis_bool=False,
+                random_yshift_bool=True)
         # ============= Placeholders for the model inputs
         self.global_step = tf.Variable(0, trainable=False)
         self.events_in = tf.placeholder(
@@ -179,7 +181,7 @@ class SSDNet:
                 }
 
     # =================== Functional definition of SSD Davis network
-    def _inference(self, dropout_keep_prob=0.3, weight_decay=0.0001,
+    def _inference(self, dropout_keep_prob=0.35, weight_decay=0.0001,
                    scope='ssd_davis'):
         """
         Forward pass through the network, input through placeholder: 
@@ -199,14 +201,15 @@ class SSDNet:
                                regularizer=tf.contrib.layers.l2_regularizer(
                                        weight_decay),
                                initializer=tf.contrib.layers.xavier_initializer()):
-            # Resize
-            net = tf.image.resize_bilinear(self.events_in, size=[240, 240])
+            # Prescaling
+            # nope
             # Block 1.
-            net = tf.layers.conv2d(net, 64, [3, 3], strides=1, use_bias=False,
-                                   activation=None, padding='VALID',
+            net = tf.layers.conv2d(self.events_in, 64, [3, 3], strides=1,
+                                   use_bias=False,
+                                   activation=None, padding='SAME',
                                    name="conv_1_1")
             net = tf.layers.conv2d(net, 64, [3, 3], strides=2,
-                                   activation=tf.nn.elu, padding='VALID',
+                                   activation=tf.nn.crelu, padding='VALID',
                                    name="conv_1_2")
             net = tf.layers.max_pooling2d(net, [2, 2], strides=1,
                                           padding='VALID', name='pool1')
@@ -225,14 +228,14 @@ class SSDNet:
             end_points['block2'] = net
 
             # Block 3.
-            net = tf.layers.conv2d(net, 128, [3, 3], strides=1, use_bias=False,
-                                   activation=None, padding='VALID',
-                                   name="conv_3_1")
-            net = tf.layers.conv2d(net, 256, [3, 3], strides=1,
-                                   activation=tf.nn.elu, padding='VALID',
-                                   name="conv_3_2")
             net = tf.layers.dropout(net, rate=dropout_keep_prob,
                                     training=self.is_training, name="dropout_3")
+            net = tf.layers.conv2d(net, 256, [3, 3], strides=1, use_bias=False,
+                                   activation=None, padding='VALID',
+                                   name="conv_3_1")
+            net = tf.layers.conv2d(net, 128, [3, 5], strides=1,
+                                   activation=tf.nn.elu, padding='VALID',
+                                   name="conv_3_2")
             net = tf.layers.max_pooling2d(net, [2, 2], strides=2,
                                           padding='VALID', name='pool3')
             end_points['block3'] = net
@@ -241,9 +244,11 @@ class SSDNet:
             # Local response normalization
             # net = tf.nn.lrn(net)
             # Padding
+            net = tf.pad(net, [[0, 0], [2, 2], [1, 1], [0, 0]], mode='CONSTANT',
+                         name="padding_4_0", constant_values=0)
             net = tf.layers.conv2d(net, 128, 1, strides=1, padding="VALID",
                                    name="conv_4_1")
-            net = tf.layers.conv2d(net, 256, [3, 3], dilation_rate=2,
+            net = tf.layers.conv2d(net, 256, [3, 5], dilation_rate=2,
                                    activation=None, padding='VALID',
                                    name="conv_4_2")
             # ====================== Feature map
@@ -251,7 +256,7 @@ class SSDNet:
             end_points['block4'] = net
             net = tf.layers.conv2d(net, 128, 1, strides=1, padding="VALID",
                                    name="conv_5_1")
-            net = tf.layers.conv2d(net, 256, [3, 3], strides=2, padding="VALID",
+            net = tf.layers.conv2d(net, 256, [3, 3], strides=2, padding="SAME",
                                    name="conv_5_2")
             # ====================== Feature map
             net = tf.nn.lrn(net)
@@ -429,8 +434,8 @@ class SSDNet:
         """
         with tf.name_scope("train"):
             learn_rate = tf.train.exponential_decay(
-                    self.opt.learning_rate, decay_rate=0.95,
-                    decay_steps=50000, global_step=self.global_step)
+                    self.opt.learning_rate, decay_rate=0.98,
+                    decay_steps=40000, global_step=self.global_step)
             # Binding loss to optimizer
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops):

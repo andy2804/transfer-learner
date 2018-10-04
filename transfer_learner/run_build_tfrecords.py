@@ -9,7 +9,7 @@ from datetime import timedelta
 
 import tensorflow as tf
 
-PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
+PROJECT_ROOT = os.getcwd()[:os.getcwd().index('transfer_learner')]
 sys.path.append(PROJECT_ROOT)
 from objdetection.rgb2ir.tfrecords_builder.builder_tfrecords import run_conversion
 

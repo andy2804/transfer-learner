@@ -17,7 +17,7 @@ import tensorflow as tf
 sys.path.append(os.getcwd()[:os.getcwd().index('objdetection')])
 from objdetection.deprecated import (encoder_tfrecord_deprecated, input_formatter_deprecated,
                                      stats_logger_deprecated, load_recording_deprecated)
-from objdetection.meta.detector import objdet_frozengraph
+from objdetection.meta.detector import detector
 from objdetection.deprecated.detection_filter_deprecated import DetectionFilter
 
 # ========= Extras for plotting
@@ -187,7 +187,7 @@ def run_tfrecords_builder(arch_to_load=2):
                   os.listdir(RECORDINGS_PATH)]
     shuffle(recordings)
     # Maybe download and load frozen graph
-    graph = objdet_frozengraph.DetectionGraph(arch=arch_to_load)
+    graph = detector.Detector(arch=arch_to_load)
     loader = load_recording_deprecated.Loader
     formatter = input_formatter_deprecated.SAE(EVENTS_FORMAT,
                                                time_span=EVENTS_FORMAT_TIMESPAN)
