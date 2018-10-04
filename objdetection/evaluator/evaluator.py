@@ -14,8 +14,8 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 
 from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
-from objdetection.meta.detector.objdet_frozengraph import ARCH_DICT, DetectionGraph
-from objdetection.meta.performances import metrics_np
+from objdetection.meta.detector.detector import ARCH_DICT, Detector
+from objdetection.meta.metrics import metrics_np
 from objdetection.meta.visualisation.plot_mAP_evaluation import plot_performance_metrics
 from objdetection.meta.visualisation.static_helper import \
     visualize_boxes_and_labels_on_image_array
@@ -23,7 +23,7 @@ from objdetection.meta.visualisation.static_helper import visualize_stereo_image
 from objdetection.rgb2ir.sheets_interface import GoogleSheetsInterface
 
 
-class EvaluatorFrozenGraph(DetectionGraph):
+class EvaluatorFrozenGraph(Detector):
     def __init__(self,
                  net_arch,
                  output_dir,

@@ -8,7 +8,7 @@ import time
 from datetime import timedelta
 from pprint import pprint
 
-from objdetection.meta.detector.objdet_frozengraph import ARCH_DICT
+from objdetection.meta.detector.detector import ARCH_DICT
 from objdetection.rgb2ir.sheets_interface import GoogleSheetsInterface
 
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]

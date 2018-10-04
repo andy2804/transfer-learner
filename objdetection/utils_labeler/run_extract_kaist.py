@@ -8,8 +8,8 @@ from PIL import Image
 
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
 sys.path.append(PROJECT_ROOT)
-from objdetection.kaist.utils_readio import read_filenames
-from objdetection.meta.detector.objdet_frozengraph import DetectionGraph
+from dataset.kaist.utils_readio import read_filenames
+from objdetection.meta.detector.detector import Detector
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     img_pairs_empty, img_pairs_full = [], []
 
     if biased_sampling:
-        detector = DetectionGraph(arch=2)
+        detector = Detector(arch=2)
         for img_pair in img_pairs[:]:
             img = np.array(Image.open(img_pair[0]))
             obj_detected = detector.run_inference_on_img(img)

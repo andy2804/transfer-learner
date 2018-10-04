@@ -49,7 +49,7 @@ LABELS_DIR = "resources/labels/"
 # =======================
 
 
-class DetectionGraph:
+class Detector:
     def __init__(self,
                  arch=2,
                  download_base='http://download.tensorflow.org/models/object_detection/',
@@ -262,5 +262,5 @@ class DetectionGraph:
 
 if __name__ == '__main__':
     print("This is only for testing, do not run as main!")
-    det_graph = DetectionGraph(arch=2)
+    det_graph = Detector(arch=2)
     print("Test ended")

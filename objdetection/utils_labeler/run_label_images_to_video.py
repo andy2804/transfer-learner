@@ -16,9 +16,9 @@ from objdetection.meta.evaluator.eval_frozengraph import _normalize_image
 from objdetection.meta.visualisation.static_helper import \
     (visualize_boxes_and_labels_on_image_array,
      add_text_overlay)
-from objdetection.meta.visualisation.vis_helper import compose_media_from_frames
+from objdetection.meta.visualisation.export_media import compose_media_from_frames
 from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.detector.objdet_frozengraph import DetectionGraph, ARCH_DICT
+from objdetection.meta.detector.detector import Detector, ARCH_DICT
 
 
 def _read_filenames_from_subfolders(dir):
@@ -38,8 +38,8 @@ def main():
     Read images, run inference on them and export it to a .mp4 video
     :return:
     """
-    detector = DetectionGraph(arch=NET_ARCH, labels_net_arch=LABELS_NET, labels_output=LABELS_OUT,
-                              retrieval_thresh=RET_THRESH)
+    detector = Detector(arch=NET_ARCH, labels_net_arch=LABELS_NET, labels_output=LABELS_OUT,
+                        retrieval_thresh=RET_THRESH)
     filenames = _read_filenames_from_subfolders(DATASET_DIR)
     label_map = load_labels(LABELS_OUT)
     frames_out = []
