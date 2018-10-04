@@ -3,8 +3,8 @@ author: aa & az
 """
 import numpy as np
 
-from objdetection.meta.observability.observer import MultiModalObserver
-from objdetection.rgb2events.tfrecords_builder.stats import TLStatistician
+from objdetection.observability.observer import MultiModalObserver
+from transferlearning.filter.stats import TLStatistician
 
 
 class LearningFilter(MultiModalObserver):

@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 from PIL import Image
 
-from objdetection.meta.datasets.encoder import Encoder
+from objdetection.datasets.encoder import Encoder
 
 
 class EncoderTFrecGoogleApi(Encoder):

@@ -1,3 +1,7 @@
+"""
+author: aa
+"""
+
 import csv
 import os
 import time
@@ -13,7 +17,7 @@ from objdetection.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleA
 from objdetection.detector.detector import Detector
 from objdetection.utils_labeler.static_helper import load_labels
 from objdetection.visualisation.static_helper import visualize_detections
-from transfer_learner.filter.learning_filter import LearningFilter
+from transferlearning.filter.learning_filter import LearningFilter
 
 
 class TransferLearner:
@@ -25,28 +29,28 @@ class TransferLearner:
         self.files = read_filenames(flags.dataset_dir, flags.main_sensor, flags.aux_sensor, 'png')
 
         # Load frozen rgb detector to create annotations
-        self.detector = Detector(arch=flags.net_arch,
-                                 labels_net_arch=flags.labels_net,
-                                 labels_output=flags.labels_out,
-                                 retrieval_thresh=flags.retrieval_thresh)
+        self._detector = Detector(arch=flags.net_arch,
+                                  labels_net_arch=flags.labels_net,
+                                  labels_output=flags.labels_out,
+                                  retrieval_thresh=flags.retrieval_thresh)
 
         # Encoder for tfrecords
         self.labels = load_labels(flags.labels_out)
-        self.encoder = EncoderTFrecGoogleApi()
+        self._encoder = EncoderTFrecGoogleApi()
         self.output = os.path.join(flags.dataset_dir, flags.tfrecord_name_prefix + ".tfrecord")
 
         # Initialize filter
-        self.learning_filter = LearningFilter(score_threshold=flags.score_threshold,
-                                              min_img_perimeter=flags.min_obj_size,
-                                              logstats=True,
-                                              verbose=False)
+        self._learning_filter = LearningFilter(score_threshold=flags.lf_score_thresh,
+                                               min_img_perimeter=flags.min_obj_size,
+                                               logstats=True,
+                                               verbose=False)
 
         # Analyze the dataset
-        self.analysis = self._analyze_dataset(flags, self.files)
+        self._analysis = self._analyze_dataset(flags, self.files)
 
         # Image Stats
-        self.encoded_mean = []
-        self.encoded_std = []
+        self._encoded_mean = []
+        self._encoded_std = []
 
     def transfer(self):
         """
@@ -60,9 +64,9 @@ class TransferLearner:
                 img_main = np.array(Image.open(file_main_sensor))
                 img_aux = np.array(Image.open(file_aux_sensor))
 
-                obj_detected = self.detector.run_inference_on_img(img_main)
+                obj_detected = self._detector.run_inference_on_img(img_main)
 
-                classes_remapped, scores_remapped, boxes_remapped = self.detector.remap_labels_2(
+                classes_remapped, scores_remapped, boxes_remapped = self._detector.remap_labels_2(
                         obj_detected.classes, obj_detected.scores, obj_detected.boxes)
 
                 if len(boxes_remapped) > 0:
@@ -70,7 +74,7 @@ class TransferLearner:
                     boxes_remapped = np.squeeze(boxes_remapped, axis=0)
                     scores_remapped = np.squeeze(scores_remapped, axis=0)
 
-                classes_remapped, boxes_remapped = self.learning_filter.apply(
+                classes_remapped, boxes_remapped = self._learning_filter.apply(
                         img_main, img_aux, classes_remapped, boxes_remapped)
 
                 # Apply preprocessing to the auxiliary image to be encoded
@@ -84,15 +88,15 @@ class TransferLearner:
                             }
 
                 # Encode instance and write example to tfrecord
-                tf_example = self.encoder.encode(instance)
+                tf_example = self._encoder.encode(instance)
                 writer.write(tf_example.SerializeToString())
                 t_loop = (time.time() - t_start) * 1000
                 print("\r[ %i / %i ] Encoded %s in %.1f ms" % (
                     count, len(self.files), os.path.basename(file_main_sensor), t_loop), end="")
 
                 # Stats
-                self.encoded_mean.append(img_aux.mean())
-                self.encoded_std.append(img_aux.std())
+                self._encoded_mean.append(img_aux.mean())
+                self._encoded_std.append(img_aux.std())
 
                 if self.flags.verbose:
                     obj_detected.classes = classes_remapped
@@ -102,39 +106,39 @@ class TransferLearner:
 
         # Print Mean & Std of all encoded images
         print('\n================ STATS OF ENCODED IMAGES ================')
-        print('Mean: %.2f' % np.mean(self.encoded_mean))
-        print('Std:  %.2f' % np.mean(self.encoded_std))
+        print('Mean: %.2f' % np.mean(self._encoded_mean))
+        print('Std:  %.2f' % np.mean(self._encoded_std))
 
     def _image_preprocessor(self, img_aux):
         if self.flags.normalize:
             if self.flags.per_image_normalization:
                 img_aux = (img_aux - img_aux.mean()) / img_aux.std()
             else:
-                img_aux = np.divide(np.subtract(img_aux, self.analysis.mean),
-                                    self.analysis.stddev)
+                img_aux = np.divide(np.subtract(img_aux, self._analysis.mean),
+                                    self._analysis.stddev)
             if self.flags.scale_back_using_cv2:
                 img_aux = cv2.normalize(img_aux, None, alpha=0, beta=255,
                                         norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
             else:
-                img_aux = ((img_aux * self.analysis.stddev_scale) +
-                           self.analysis.mean_scale).clip(0, 255).astype(np.uint8)
+                img_aux = ((img_aux * self._analysis.stddev_scale) +
+                           self._analysis.mean_scale).clip(0, 255).astype(np.uint8)
         return img_aux
 
-    def _save_statistics(self):
-        self.learning_filter.stats.save(self.flags.output_dir, self.flags.tfrecord_name_prefix)
+    def save_statistics(self):
+        self._learning_filter.stats.save(self.flags.output_dir, self.flags.tfrecord_name_prefix)
         if self.flags.generate_plots:
-            self.learning_filter.stats.make_plots(save_plots=self.flags.generate_plots,
-                                                  output_dir=self.flags.output_dir,
-                                                  filename=self.flags.tfrecord_name_prefix,
-                                                  show_plots=self.flags.show_plots)
+            self._learning_filter.stats.make_plots(save_plots=self.flags.generate_plots,
+                                                   output_dir=self.flags.output_dir,
+                                                   filename=self.flags.tfrecord_name_prefix,
+                                                   show_plots=self.flags.show_plots)
 
         # Save dataset stats
         if self.flags.normalize and not self.flags.per_image_normalization:
             stats_file = os.path.join(self.flags.dataset_dir,
                                       self.flags.tfrecord_name_prefix + "_stats.csv")
             data = [['data_type', 'r', 'g', 'b'],
-                    ['mean'].extend(self.analysis.mean),
-                    ['stddev'].extend(self.analysis.stddev)]
+                    ['mean'].extend(self._analysis.mean),
+                    ['stddev'].extend(self._analysis.stddev)]
             with open(stats_file, 'w') as fs:
                 writer = csv.writer(fs)
                 writer.writerows(data)

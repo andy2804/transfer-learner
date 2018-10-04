@@ -1,6 +1,7 @@
 """
 author: az
 """
+
 import json
 import os
 import sys
@@ -10,8 +11,9 @@ import time
 import numpy as np
 import six.moves.urllib as urllib
 import tensorflow as tf
+from recordclass import recordclass
 
-from rosbag_converter.data_instance import ObjectDetected
+ObjectDetected = recordclass('ObjectDetected', ['source', 'boxes', 'scores', 'classes', 'ts'])
 
 # ======================
 # Negative number indexes for networks trained by us. Positive numbers for nets trained by third

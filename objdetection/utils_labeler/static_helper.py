@@ -5,7 +5,7 @@ author: aa
 import json
 import os
 
-ROOT_DIR = "zauron/"
+ROOT_DIR = "WormholeLearning/"
 LABELS_DIR = "resources/labels/"
 LABELS_PATH = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR, LABELS_DIR)
 

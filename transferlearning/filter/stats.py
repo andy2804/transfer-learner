@@ -10,8 +10,8 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-from objdetection.meta.utils_generic.magic_constants import DAVIS240c
-from objdetection.meta.utils_labeler.static_helper import load_labels
+from objdetection.utils_labeler.static_helper import load_labels
+from resources.constants.magic_constants import DAVIS240c
 
 ObjStats = namedtuple('ObjStats', ['label',
                                    'ymin',
