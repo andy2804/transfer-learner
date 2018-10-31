@@ -10,7 +10,7 @@ from PIL import Image
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 
-from semsegmentation.datasets.cityscapes import CITYSCAPES_LABELS
+from semsegmentation.datasets.cityscapes import Cityscapes
 
 ARCH_DICT = {
     0: ("deeplabv3_mnv2_cityscapes_train", "_2018_02_05"),
@@ -18,8 +18,8 @@ ARCH_DICT = {
 }
 ROOT_DIR = "WormholeLearning/"
 NETS_CKPT_DIR = "resources/nets_ckpt/"
-AVAILABLE_LABELS = {"cityscapes": CITYSCAPES_LABELS,
-                    }
+AVAILABLE_DATASETS = {"cityscapes": Cityscapes,
+                      }
 
 
 class Segmentator:
@@ -27,13 +27,13 @@ class Segmentator:
                  arch=0,
                  download_base='http://download.tensorflow.org/models/',
                  input_size=513,
-                 label_map="cityscapes"):
+                 dataset="cityscapes"):
 
         # core parameters & paths
-        assert label_map in AVAILABLE_LABELS
-        self._labels_names = AVAILABLE_LABELS[label_map]
-        self._full_label_map = np.arange(len(self._labels_names)).reshape(
-                len(self._labels_names), 1)
+        assert dataset in AVAILABLE_DATASETS
+        self._dataset = AVAILABLE_DATASETS[dataset]()
+        self._full_label_map = np.arange(len(self._dataset.labels)).reshape(
+                len(self._dataset.labels), 1)
         self._full_color_map = self._label_to_color_image(self._full_label_map)
         self._input_size = input_size
         assert arch in ARCH_DICT
@@ -131,22 +131,6 @@ class Segmentator:
         seg_map = batch_seg_map[0]
         return resized_image, seg_map
 
-    @staticmethod
-    def _create_label_colormap():
-        """Creates a label colormap (used in PASCAL VOC segmentation benchmark).
-
-        Returns:
-          A Colormap for visualizing segmentation results.
-        """
-        colormap = np.zeros((256, 3), dtype=int)
-        ind = np.arange(256, dtype=int)
-
-        for shift in reversed(range(8)):
-            for channel in range(3):
-                colormap[:, channel] |= ((ind >> channel) & 1) << shift
-            ind >>= 3
-        return colormap
-
     def _label_to_color_image(self, label):
         """Adds color defined by the dataset colormap to the label.
 
@@ -165,7 +149,7 @@ class Segmentator:
         if label.ndim != 2:
             raise ValueError('Expect 2-D input label')
 
-        colormap = self._create_label_colormap()
+        colormap = self._dataset.colormap()
 
         if np.max(label) >= len(colormap):
             raise ValueError('label value too large.')
