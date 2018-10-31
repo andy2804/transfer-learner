@@ -10,7 +10,7 @@ from PIL import Image
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 
-from semsegmentation.core.cityscapes import CITYSCAPES_LABELS
+from semsegmentation.datasets.cityscapes import CITYSCAPES_LABELS
 
 ARCH_DICT = {
     0: ("deeplabv3_mnv2_cityscapes_train", "_2018_02_05"),
