@@ -10,40 +10,42 @@ from PIL import Image
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 
+from semsegmentation.core.cityscapes import CITYSCAPES_LABELS
+
 ARCH_DICT = {
-    0: "deeplabv3_mnv2_cityscapes_train",
+    0: ("deeplabv3_mnv2_cityscapes_train", "_2018_02_05"),
+    1: ("deeplabv3_cityscapes_train", "_2018_02_06")
 }
 ROOT_DIR = "WormholeLearning/"
 NETS_CKPT_DIR = "resources/nets_ckpt/"
-LABELS_DIR = "resources/labels/"
-CITYSCAPES_LABELS = ("road", "sidewalk",
-                     "person", "rider",
-                     "car", "truck", "bus", "on rails", "motorcycle", " bicycle",
-                     "building", " wall", " fence",
-                     "pole", "traffic sign", "traffic light",
-                     "vegetation", " terrain",
-                     "sky")
+AVAILABLE_LABELS = {"cityscapes": CITYSCAPES_LABELS,
+                    }
 
 
 class Segmentator:
     def __init__(self,
                  arch=0,
                  download_base='http://download.tensorflow.org/models/',
-                 labels_net_arch='cityscape_map.json',
-                 input_size=513):
-        # core parameters
+                 input_size=513,
+                 label_map="cityscapes"):
+
+        # core parameters & paths
+        assert label_map in AVAILABLE_LABELS
+        self._labels_names = AVAILABLE_LABELS[label_map]
+        self._full_label_map = np.arange(len(self._labels_names)).reshape(
+                len(self._labels_names), 1)
+        self._full_color_map = self._label_to_color_image(self._full_label_map)
         self._input_size = input_size
-        assert arch in ARCH_DICT.keys()
+        assert arch in ARCH_DICT
         self._download_base = download_base
-        self._model_name = ARCH_DICT[arch]
-        self._model_file = ARCH_DICT[arch] + '.tar.gz'
+        self._model_name = ARCH_DICT[arch][0]
+        self._model_file = ARCH_DICT[arch][0] + ARCH_DICT[arch][1] + '.tar.gz'
         self._path_to_root = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR)
 
         # Path to frozen detection graph.
         self._path_to_ckpt_dir = os.path.join(self._path_to_root, NETS_CKPT_DIR)
         self._path_to_ckpt = os.path.join(self._path_to_ckpt_dir,
                                           self._model_name + '/frozen_inference_graph.pb')
-        self._labels_netarch = labels_net_arch
         self._maybe_download()
 
         # load graph and init input-output tensors
@@ -129,7 +131,48 @@ class Segmentator:
         seg_map = batch_seg_map[0]
         return resized_image, seg_map
 
-    def vis_segmentation(image, seg_map):
+    @staticmethod
+    def _create_label_colormap():
+        """Creates a label colormap (used in PASCAL VOC segmentation benchmark).
+
+        Returns:
+          A Colormap for visualizing segmentation results.
+        """
+        colormap = np.zeros((256, 3), dtype=int)
+        ind = np.arange(256, dtype=int)
+
+        for shift in reversed(range(8)):
+            for channel in range(3):
+                colormap[:, channel] |= ((ind >> channel) & 1) << shift
+            ind >>= 3
+        return colormap
+
+    def _label_to_color_image(self, label):
+        """Adds color defined by the dataset colormap to the label.
+
+        Args:
+          label: A 2D array with integer type, storing the segmentation label.
+
+        Returns:
+          result: A 2D array with floating type. The element of the array
+            is the color indexed by the corresponding element in the input label
+            to the PASCAL color map.
+
+        Raises:
+          ValueError: If label is not of rank 2 or its value is larger than color
+            map maximum entry.
+        """
+        if label.ndim != 2:
+            raise ValueError('Expect 2-D input label')
+
+        colormap = self._create_label_colormap()
+
+        if np.max(label) >= len(colormap):
+            raise ValueError('label value too large.')
+
+        return colormap[label]
+
+    def vis_segmentation(self, image, seg_map):
         """Visualizes input image, segmentation map and overlay view."""
         plt.figure(figsize=(15, 5))
         grid_spec = gridspec.GridSpec(1, 4, width_ratios=[6, 6, 6, 1])
@@ -140,7 +183,7 @@ class Segmentator:
         plt.title('input image')
 
         plt.subplot(grid_spec[1])
-        seg_image = label_to_color_image(seg_map).astype(np.uint8)
+        seg_image = self._label_to_color_image(seg_map).astype(np.uint8)
         plt.imshow(seg_image)
         plt.axis('off')
         plt.title('segmentation map')
@@ -154,9 +197,9 @@ class Segmentator:
         unique_labels = np.unique(seg_map)
         ax = plt.subplot(grid_spec[3])
         plt.imshow(
-                FULL_COLOR_MAP[unique_labels].astype(np.uint8), interpolation='nearest')
+                self._full_color_map[unique_labels].astype(np.uint8), interpolation='nearest')
         ax.yaxis.tick_right()
-        plt.yticks(range(len(unique_labels)), LABEL_NAMES[unique_labels])
+        plt.yticks(range(len(unique_labels)), self._labels_names[unique_labels])
         plt.xticks([], [])
         ax.tick_params(width=0.0)
         plt.grid('off')
