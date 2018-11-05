@@ -15,11 +15,17 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Extract images from a ROS bag.")
     parser.add_argument("--bag_file", help="Input ROS bag.", required=False,
-                        default="/media/ale/dubi_usb1/zauron_seye/eth_2018-10-26-10-06-30.bag")
+                        default="/media/sdc/andya/wormhole_learning"
+                                "/zauron_recordings/"
+                                "20181026/day_cloudy_2018-10-26-10-34-00.bag")
     parser.add_argument("--output_dir", help="Output directory.",
-                        default="/home/ale/Pictures/zauron_eye", required=False)
+                        default="/home/azanardi/pictures/zauron_eye", required=False)
     parser.add_argument("--image_topic", help="Image topic.",
                         default="/zed/right/image_raw/compressed", required=False)
+    parser.add_argument("--offset_frame", help="offset frame to begin with extraction",
+                        default=2000)
+    parser.add_argument("--max_frames", help="Max number of frames to extract",
+                        default=1000)
 
     args = parser.parse_args()
 
@@ -30,18 +36,17 @@ def main():
     bridge = CvBridge()
     count = 0
     for topic, msg, t in bag.read_messages(topics=[args.image_topic]):
+        if count in range(args.offset_frame, args.offset_frame + args.max_frames):
+            cv_img = bridge.compressed_imgmsg_to_cv2(msg, "passthrough")
+            # cv_img = cv_img[..., ::-1]
+            cv2.imwrite(os.path.join(args.output_dir, "img{:06d}.png".format(count)), cv_img)
 
-        cv_img = bridge.compressed_imgmsg_to_cv2(msg, "passthrough")
-        # cv_img = cv_img[..., ::-1]
-        cv2.imwrite(os.path.join(args.output_dir, "frame{:d}.png".format(count)), cv_img)
-
-        if count % 50 == 0:
-            print("Wrote {:d} images".format(count))
+            if count % 50 == 0:
+                print("Wrote {:d} images".format(count - args.offset_frame))
 
         count += 1
 
     bag.close()
-
     return
 
 

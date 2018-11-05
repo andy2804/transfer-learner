@@ -149,7 +149,7 @@ class Segmentator:
         if label.ndim != 2:
             raise ValueError('Expect 2-D input label')
 
-        colormap = self._dataset.colormap()
+        colormap = self._dataset.colormap
 
         if np.max(label) >= len(colormap):
             raise ValueError('label value too large.')
@@ -183,11 +183,35 @@ class Segmentator:
         plt.imshow(
                 self._full_color_map[unique_labels].astype(np.uint8), interpolation='nearest')
         ax.yaxis.tick_right()
-        plt.yticks(range(len(unique_labels)), self._labels_names[unique_labels])
+        plt.yticks(range(len(unique_labels)), self._dataset.labels[unique_labels])
         plt.xticks([], [])
         ax.tick_params(width=0.0)
         plt.grid('off')
         plt.show()
+
+    def vis_movie(self, ax1, ax2, ax3, image, seg_map):
+        seg_image = self._label_to_color_image(seg_map).astype(np.uint8)
+
+        ax1.imshow(image)
+        ax1.axis('off')
+        ax1.set_title('input image')
+
+        ax2.imshow(image)
+        ax2.imshow(seg_image, alpha=0.7)
+        ax2.axis('off')
+        ax2.set_title('segmentation overlay')
+
+        # colormap legend
+
+        unique_labels = np.unique(seg_map)
+        ax3.imshow(
+                self._full_color_map[unique_labels].astype(np.uint8), interpolation='nearest')
+        ax3.yaxis.tick_right()
+        ax3.set_yticks(range(len(unique_labels)))
+        ax3.set_yticklabels(self._dataset.labels[unique_labels])
+        ax3.set_xticks([], [])
+        ax3.tick_params(width=0.0)
+        plt.grid('off')
 
 
 if __name__ == '__main__':
