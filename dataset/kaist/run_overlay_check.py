@@ -17,7 +17,7 @@ FLAGS = flags.FLAGS
 # ========== Labels
 flags.DEFINE_string('labels_net', 'mscoco_label_map.json',
                     'Labels on which the network has been trained')
-flags.DEFINE_string('labels_out', 'zauronscapes_label_map.json',
+flags.DEFINE_string('labels_out', 'zauron_label_map.json',
                     'Labels to be used as output: lapels_net will be remapped to labels_out')
 # ========== Directories
 # flags.DEFINE_string('dataset_dir', "/shared_experiments",

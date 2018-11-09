@@ -127,7 +127,7 @@ if __name__ == '__main__':
                  "/images_hand_labeling"
     path_to_labels = "/home/ale/git_cloned/DynamicVisionTracking" \
                      "/objdetection/" \
-                     "SSDneuromorphic/labels/zauronscapes_label_map.json"
+                     "SSDneuromorphic/labels/zauron_label_map.json"
     resume_number = 1554
     if not os.path.exists(path_to_target):
         raise ValueError("Select an existing path!")

@@ -26,7 +26,7 @@ class TransferLearner:
         self.flags = flags
 
         # Load all file names
-        self.files = read_filenames(flags.dataset_dir, flags.main_sensor, flags.aux_sensor, 'png')
+        self.files = read_filenames(flags.dataset_dir, flags.filter_keywords, flags.main_sensor, flags.aux_sensor, 'png')
 
         # Load frozen rgb detector to create annotations
         self._detector = Detector(arch=flags.net_arch,
@@ -149,7 +149,8 @@ class TransferLearner:
         img_aux_labeled = visualize_detections(img_aux, obj_detected, labels=labels)
         img_stack = np.hstack((img_main_labeled, img_aux_labeled))
         if use_cv2:
-            cv2.imshow('Transfer Learning Step', img_stack)
+            cv2.imshow('Transfer Learning Step', cv2.cvtColor(img_stack, cv2.COLOR_BGR2RGB))
+            cv2.waitKey(1)
         else:
             plt.figure("figure", figsize=(16, 8))
             plt.xticks([])
@@ -165,6 +166,7 @@ class TransferLearner:
         :param files:
         :return:
         """
+        mean, stddev, mean_scale, stddev_scale = 0, 0, 0, 0;
         if flags.normalize:
             if not flags.per_image_normalization:
                 v_mean = []

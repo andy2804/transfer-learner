@@ -7,7 +7,7 @@ from objdetection.meta.utils_labeler.static_helper import load_labels
 
 
 class LearningTracker:
-    def __init__(self, n_instances=0, labels_file='zauronscapes_label_map.json'):
+    def __init__(self, n_instances=0, labels_file='zauron_label_map.json'):
         self._n_instances = n_instances
         self._n_objects = 0
         self._labels = load_labels(labels_file)

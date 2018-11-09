@@ -306,7 +306,7 @@ if __name__ == '__main__':
                         default="/home/ale/git_cloned/DynamicVisionTracking"
                                 "/objdetection/"
                                 "SSDneuromorphic/labels"
-                                "/zauronscapes_label_map.json",
+                                "/zauron_label_map.json",
                         action="store_true",
                         help='Path to where the labels for the categories are stashed')
     parser.add_argument('--network_model',

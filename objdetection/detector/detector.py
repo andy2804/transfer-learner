@@ -20,7 +20,9 @@ ObjectDetected = recordclass('ObjectDetected', ['source', 'boxes', 'scores', 'cl
 # parties.
 # Each name must contain info about the net architecture, the dataset it has been trained on and
 # the label map
-ROOT_DIR = "zauron/"
+
+ROOT_DIR = "WormholeLearning/"
+
 ARCH_DICT = {
     # -1x: nets trained at daytime only, -2x: ir nets, -3x: retrained nets with daytime + ir labels
     -42: "ssd_inception_v2_kaist_ir035_rgb050_nightonly_RGB",
@@ -129,15 +131,16 @@ class Detector:
         if count == 0:
             start_time = time.time()
             return
-        curr_time = time.time()
-        duration = curr_time - start_time
-        progress_size = int(count * block_size)
-        speed = int(progress_size / (1024 * duration))
-        percent = min(int(count * block_size * 100 / total_size), 100)
-        sys.stdout.write("\r[%d%%] %d MB \tSpeed: %d MB/s" %
-                         (percent, progress_size / (1024 * 1024), speed / 1e8))
-        sys.stdout.flush()
-        start_time = curr_time
+        if count % 10 == 0:
+            curr_time = time.time()
+            duration = curr_time - start_time
+            progress_size = int(count * block_size)
+            speed = progress_size / (1024 * duration)
+            percent = min(int(count * block_size * 100 / total_size), 100)
+            sys.stdout.write("\r[%d%%] %d MB \tSpeed: %.1f MB/s" %
+                             (percent, progress_size / (1024 * 1024), speed / 1e3))
+            sys.stdout.flush()
+            # start_time = curr_time
 
     def _load_labels(self, labels):
         """

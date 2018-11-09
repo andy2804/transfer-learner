@@ -43,7 +43,7 @@ flags.DEFINE_string('weight_fn', 'gaus',
                     'Weighting function for event frame decay')
 flags.DEFINE_integer('time_window', 80,
                      'Time window over which we accumulate events into the frame [ms]')
-flags.DEFINE_string('labels_map_file', 'resources/labels/zauronscapes_label_map.json',
+flags.DEFINE_string('labels_map_file', 'resources/labels/zauron_label_map.json',
                     'Labels map file, relative from')
 # mask gpus for rudolf todo pass these as parameters with FLAGS
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"

@@ -115,7 +115,7 @@ if __name__ == '__main__':
     parser.add_argument('--path2labels',
                         default="/home/ale/git_cloned/DynamicVisionTracking"
                                 "/objdetection/"
-                                "SSDneuromorphic/labels/zauronscapes_label_map.json",
+                                "SSDneuromorphic/labels/zauron_label_map.json",
                         action="store_true",
                         help='Path to where the labels for the categories are '
                              'stashed')

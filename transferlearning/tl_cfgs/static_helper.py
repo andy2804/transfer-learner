@@ -27,6 +27,7 @@ def load_config(flags, config_file):
 
     # ================ DIRECTORIES
     flags.DEFINE_string('dataset_dir', config['dataset_dir'], 'dataset_dir')
+    flags.DEFINE_list('filter_keywords', config['filter_keywords'], 'filter_keywords')
     flags.DEFINE_string('main_sensor', config['main_sensor'], 'main_sensor')
     flags.DEFINE_string('aux_sensor', config['aux_sensor'], 'aux_sensor')
     flags.DEFINE_string('tfrecord_name_prefix', config['tfrecord_name_prefix'],

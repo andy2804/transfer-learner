@@ -22,7 +22,7 @@ MODEL_SAVE_PATH = "/home/ale/datasets/zuriscapes/Logs/Log_09Nov2017_083429" \
                   "/200_exp_model.ckpt"
 # Load mapping from integer class ID to sign name string
 PATH2LABELS = "/home/ale/git_cloned/DynamicVisionTracking/objdetection/" \
-              "SSDneuromorphic/labels/zauronscapes_label_map.json"
+              "SSDneuromorphic/labels/zauron_label_map.json"
 with open(PATH2LABELS, "r") as f:
     raw_dict = json.load(f)
     # reformatting with key as int

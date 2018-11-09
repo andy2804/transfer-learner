@@ -15,8 +15,8 @@ testfiles = ["KAIST_TESTING_DAY_ZAURONSCAPES_RGB.tfrecord",
              "KAIST_TESTING_NIGHT_ZAURONSCAPES_RGB.tfrecord"]
 normalize_images = False
 network_model = [-10, -10]
-labels_net_arch = "zauronscapes_label_map.json"
-labels_output = "zauronscapes_label_map.json"
+labels_net_arch = "zauron_label_map.json"
+labels_output = "zauron_label_map.json"
 cuda_visible_devices = ["0", "1"]
 num_readers = 2
 num_parallel_calls = 5

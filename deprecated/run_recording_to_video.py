@@ -20,7 +20,7 @@ MODEL_SAVE_PATH = "/home/ale/datasets/zuriscapes/Logs_official/Logs/" \
 NETWORK_MODEL = "ssd_davisSAE_master"
 # Load mapping from integer class ID to sign name string
 PATH2LABELS = "/home/ale/git_cloned/DynamicVisionTracking/objdetection/" \
-              "SSDneuromorphic/labels/zauronscapes_label_map.json"
+              "SSDneuromorphic/labels/zauron_label_map.json"
 VIDEO_fold = "/home/ale/Videos/"
 VIDEO_name = "output_long.mp4"
 VIDEO_fullpath = VIDEO_fold + VIDEO_name

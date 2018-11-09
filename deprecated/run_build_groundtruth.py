@@ -195,7 +195,7 @@ def run_tfrecords_builder(arch_to_load=2):
                                        min_numb_of_objs=0,
                                        for_testing=FOR_TESTING)
     path_to_labels = os.path.join(os.getcwd(),
-                                  "labels/zauronscapes_label_map.json")
+                                  "labels/zauron_label_map.json")
     with open(path_to_labels, "r") as f:
         raw_dict = json.load(f)
         labels_dict = {int(k): v for k, v in raw_dict.items()}

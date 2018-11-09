@@ -8,7 +8,7 @@ from objdetection.meta.visualisation.static_helper import add_text_overlay
 
 
 class LFImageBlender:
-    def __init__(self, labels='zauronscapes_label_map.json'):
+    def __init__(self, labels='zauron_label_map.json'):
         self._labels = load_labels(labels)
         self._avg_look = OrderedDict().fromkeys(
                 list(self._labels.keys()), (0, np.zeros([180, 240, 3], dtype=np.float64)))

@@ -24,7 +24,7 @@ class TLStatistician:
     def __init__(self,
                  tl_score_threshold=0,
                  norm_wrt=(DAVIS240c.height, DAVIS240c.width),
-                 labels_file='zauronscapes_label_map.json'):
+                 labels_file='zauron_label_map.json'):
         self._labels = load_labels(labels_file)
         self._n_instances = 0
         self._objstats = []

@@ -47,7 +47,7 @@ flags.DEFINE_string('weight_fn', 'gaus',
                     'Weighting function for event frame decay')
 flags.DEFINE_integer('time_window', 100,
                      'Time window over which we accumulate events into the frame [ms]')
-flags.DEFINE_string('labels_map_file', 'resources/labels/zauronscapes_label_map.json',
+flags.DEFINE_string('labels_map_file', 'resources/labels/zauron_label_map.json',
                     'Labels map file, relative from root project')
 
 # =========== Transfer Learning region parameters

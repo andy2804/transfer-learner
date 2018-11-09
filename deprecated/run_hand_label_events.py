@@ -88,9 +88,9 @@ if __name__ == '__main__':
     OUTPUT_DIR = "/media/andya/EXTSSD_T3/crossmodal_mt/rosbags/official/ODN_NE_E0_2018-05-01-21" \
                  "-27-26/"
     # PATH_TO_LABELS = "/home/ale/git_cloned/CrossModalTL/objdetection/" \
-    #                  "SSDneuromorphic/labels/zauronscapes_label_map.json"
+    #                  "SSDneuromorphic/labels/zauron_label_map.json"
     PATH_TO_LABELS = "/home/andya/crossmodal_mt/catkin_ws/src/zauron/resources/labels" \
-                     "/zauronscapes_label_map.json"
+                     "/zauron_label_map.json"
     RESUME_NUMBER = 100
     EVENTS_FORMAT = "_11gaus"
     EVENTS_FORMAT_TIMESPAN = 40 / 1000

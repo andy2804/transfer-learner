@@ -17,7 +17,7 @@ sys.path.append(PROJECT_ROOT)
 
 flags = tf.flags
 FLAGS = flags.FLAGS
-CONFIG = 'kaist_rgb2ir.yaml'
+CONFIG = 'zauron_rgb.yaml'
 
 flags = load_config(flags, CONFIG)
 

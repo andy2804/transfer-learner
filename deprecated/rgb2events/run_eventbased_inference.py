@@ -16,7 +16,7 @@ LABELS_DIR = "resources/labels/"
 
 
 class EventBasedObjDet:
-    def __init__(self, path_to_ckpt, retrieval_thresh=.5, labels='zauronscapes_label_map.json'):
+    def __init__(self, path_to_ckpt, retrieval_thresh=.5, labels='zauron_label_map.json'):
         self._labels_file = labels
         self._path_to_root = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR)
 

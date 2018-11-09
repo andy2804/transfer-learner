@@ -22,7 +22,7 @@ from objdetection.visualisation.static_helper import visualize_stereo_images, \
 
 class MultiModalObserver:
     def __init__(self):
-        self._labels = load_labels('zauronscapes_label_map.json')
+        self._labels = load_labels('zauron_label_map.json')
 
         # Only initialize in the instance that really needs it
         self._img_blender = None

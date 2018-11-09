@@ -3,27 +3,27 @@
 labels_net: mscoco_label_map.json
 
 # Labels to be used as output --> labels_net is remapped to labels_out
-labels_out: kaist_label_map.json
+labels_out: zauron_label_map.json
 
 
 # ================ DIRECTORIES
 # The directory where the dataset files are stored as absolute path
-dataset_dir: /shared_experiments/kaist/training/day
+dataset_dir: /media/sdc/andya/wormhole_learning/zauron_dataset
 
 # Filter keywords that needs to be contained in the path
-filter_keywords: []
+filter_keywords: ["day"]
 
 # Name of the sub-directory containing images of the main sensor
-main_sensor: visible
+main_sensor: RGB
 
 # Name of the sub-directory containing images of the auxiliary sensor
-aux_sensor: lwir
+aux_sensor: RGB
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: KAIST_TRAINING_DAY_rgb_050
+tfrecord_name_prefix: ZAURON_DAYONLY
 
 # Additionally generated files during transfer_learning will be saved here
-output_dir: /shared_experiments/kaist/results/datasets
+output_dir: /media/sdc/andya/wormhole_learning/zauron_dataset
 
 
 # ================ GPUS MASK
@@ -65,7 +65,7 @@ lf_score_thresh: 0
 
 # ================ VISUALIZATION AND PLOTS
 # Activates verbose mode with visualisation
-verbose: False
+verbose: True
 
 # Generates and saves plots on the home folder
 generate_plots: True
