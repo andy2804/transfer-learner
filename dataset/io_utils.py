@@ -1,29 +1,24 @@
-import ast
 import os
-import sys
 from glob import glob
 
 __all__ = ["read_filenames"]
 
 
-def read_filenames(dir, filter, main_sensor_name, aux_sensor_name, filetype='png'):
+def read_filenames(dir, filter_keywords, main_sensor_name, aux_sensor_name, filetype='png'):
     """
     Reads filenames for any arbitrary sensor combinations specified in the function call.
     Additionally the filetype can be specified. The image pair require to have the same name.
     :param dir:
     :return:
     """
-    if sys.version_info[0] >= 3.6:
-        num = lambda x: int("".join(filter(str.isdigit, os.path.basename(x))))
-    else:
-        num = lambda x: int("".join(filter(str.isdigit, ast.literal_eval(os.path.basename(x)))))
+    num = lambda x: int("".join(filter(str.isdigit, os.path.basename(x))))
     if os.path.exists(dir):
         main_sensor_images = [file for path_tuple in os.walk(dir) for file in
                               glob(os.path.join(path_tuple[0], '*.' + filetype)) if
-                              main_sensor_name in file and all([s in file for s in filter])]
+                              main_sensor_name in file and all([s in file for s in filter_keywords])]
         aux_sensor_images = [file for path_tuple in os.walk(dir) for file in
                              glob(os.path.join(path_tuple[0], '*.' + filetype)) if
-                             aux_sensor_name in file and all([s in file for s in filter])]
+                             aux_sensor_name in file and all([s in file for s in filter_keywords])]
         main_sensor_images.sort()
         aux_sensor_images.sort()
 
