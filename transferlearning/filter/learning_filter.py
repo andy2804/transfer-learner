@@ -8,11 +8,13 @@ from transferlearning.filter.stats import TLStatistician
 
 
 class LearningFilter(MultiModalObserver):
-    def __init__(self, score_threshold=0, min_img_perimeter=80, logstats=False, verbose=False):
+    def __init__(self, score_threshold=0, min_img_perimeter=80, logstats=False, mode='rgb',
+                 verbose=False):
         MultiModalObserver.__init__(self)
         self.stats = TLStatistician(tl_score_threshold=score_threshold) if logstats else None
         self._keep_thresh = score_threshold
         self._min_img_perimeter = min_img_perimeter
+        self._observability_mode = mode
         self._verbose = verbose
 
     def apply(self, img_main_in, img_aux_in, classes, boxes):
@@ -39,9 +41,11 @@ class LearningFilter(MultiModalObserver):
                 img_grad_rgb_box = self._get_box_crop(img_rgb_grad, box_abs)
                 img_grad_ir_box = self._get_box_crop(img_ir_grad, box_abs)
                 perimeter = 2 * sum(img_grad_rgb_box.shape[:2])
-                rgb_score = self._compute_observability_score([img_grad_rgb_box], type='rgb',
+                rgb_score = self._compute_observability_score([img_grad_rgb_box],
+                                                              type=self._observability_mode,
                                                               verbose=self._verbose)
-                ir_score = self._compute_observability_score([img_grad_ir_box], type='rgb',
+                ir_score = self._compute_observability_score([img_grad_ir_box],
+                                                             type=self._observability_mode,
                                                              verbose=self._verbose)
                 tl_keep = rgb_score > self._keep_thresh and ir_score > self._keep_thresh and \
                           perimeter >= self._min_img_perimeter
@@ -65,3 +69,37 @@ class LearningFilter(MultiModalObserver):
         if self.stats is not None:
             self.stats.n_instances += 1
         return classes_to_keep, boxes_to_keep
+
+    def remove_boxes_from_roi(self, classes, boxes, roi=None, shape=None, tolerance=0.1):
+        """
+        If roi is defined, boxes with given shape lying within the roi will be removed
+        :param classes:
+        :param boxes:
+        :param roi: Tuple of float specifying the corner points similar to boxes
+                    with (y_min, x_min, y_max, x_max)
+        :param shape: Tuple of float specifying height and width
+        :param tolerance: Tolerance of shape
+        :return:
+        """
+        if roi is not None:
+            classes_to_keep = np.empty((0,), dtype=np.int)
+            boxes_to_keep = np.empty((0, 4), dtype=np.float)
+            for box, class_id in zip(boxes, classes):
+                if not self.check_box_in_roi(box, roi) and not self.check_box_shape(box, shape, tolerance):
+                    classes_to_keep = np.concatenate(([class_id], classes_to_keep), axis=0)
+                    boxes_to_keep = np.concatenate(([box], boxes_to_keep), axis=0)
+            return classes_to_keep, boxes_to_keep
+        return classes, boxes
+
+    @staticmethod
+    def check_box_in_roi(box, roi):
+        if box[0] > roi[0] and box[1] > roi[1] and box[2] < roi[2] and box[3] < roi[3]:
+            return True
+        return False
+
+    @staticmethod
+    def check_box_shape(box, shape, tolerance):
+        if abs(1.0 - ((box[2] - box[0]) / shape[0])) < tolerance and \
+                abs(1.0 - ((box[3] - box[1]) / shape[1])) < tolerance:
+            return True
+        return False

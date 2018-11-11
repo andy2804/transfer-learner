@@ -8,7 +8,7 @@ labels_out: zauron_label_map.json
 
 # ================ DIRECTORIES
 # The directory where the dataset files are stored as absolute path
-dataset_dir: /media/sdc/andya/wormhole_learning/zauron_dataset/training
+dataset_dir: /media/andya/EXTSSD_T3/crossmodal_mt/rosbags/zauron_eye_2.0/verbose/day
 
 # Filter keywords that needs to be contained in the path
 filter_keywords: ["day"]
@@ -20,10 +20,10 @@ main_sensor: RGB
 aux_sensor: RGB
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: ZAURON_DAYONLY
+tfrecord_name_prefix: ZAURON_DAYONLY_TEST
 
 # Additionally generated files during transfer_learning will be saved here
-output_dir: /media/sdc/andya/wormhole_learning/zauron_dataset
+output_dir: /media/andya/EXTSSD_T3/crossmodal_mt/rosbags/zauron_eye_2.0/verbose/day
 
 
 # ================ GPUS MASK
@@ -33,7 +33,7 @@ cuda_visible_devices: "0"
 
 # ================ SEMI-SUPERVISED LABEL GENERATOR
 # Passes argument to cuda visible devices, comma separated values
-net_arch: 6
+net_arch: 2
 
 # Retrieval Threshold of the Detector used in generating the labels
 retrieval_thresh: 0.5
@@ -74,7 +74,7 @@ remove_shape: [0.33, 0.99]
 
 # ================ VISUALIZATION AND PLOTS
 # Activates verbose mode with visualisation
-verbose: False
+verbose: True
 
 # Generates and saves plots on the home folder
 generate_plots: True

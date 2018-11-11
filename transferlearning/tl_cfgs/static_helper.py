@@ -49,8 +49,12 @@ def load_config(flags, config_file):
     flags.DEFINE_float('confidence_interval', config['confidence_interval'], 'confidence_interval')
     flags.DEFINE_bool('scale_back_using_cv2', config['scale_back_using_cv2'],
                       'scale_back_using_cv2')
+
+    # ================ LEARNING FILTER
     flags.DEFINE_integer('min_obj_size', config['min_obj_size'], 'min_obj_size')
     flags.DEFINE_integer('lf_score_thresh', config['lf_score_thresh'], 'lf_score_thresh')
+    flags.DEFINE_list('remove_roi', config['remove_roi'], 'remove_roi')
+    flags.DEFINE_list('remove_shape', config['remove_shape'], 'remove_shape')
 
     # ================ VISUALIZATION AND PLOTS
     flags.DEFINE_bool('verbose', config['verbose'], 'verbose')

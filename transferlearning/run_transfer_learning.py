@@ -9,15 +9,15 @@ from datetime import timedelta
 
 import tensorflow as tf
 
-from transferlearning.tl_cfgs.static_helper import load_config
-from transferlearning.transfer_learner import TransferLearner
-
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('transferlearning')]
 sys.path.append(PROJECT_ROOT)
 
+from transferlearning.tl_cfgs.static_helper import load_config
+from transferlearning.transfer_learner import TransferLearner
+
 flags = tf.flags
 FLAGS = flags.FLAGS
-CONFIG = 'zauron_rgb.yaml'
+CONFIG = 'debug.yaml'
 
 flags = load_config(flags, CONFIG)
 

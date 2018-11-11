@@ -26,7 +26,8 @@ class TransferLearner:
         self.flags = flags
 
         # Load all file names
-        self.files = read_filenames(flags.dataset_dir, flags.filter_keywords, flags.main_sensor, flags.aux_sensor, 'png')
+        self.files = read_filenames(flags.dataset_dir, flags.filter_keywords, flags.main_sensor,
+                                    flags.aux_sensor, 'png')
 
         # Load frozen rgb detector to create annotations
         self._detector = Detector(arch=flags.net_arch,
@@ -76,6 +77,8 @@ class TransferLearner:
 
                 classes_remapped, boxes_remapped = self._learning_filter.apply(
                         img_main, img_aux, classes_remapped, boxes_remapped)
+                classes_remapped, boxes_remapped = self._learning_filter.remove_boxes_from_roi(
+                    classes_remapped, boxes_remapped, self.flags.remove_roi, self.flags.remove_shape)
 
                 # Apply preprocessing to the auxiliary image to be encoded
                 img_aux = self._image_preprocessor(img_aux)
