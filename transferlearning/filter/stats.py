@@ -7,11 +7,13 @@ from collections import namedtuple
 
 import numpy as np
 import seaborn as sns
+import matplotlib
+
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
 from objdetection.utils_labeler.static_helper import load_labels
-from resources.constants.magic_constants import DAVIS240c
+from resources.constants.magic_constants import SILICON_EYE
 
 ObjStats = namedtuple('ObjStats', ['label',
                                    'ymin',
@@ -25,7 +27,7 @@ ObjStats = namedtuple('ObjStats', ['label',
 class TLStatistician:
     def __init__(self,
                  tl_score_threshold,
-                 norm_wrt=(DAVIS240c.height, DAVIS240c.width),
+                 norm_wrt=(SILICON_EYE.height, SILICON_EYE.width),
                  labels_file='zauron_label_map.json'):
         self._labels = load_labels(labels_file)
         self._n_instances = 0

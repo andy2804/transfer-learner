@@ -12,12 +12,14 @@ import tensorflow as tf
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('transferlearning')]
 sys.path.append(PROJECT_ROOT)
 
-from transferlearning.tl_cfgs.static_helper import load_config
+from transferlearning.config.static_helper import load_config
 from transferlearning.transfer_learner import TransferLearner
 
 flags = tf.flags
 FLAGS = flags.FLAGS
-CONFIG = 'debug.yaml'
+
+# Change this line to load your desired transfer learning configuration
+CONFIG = 'zauron_rgb.yaml'
 
 flags = load_config(flags, CONFIG)
 

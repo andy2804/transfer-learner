@@ -7,7 +7,7 @@ import os
 import yaml
 
 ROOT_DIR = "WormholeLearning/"
-CFG_DIR = "transferlearning/tl_cfgs/"
+CFG_DIR = "transferlearning/config/"
 CFG_PATH = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR, CFG_DIR)
 
 
@@ -51,6 +51,7 @@ def load_config(flags, config_file):
                       'scale_back_using_cv2')
 
     # ================ LEARNING FILTER
+    flags.DEFINE_string('lf_mode', config['lf_mode'], 'lf_mode')
     flags.DEFINE_integer('min_obj_size', config['min_obj_size'], 'min_obj_size')
     flags.DEFINE_integer('lf_score_thresh', config['lf_score_thresh'], 'lf_score_thresh')
     flags.DEFINE_list('remove_roi', config['remove_roi'], 'remove_roi')

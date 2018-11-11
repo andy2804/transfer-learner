@@ -32,39 +32,39 @@ class LearningFilter(MultiModalObserver):
         classes_to_keep = np.empty((0,), dtype=np.int)
         boxes_to_keep = np.empty((0, 4), dtype=np.float)
 
-        img_rgb, img_ir, boxes = list(map(np.copy, [img_main_in, img_aux_in, boxes]))
-        img_rgb_grad = self._filter_img(img_rgb, filter='gradient')
-        img_ir_grad = self._filter_img(img_ir, filter='gradient')
+        img_main, img_aux, boxes = list(map(np.copy, [img_main_in, img_aux_in, boxes]))
+        img_main_grad = self._filter_img(img_main, filter='gradient')
+        img_aux_grad = self._filter_img(img_aux, filter='gradient')
         for box_abs, class_id in zip(
-                [self._box_norm_to_abs(box, img_rgb_grad) for box in boxes], classes):
+                [self._box_norm_to_abs(box, img_main_grad) for box in boxes], classes):
             if class_id:
-                img_grad_rgb_box = self._get_box_crop(img_rgb_grad, box_abs)
-                img_grad_ir_box = self._get_box_crop(img_ir_grad, box_abs)
-                perimeter = 2 * sum(img_grad_rgb_box.shape[:2])
-                rgb_score = self._compute_observability_score([img_grad_rgb_box],
-                                                              type=self._observability_mode,
-                                                              verbose=self._verbose)
-                ir_score = self._compute_observability_score([img_grad_ir_box],
-                                                             type=self._observability_mode,
-                                                             verbose=self._verbose)
-                tl_keep = rgb_score > self._keep_thresh and ir_score > self._keep_thresh and \
-                          perimeter >= self._min_img_perimeter
+                img_main_grad_box = self._get_box_crop(img_main_grad, box_abs)
+                img_aux_grad_box = self._get_box_crop(img_aux_grad, box_abs)
+                perimeter = 2 * sum(img_main_grad_box.shape[:2])
+                main_sensor_score = self._compute_observability_score([img_main_grad_box],
+                                                                      type='rgb',
+                                                                      verbose=self._verbose)
+                aux_sensor_score = self._compute_observability_score([img_aux_grad_box],
+                                                                     type=self._observability_mode,
+                                                                     verbose=self._verbose)
+                tl_keep = main_sensor_score > self._keep_thresh and aux_sensor_score > \
+                          self._keep_thresh and perimeter >= self._min_img_perimeter
 
                 # Record statistics
                 if self.stats is not None:
                     self.stats.append_obj_stats(
                             label=class_id,
-                            ymin=box_abs[0] / img_rgb.shape[0],
-                            xmin=box_abs[1] / img_rgb.shape[1],
-                            h=img_grad_rgb_box.shape[0] / img_rgb.shape[0],
-                            w=img_grad_rgb_box.shape[1] / img_rgb.shape[1],
-                            tl_score=(rgb_score if rgb_score < ir_score else ir_score),
+                            ymin=box_abs[0] / img_main.shape[0],
+                            xmin=box_abs[1] / img_main.shape[1],
+                            h=img_main_grad_box.shape[0] / img_main.shape[0],
+                            w=img_main_grad_box.shape[1] / img_main.shape[1],
+                            tl_score=(main_sensor_score if main_sensor_score < aux_sensor_score else
+                                aux_sensor_score),
                             tl_difficult=tl_keep)
                 if tl_keep:
                     classes_to_keep = np.concatenate(([class_id], classes_to_keep), axis=0)
-                    box_to_keep = self._abs_box_to_norm(box=box_abs, img=img_rgb_grad)
-                    boxes_to_keep = np.concatenate(
-                            ([box_to_keep], boxes_to_keep), axis=0)
+                    box_to_keep = self._abs_box_to_norm(box=box_abs, img=img_main_grad)
+                    boxes_to_keep = np.concatenate(([box_to_keep], boxes_to_keep), axis=0)
 
         if self.stats is not None:
             self.stats.n_instances += 1
@@ -85,7 +85,8 @@ class LearningFilter(MultiModalObserver):
             classes_to_keep = np.empty((0,), dtype=np.int)
             boxes_to_keep = np.empty((0, 4), dtype=np.float)
             for box, class_id in zip(boxes, classes):
-                if not self.check_box_in_roi(box, roi) and not self.check_box_shape(box, shape, tolerance):
+                if not self.check_box_in_roi(box, roi) and not self.check_box_shape(box, shape,
+                                                                                    tolerance):
                     classes_to_keep = np.concatenate(([class_id], classes_to_keep), axis=0)
                     boxes_to_keep = np.concatenate(([box], boxes_to_keep), axis=0)
             return classes_to_keep, boxes_to_keep

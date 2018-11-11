@@ -10,6 +10,10 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from PIL import Image, ImageStat
+import matplotlib
+
+# Use different back-end to circumvent check for Display variable
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 from dataset.io_utils import read_filenames
@@ -43,8 +47,7 @@ class TransferLearner:
         # Initialize filter
         self._learning_filter = LearningFilter(score_threshold=flags.lf_score_thresh,
                                                min_img_perimeter=flags.min_obj_size,
-                                               logstats=True,
-                                               verbose=False)
+                                               logstats=True, mode=self.flags.lf_mode, verbose=False)
 
         # Analyze the dataset
         self._analysis = self._analyze_dataset(flags, self.files)
@@ -75,10 +78,12 @@ class TransferLearner:
                     boxes_remapped = np.squeeze(boxes_remapped, axis=0)
                     scores_remapped = np.squeeze(scores_remapped, axis=0)
 
+                # Apply learning filter and boxes from ROI removal if specified
                 classes_remapped, boxes_remapped = self._learning_filter.apply(
                         img_main, img_aux, classes_remapped, boxes_remapped)
                 classes_remapped, boxes_remapped = self._learning_filter.remove_boxes_from_roi(
-                    classes_remapped, boxes_remapped, self.flags.remove_roi, self.flags.remove_shape)
+                        classes_remapped, boxes_remapped, self.flags.remove_roi,
+                        self.flags.remove_shape)
 
                 # Apply preprocessing to the auxiliary image to be encoded
                 img_aux = self._image_preprocessor(img_aux)
@@ -87,8 +92,7 @@ class TransferLearner:
                 instance = {"image":    img_main,
                             "boxes":    boxes_remapped,
                             "labels":   classes_remapped,
-                            "filename": file_main_sensor
-                            }
+                            "filename": file_main_sensor}
 
                 # Encode instance and write example to tfrecord
                 tf_example = self._encoder.encode(instance)
