@@ -23,7 +23,7 @@ aux_sensor: lwir
 tfrecord_name_prefix: KAIST_TRAINING_DAY_rgb_050
 
 # Additionally generated files during transfer_learning will be saved here
-output_dir: /shared_experiments/kaist/results/datasets
+output_dir: /shared_experiments/kaist/results/encoder
 
 
 # ================ GPUS MASK

@@ -8,7 +8,7 @@ from PIL import Image
 
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
 sys.path.append(PROJECT_ROOT)
-from dataset.kaist.utils_readio import read_filenames
+from deprecated.kaist.utils_readio import read_filenames
 from objdetection.meta.detector.detector import Detector
 
 

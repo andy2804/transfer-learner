@@ -14,7 +14,7 @@ def _parse_input():
     parser = argparse.ArgumentParser(
             description='Split dataset into day/night images')
     parser.add_argument('--src_dir', type=str,
-                        default="/home/ale/datasets/day_vs_night/val2017",
+                        default="/home/ale/encoder/day_vs_night/val2017",
                         help='Output directory containing images at day time')
     parser.add_argument('--day_dir', type=str,
                         default="day",

@@ -120,10 +120,10 @@ def main(data):
 
 
 if __name__ == '__main__':
-    path_to_target = "/home/ale/datasets/zuriscapes/hand_labeling/291f7a3a" \
+    path_to_target = "/home/ale/encoder/zuriscapes/hand_labeling/291f7a3a" \
                      "-229c-472a-9d23-c7ae70d79bf0.csv"
-    output_dir = "/home/ale/datasets/zuriscapes/hand_labeling/pickle/"
-    frames_dir = "/home/ale/datasets/zuriscapes/hand_labeling" \
+    output_dir = "/home/ale/encoder/zuriscapes/hand_labeling/pickle/"
+    frames_dir = "/home/ale/encoder/zuriscapes/hand_labeling" \
                  "/images_hand_labeling"
     path_to_labels = "/home/ale/git_cloned/DynamicVisionTracking" \
                      "/objdetection/" \

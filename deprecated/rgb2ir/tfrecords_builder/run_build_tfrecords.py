@@ -24,10 +24,10 @@ flags.DEFINE_string('labels_out', 'kaist_label_map.json',
 
 # ================ DIRECTORIES
 flags.DEFINE_string('dataset_dir', "/shared_experiments/kaist/training/day",
-                    'The directory where the datasets files are stored as absolute path.')
+                    'The directory where the encoder files are stored as absolute path.')
 flags.DEFINE_string('tfrecord_name_prefix', "KAIST_TRAINING_DAY_rgb_050",
                     'Output will be "$(tfrecord_name).tfrecord"')
-flags.DEFINE_string('output_dir', "/shared_experiments/kaist/results/datasets",
+flags.DEFINE_string('output_dir', "/shared_experiments/kaist/results/encoder",
                     'If any additional(on top of *.tfrecods) output is being generated it will be '
                     'saved here')
 

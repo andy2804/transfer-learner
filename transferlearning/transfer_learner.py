@@ -7,20 +7,21 @@ import os
 import time
 
 import cv2
+import matplotlib
 import numpy as np
 import tensorflow as tf
 from PIL import Image, ImageStat
-import matplotlib
 
 # Use different back-end to circumvent check for Display variable
+from utils.visualisation.static_helper import visualize_detections
+
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
-from dataset.io_utils import read_filenames
-from objdetection.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
+from utils.io.io_utils import read_filenames
+from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.detector.detector import Detector
-from objdetection.utils_labeler.static_helper import load_labels
-from objdetection.visualisation.static_helper import visualize_detections
+from utils.static_helper import load_labels
 from transferlearning.filter.learning_filter import LearningFilter
 
 
@@ -117,21 +118,30 @@ class TransferLearner:
         print('Std:  %.2f' % np.mean(self._encoded_std))
 
     def _image_preprocessor(self, img_aux):
+        """
+        Preprocesses auxiliary images if specified and normalizes the image range.
+        :param img_aux:
+        :return:
+        """
         if self.flags.normalize:
             if self.flags.per_image_normalization:
                 img_aux = (img_aux - img_aux.mean()) / img_aux.std()
             else:
-                img_aux = np.divide(np.subtract(img_aux, self._analysis.mean),
-                                    self._analysis.stddev)
+                img_aux = np.divide(np.subtract(img_aux, self._analysis["mean"]),
+                                    self._analysis["stddev"])
             if self.flags.scale_back_using_cv2:
                 img_aux = cv2.normalize(img_aux, None, alpha=0, beta=255,
                                         norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
             else:
-                img_aux = ((img_aux * self._analysis.stddev_scale) +
-                           self._analysis.mean_scale).clip(0, 255).astype(np.uint8)
+                img_aux = ((img_aux * self._analysis["stddev_scale"]) +
+                           self._analysis["mean_scale"]).clip(0, 255).astype(np.uint8)
         return img_aux
 
     def save_statistics(self):
+        """
+        Save collected statistics in the learning filter to pickled file and pdf
+        :return:
+        """
         self._learning_filter.stats.save(self.flags.output_dir, self.flags.tfrecord_name_prefix)
         if self.flags.generate_plots:
             self._learning_filter.stats.make_plots(save_plots=self.flags.generate_plots,
@@ -152,6 +162,15 @@ class TransferLearner:
 
     @staticmethod
     def _visualize_transfer_step(obj_detected, img_main, img_aux, labels, use_cv2=False):
+        """
+        Verbose method
+        :param obj_detected:
+        :param img_main:
+        :param img_aux:
+        :param labels:
+        :param use_cv2:
+        :return:
+        """
         img_main_labeled = visualize_detections(img_main, obj_detected, labels=labels)
         img_aux_labeled = visualize_detections(img_aux, obj_detected, labels=labels)
         img_stack = np.hstack((img_main_labeled, img_aux_labeled))

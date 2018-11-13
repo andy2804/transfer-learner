@@ -19,7 +19,7 @@ REL_LABELS_DIR = "resources/labels/"
 TEMP_BLACK_LIST = ["ODS", "ODC"]
 # ========== Directories
 flags.DEFINE_string('dataset_dir', "/shared_experiments",
-                    'The directory where the datasets files are stored as absolute path.')
+                    'The directory where the encoder files are stored as absolute path.')
 flags.DEFINE_string('src_dir', "training/rosbags/converted_rosbags",
                     'Relative path from dataset_dir to the source directory of *.tfrecords.')
 flags.DEFINE_string('out_dir', "training/extracted_frames_night",

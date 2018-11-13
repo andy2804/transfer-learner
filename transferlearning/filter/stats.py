@@ -7,12 +7,11 @@ from collections import namedtuple
 
 import numpy as np
 import seaborn as sns
-import matplotlib
 
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-from objdetection.utils_labeler.static_helper import load_labels
+from utils.static_helper import load_labels
 from resources.constants.magic_constants import SILICON_EYE
 
 ObjStats = namedtuple('ObjStats', ['label',

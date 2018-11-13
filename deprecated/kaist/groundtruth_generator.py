@@ -6,7 +6,7 @@ import tensorflow as tf
 from PIL import Image
 from matplotlib import pyplot as plt
 
-from dataset.kaist.utils_readio import read_filenames
+from deprecated.kaist.utils_readio import read_filenames
 from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.meta.detector.detector import Detector
 from objdetection.meta.utils_labeler.static_helper import load_labels

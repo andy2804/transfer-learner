@@ -19,7 +19,7 @@ def main(recordings_dir, target_dir):
 if __name__ == '__main__':
     recordings_dir = "/media/ale/ZILLY_DISK/ALESSANDRO/zuriscapes_official" \
                      "/hand_labeling_night/uzh"
-    target_dir = "/home/ale/datasets/zuriscapes/hand_labeling_night/"
+    target_dir = "/home/ale/encoder/zuriscapes/hand_labeling_night/"
     assert os.path.exists(recordings_dir)
     if not os.path.exists(target_dir):
         os.mkdir(target_dir)

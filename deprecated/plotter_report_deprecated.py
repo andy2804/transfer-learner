@@ -179,7 +179,7 @@ class PlotterEventBased:
 
 
 if __name__ == "__main__":
-    recs_path = "/home/ale/datasets/zuriscapes/export"
+    recs_path = "/home/ale/encoder/zuriscapes/export"
     # select one at random?
     recordings = [os.path.join(recs_path, rec_name) for rec_name in
                   os.listdir(recs_path)]

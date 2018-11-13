@@ -6,7 +6,7 @@ import os
 from glob import glob
 
 if __name__ == '__main__':
-    target_folder = "/home/ale/datasets/kaist"
+    target_folder = "/home/ale/encoder/kaist"
     filelist = [y for x in os.walk(target_folder) for y in
                 glob(os.path.join(x[0], '*.jpg'))]
     for file_obj in filelist:

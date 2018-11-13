@@ -13,14 +13,14 @@ import tensorflow as tf
 # matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
-from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
-from objdetection.meta.detector.detector import ARCH_DICT, Detector
-from objdetection.meta.metrics import metrics_np
-from objdetection.meta.visualisation.plot_mAP_evaluation import plot_performance_metrics
-from objdetection.meta.visualisation.static_helper import \
+from objdetection.detector.detector import ARCH_DICT, Detector
+from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
+from objdetection.metrics import metrics_np
+from utils.sheets_interface import GoogleSheetsInterface
+from utils.visualisation.plot_mAP_evaluation import plot_performance_metrics
+from utils.visualisation.static_helper import \
     visualize_boxes_and_labels_on_image_array
-from objdetection.meta.visualisation.static_helper import visualize_stereo_images
-from objdetection.rgb2ir.sheets_interface import GoogleSheetsInterface
+from utils.visualisation.static_helper import visualize_stereo_images
 
 
 class EvaluatorFrozenGraph(Detector):

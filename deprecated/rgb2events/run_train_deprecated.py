@@ -24,9 +24,9 @@ FLAGS = flags.FLAGS
 # ========== Directories
 flags.DEFINE_string('dataset_dir',
                     "/home/ale/catkin_ws/src/zauron/zauron_eye/recordings/zauron_0.2/",
-                    'The directory where the datasets files are stored.')
+                    'The directory where the encoder files are stored.')
 flags.DEFINE_string('train_dir', "converted_rosbags",
-                    'The directory where the datasets files are stored.')
+                    'The directory where the encoder files are stored.')
 flags.DEFINE_string('dir_to_ckpt',
                     "/home/ale/catkin_ws/src/zauron/zauron_eye/recordings/zauron_0.2/",
                     'The directory where the checkpoints of the model are '

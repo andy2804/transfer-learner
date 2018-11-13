@@ -11,7 +11,7 @@ import tensorflow as tf
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('dataset')]
 sys.path.append(PROJECT_ROOT)
 
-from dataset.kaist import run
+from deprecated.kaist import run
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -23,7 +23,7 @@ flags.DEFINE_string('labels_out', 'kaist_label_map.json',
                     'Labels to be used as output: lapels_net will be remapped to labels_out')
 # ========== Directories
 flags.DEFINE_string('dataset_dir', "/shared_experiments/kaist/training/night",
-                    'The directory where the datasets files are stored as absolute path.')
+                    'The directory where the encoder files are stored as absolute path.')
 flags.DEFINE_string('tfrecord_name_prefix', "KAIST_TRAINING_NIGHT_ZAURONSCAPES_test",
                     'Output will be "$(tfrecord_name).tfrecord"')
 # =========== Ground-truth generator

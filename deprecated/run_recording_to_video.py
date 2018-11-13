@@ -15,7 +15,7 @@ from utils_visualisation import fun_general as vis_util
 UDP_IP = "127.0.0.1"
 UDP_PORT = 6785
 BUFFERSIZE = 43200
-MODEL_SAVE_PATH = "/home/ale/datasets/zuriscapes/Logs_official/Logs/" \
+MODEL_SAVE_PATH = "/home/ale/encoder/zuriscapes/Logs_official/Logs/" \
                   "03Dec2017_235135tfTRAINgaus40/10_gaus_model.ckpt"
 NETWORK_MODEL = "ssd_davisSAE_master"
 # Load mapping from integer class ID to sign name string

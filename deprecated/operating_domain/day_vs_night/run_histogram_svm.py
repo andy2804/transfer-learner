@@ -14,10 +14,10 @@ def _parse_input():
     parser = argparse.ArgumentParser(
             description='Train svm for day/night classification of images')
     parser.add_argument('--day_dir', type=str,
-                        default="/home/ale/datasets/day_vs_night/day_images",
+                        default="/home/ale/encoder/day_vs_night/day_images",
                         help='Directory containing images at day time')
     parser.add_argument('--night_dir', type=str,
-                        default="/home/ale/datasets/day_vs_night/night_images",
+                        default="/home/ale/encoder/day_vs_night/night_images",
                         help='Directory containing images at night time')
     _args = parser.parse_args()
     return _args

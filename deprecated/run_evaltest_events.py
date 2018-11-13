@@ -94,14 +94,14 @@ if __name__ == '__main__':
     # Configure command line options
     parser = argparse.ArgumentParser("Restore trained model and run inference")
     parser.add_argument('--input_dir',
-                        default="/home/ale/datasets/zuriscapes"
+                        default="/home/ale/encoder/zuriscapes"
                                 "/tfHANDTESTgaus30",
                         action="store_true",
                         help='Directory of input videos/images'
                              'Will run inference on all videos/images in that'
                              ' dir')
     parser.add_argument('--modelckpt_dir',
-                        default="/home/ale/datasets/zuriscapes/Logs_official"
+                        default="/home/ale/encoder/zuriscapes/Logs_official"
                                 "/Logs/"
                                 "03Dec2017_144140tfTRAINgaus40/175_gaus_model.ckpt",
                         action="store_true",

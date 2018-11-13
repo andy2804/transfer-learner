@@ -22,7 +22,7 @@ from objdetection.deprecated.detection_filter_deprecated import DetectionFilter
 
 # ========= Extras for plotting
 # import numpy as np
-# from NeuromorphicDeepLearning.datasets import visualization_utils as 
+# from NeuromorphicDeepLearning.encoder import visualization_utils as
 # vis_util
 # from matplotlib import pyplot as plt
 # from matplotlib import ticker
@@ -236,7 +236,7 @@ if __name__ == "__main__":
                         help='Minimum confidence value for detected object to '
                              'be considered ground truth')
     parser.add_argument('--dataset_path', action="store_true",
-                        default="/home/ale/datasets/zuriscapes"
+                        default="/home/ale/encoder/zuriscapes"
                                 "/hand_labeling_night/",
                         help='full path to the dataset')
     parser.add_argument('--events_formatter', action="store_true",
@@ -257,7 +257,7 @@ if __name__ == "__main__":
                         default=True,
                         help='prefix name of the folder to be used as output')
     parser.add_argument('--handlabeling_fold', action="store_true",
-                        default="/home/ale/datasets/zuriscapes"
+                        default="/home/ale/encoder/zuriscapes"
                                 "/hand_labeling_night/pickle",
                         help='path to pickled hand labeled data')
     args = parser.parse_args()

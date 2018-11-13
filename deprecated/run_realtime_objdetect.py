@@ -18,7 +18,7 @@ from objdetection.meta.utils_generic.magic_constants import Davis240c
 UDP_IP = "127.0.0.1"
 UDP_PORT = 6785
 BUFFERSIZE = 43200
-MODEL_SAVE_PATH = "/home/ale/datasets/zuriscapes/Logs/Log_09Nov2017_083429" \
+MODEL_SAVE_PATH = "/home/ale/encoder/zuriscapes/Logs/Log_09Nov2017_083429" \
                   "/200_exp_model.ckpt"
 # Load mapping from integer class ID to sign name string
 PATH2LABELS = "/home/ale/git_cloned/DynamicVisionTracking/objdetection/" \

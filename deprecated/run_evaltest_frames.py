@@ -84,7 +84,7 @@ if __name__ == '__main__':
     # Configure command line options
     parser = argparse.ArgumentParser("Restore trained model and run inference")
     parser.add_argument('--input_dir',
-                        default="/home/ale/datasets/zuriscapes"
+                        default="/home/ale/encoder/zuriscapes"
                                 "/tfHANDTESTgaus40",
                         action="store_true",
                         help='Directory of input videos/images'

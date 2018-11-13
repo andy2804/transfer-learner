@@ -81,10 +81,10 @@ def main():
 
 
 if __name__ == '__main__':
-    # RECORDINGS_PATH = "/home/ale/datasets/zuriscapes/hand_labeling_night" \
+    # RECORDINGS_PATH = "/home/ale/encoder/zuriscapes/hand_labeling_night" \
     #                   "/uzhNIGHT/"
     RECORDINGS_PATH = "/media/andya/EXTSSD_T3/crossmodal_mt/rosbags/official/hand_labelling"
-    # OUTPUT_DIR = "/home/ale/datasets/zuriscapes/hand_labeling_night/pickle/"
+    # OUTPUT_DIR = "/home/ale/encoder/zuriscapes/hand_labeling_night/pickle/"
     OUTPUT_DIR = "/media/andya/EXTSSD_T3/crossmodal_mt/rosbags/official/ODN_NE_E0_2018-05-01-21" \
                  "-27-26/"
     # PATH_TO_LABELS = "/home/ale/git_cloned/CrossModalTL/objdetection/" \

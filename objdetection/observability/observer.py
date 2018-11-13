@@ -9,14 +9,13 @@ Using the `_compute_score` method we compute an empirical score used to infer wh
 same object is visible in both domains.
 #todo
 """
-from collections import OrderedDict
 
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-from objdetection.utils_labeler.static_helper import load_labels
-from objdetection.visualisation.static_helper import visualize_stereo_images, \
+from utils.static_helper import load_labels
+from utils.visualisation import visualize_stereo_images, \
     draw_bounding_box_on_image_array, scale_to_box, add_text_overlay
 
 

@@ -11,7 +11,7 @@ import tensorflow as tf
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('dataset')]
 sys.path.append(PROJECT_ROOT)
 
-from dataset.kaist.eval_dataset import run_evaluation
+from deprecated.kaist.eval_dataset import run_evaluation
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -21,7 +21,7 @@ flags.DEFINE_string('dataset_dir', "/shared_experiments/kaist/",
                     'The directory where the dataset files are stored as absolute path.')
 flags.DEFINE_string('src_dir', "training/day_n_night/",
                     'Relative path from dataset_dir to the source directory of *.tfrecords.')
-flags.DEFINE_string('output_dir', "/shared_experiments/kaist/results/datasets",
+flags.DEFINE_string('output_dir', "/shared_experiments/kaist/results/encoder",
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME

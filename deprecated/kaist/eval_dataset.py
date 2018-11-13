@@ -33,7 +33,7 @@ def _input_parser(example_proto):
 
 def run_evaluation(flags):
     """
-    Evaluates datasets for objects detected and uploads them to Google Sheet
+    Evaluates encoder for objects detected and uploads them to Google Sheet
     :param flags:
     :return:
     """
@@ -109,5 +109,5 @@ def run_evaluation(flags):
             diff = len(stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=0))
             values.append('%d (%d)' % (number, diff))
         values.append(len(stats.get_tlscores()))
-        sheets.upload_data('datasets', 'B', 'H', output_name, values)
+        sheets.upload_data('encoder', 'B', 'H', output_name, values)
     return
