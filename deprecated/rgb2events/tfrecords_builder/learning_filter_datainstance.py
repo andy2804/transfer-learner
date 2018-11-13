@@ -6,10 +6,10 @@ import cv2
 import numpy as np
 
 from objdetection.meta.observability.observer import MultiModalObserver
-from objdetection.meta.visualisation.img_blender import LFImageBlender
-from objdetection.meta.visualisation.static_helper import (draw_img_from_events,
-                                                           draw_overlay_from_events,
-                                                           visualize_rgb_detections)
+from objdetection.meta.visual.img_blender import LFImageBlender
+from objdetection.meta.visual.static_helper import (draw_img_from_events,
+                                                    draw_overlay_from_events,
+                                                    visualize_rgb_detections)
 from objdetection.rgb2events.tfrecords_builder.learning_tracker import LearningTracker
 
 

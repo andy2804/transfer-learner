@@ -6,7 +6,7 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 from objdetection.meta.observability.observer import MultiModalObserver
-from objdetection.meta.visualisation.static_helper import add_text_overlay
+from objdetection.meta.visual.static_helper import add_text_overlay
 from objdetection.rgb2events.tfrecords_builder.stats import TLStatistician
 
 

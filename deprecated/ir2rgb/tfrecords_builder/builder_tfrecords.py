@@ -12,7 +12,7 @@ from deprecated.kaist.utils_readio import read_filenames
 from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.meta.detector.detector import Detector
 from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.visualisation.static_helper import visualize_boxes_and_labels_on_image_array
+from objdetection.meta.visual.static_helper import visualize_boxes_and_labels_on_image_array
 
 __all__ = ['run_conversion']
 

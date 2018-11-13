@@ -16,7 +16,7 @@ sys.path.append(PROJECT_ROOT)
 
 from objdetection.meta.evaluator.evaluator import EvaluatorFrozenGraph
 from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.visualisation.plot_mAP_evaluation import plot_performance_metrics
+from objdetection.meta.visual.plot_mAP_evaluation import plot_performance_metrics
 
 INPUT_DIR = '/shared_experiments/kaist/results/evaluation/'
 OUTPUT_DIR = '/shared_experiments/kaist/results/'
