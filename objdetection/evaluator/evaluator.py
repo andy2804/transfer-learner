@@ -81,8 +81,9 @@ class EvaluatorFrozenGraph(Detector):
         :param pr_bboxes: predicted
         :type pr_bboxes: array[Nx4](float),N>=0
         :param gt_labels: ground-truth
-        :type gt_labels: array[]
+        :type gt_labels: *
         :param gt_boxes: ground-truth
+        :type gt_boxes: *
         :return:
         """
         # todo add support for batch sizes bigger than ones

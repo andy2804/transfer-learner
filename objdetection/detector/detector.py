@@ -25,20 +25,8 @@ ROOT_DIR = "WormholeLearning/"
 
 ARCH_DICT = {
     # -1x: nets trained at daytime only, -2x: ir nets, -3x: retrained nets with daytime + ir labels
-    -42: "ssd_inception_v2_kaist_ir035_rgb050_nightonly_RGB",
-    -41: "ssd_inception_v2_kaist_ir035_rgb035_nightonly_RGB",
-    -40: "ssd_inception_v2_kaist_ir035_rgb015_nightonly_RGB",
-    -34: "ssd_inception_v2_kaist_ir035_rgb065_RGB",
-    -33: "ssd_inception_v2_kaist_ir035_rgb050_RGB",
-    -32: "ssd_inception_v2_kaist_ir035_rgb035_RGB",
-    -31: "ssd_inception_v2_kaist_ir035_rgb015_RGB",
-    -30: "ssd_inception_v2_kaist_ir050_rgb050_RGB",
-    -24: "ssd_inception_v2_kaist_ir035_norm_IR",
-    -23: "ssd_inception_v2_kaist_ir065_IR",
-    -22: "ssd_inception_v2_kaist_ir050_IR",
-    -21: "ssd_inception_v2_kaist_ir035_IR",
-    -20: "ssd_inception_v2_kaist_ir015_IR",
-    -10: "ssd_inception_v2_kaist_dayonly_RGB",
+    -11: "ssd_inception_v2_zauron_roiclipped_dayonly_RGB",
+    -10: "ssd_inception_v2_zauron_dayonly_RGB",
     1:   "ssd_mobilenet_v1_coco_11_06_2017",
     2:   "ssd_inception_v2_coco_2018_01_28",
     3:   "rfcn_resnet101_coco_11_06_2017",
@@ -123,7 +111,7 @@ class Detector:
             except urllib.error.URLError as e:
                 print("\nSomething went wrong connecting to tensorflow API, error:", e)
         else:
-            print("Using pre-downloaded network.")
+            print("Using pre-downloaded network: %s" % self._model_name)
 
     @staticmethod
     def _reporthook(count, block_size, total_size):

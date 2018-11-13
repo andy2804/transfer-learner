@@ -9,7 +9,7 @@ from httplib2 import Http
 from oauth2client import client, file, tools
 from redis import WatchError
 
-ROOT_DIR = "zauron/"
+ROOT_DIR = "WormholeLearning/"
 CREDENTIALS_DIR = "resources/credentials/"
 CREDENTIALS_PATH = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR,
                                 CREDENTIALS_DIR)

@@ -10,5 +10,5 @@ job_name=dayonly_roi_clip
 CUDA_VISIBLE_DEVICES=5,6,7 python3 object_detection/train.py \
     --logtostderr \
     --pipeline_config_path=$HOME/WormholeLearning/resources/nets_cfgs/configs/ssd_inceptionv2_$job_name.config \
-    --train_dir=/media/sdc/andya/wormhole_learning/models/obj_detector_retrain/$job_name/ \
+    --train_dir=/media/sdc/andya/wormhole_learning/models/obj_detector_retrain/train_$job_name/ \
     --num_clones 3

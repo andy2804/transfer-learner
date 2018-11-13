@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-from objdetection.meta.evaluator.evaluator import EvaluatorFrozenGraph
+from objdetection.evaluator.evaluator import EvaluatorFrozenGraph
 
 
 def _filter_difficult(gt_labels_in, gt_boxes_in, difficult_flag_in, eval_difficult=False):
@@ -84,7 +84,7 @@ def run_evaluation(flags):
         with tf.Session(graph=evaluator.detection_graph) as sess:
             # "Dataset"
             filenames_placeholder = tf.placeholder(tf.string, shape=[None])
-            testfiles = [os.path.join(flags.dataset_dir + flags.src_dir, f) for f in
+            testfiles = [os.path.join(flags.dataset_dir, f) for f in
                          flags.testfiles]
             dataset = tf.data.TFRecordDataset(filenames_placeholder)
 
