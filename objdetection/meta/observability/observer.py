@@ -16,11 +16,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.visualisation.static_helper import (add_text_overlay,
-                                                           draw_bounding_box_on_image_array,
-                                                           draw_overlay_from_events,
-                                                           scale_to_box,
-                                                           visualize_stereo_images)
+from objdetection.meta.visual.static_helper import (add_text_overlay,
+                                                    draw_bounding_box_on_image_array,
+                                                    draw_overlay_from_events,
+                                                    scale_to_box,
+                                                    visualize_stereo_images)
 
 
 class MultiModalObserver:

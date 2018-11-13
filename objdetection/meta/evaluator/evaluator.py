@@ -9,17 +9,16 @@ from pprint import pprint
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-# import matplotlib
-# matplotlib.use('TkAgg')
+from contracts import contract
 from matplotlib import pyplot as plt
 
 from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.meta.detector.objdet_frozengraph import ARCH_DICT, DetectionGraph
 from objdetection.meta.performances import metrics_np
-from objdetection.meta.visualisation.plot_mAP_evaluation import plot_performance_metrics
-from objdetection.meta.visualisation.static_helper import \
+from objdetection.meta.visual.plot_mAP_evaluation import plot_performance_metrics
+from objdetection.meta.visual.static_helper import \
     visualize_boxes_and_labels_on_image_array
-from objdetection.meta.visualisation.static_helper import visualize_stereo_images
+from objdetection.meta.visual.static_helper import visualize_stereo_images
 from objdetection.rgb2ir.sheets_interface import GoogleSheetsInterface
 
 
@@ -49,7 +48,7 @@ class EvaluatorFrozenGraph(DetectionGraph):
         self._num_classes = len(self._labels_output_dict)
         self._network_name = ARCH_DICT.get(net_arch)
         # stats
-        self._corestats = None
+        self._stats = None
         self._mAP = 0
         self._AP = None
         self._init_stats(n_thresholds)
@@ -71,35 +70,40 @@ class EvaluatorFrozenGraph(DetectionGraph):
                 "difficult_flag": decoded_ex["difficult_flag"]
                 }
 
+    @contract
     def update_evaluation_from_single_batch(
             self, pr_labels, pr_scores, pr_bboxes, gt_labels, gt_boxes):
         """
         :param pr_labels: predicted
+        :type pr_labels: array[N],N>=0
         :param pr_scores: predicted
+        :type pr_scores: array[N],N>=0
         :param pr_bboxes: predicted
+        :type pr_bboxes: array[Nx4](float),N>=0
         :param gt_labels: ground-truth
+        :type gt_labels: array[]
         :param gt_boxes: ground-truth
         :return:
         """
         # todo add support for batch sizes bigger than ones
 
         # compute stats
-        for thresh in self._corestats:
+        for thresh in self._stats:
             n_gt, tp, fp = metrics_np.gather_stats_on_single_batch(
                     pr_labels, pr_scores, pr_bboxes, gt_labels, gt_boxes,
                     self._num_classes, thresh)
-            self._update_corestats(ret_thresh=thresh, n_gt=n_gt, tp=tp, fp=fp)
+            self._update_stats(ret_thresh=thresh, n_gt=n_gt, tp=tp, fp=fp)
         return
 
     def compute_stats(self):
-        self._corestats = self.compute_acc_rec(self._corestats, self._num_classes)
-        self._AP, self._mAP = self.compute_ap(self._corestats, self._thresholds)
+        self._stats = self.compute_acc_rec(self._stats, self._num_classes)
+        self._AP, self._mAP = self.compute_ap(self._stats, self._thresholds)
 
     @staticmethod
     def compute_acc_rec(corestats, num_classes):
         """
         Evaluate statistics of detected objects and calculate performance metrics
-        according to M. Everingham et. al (https://doi.org/10.1007/s11263-014-0733-5
+        according to M. Everingham et. al (https://doi.org/10.1007/s11263-014-0733-5)
         :return:
         """
         for thresh in corestats:
@@ -141,7 +145,7 @@ class EvaluatorFrozenGraph(DetectionGraph):
         mAP = np.mean(list(AP.values()))
         return AP, mAP
 
-    def _update_corestats(self, ret_thresh, n_gt, tp, fp):
+    def _update_stats(self, ret_thresh, n_gt, tp, fp):
         """
         Update ground truth, true positive and false positive parameters for each class
         :param ret_thresh:
@@ -151,11 +155,12 @@ class EvaluatorFrozenGraph(DetectionGraph):
         :return:
         """
         for cls in range(1, self._num_classes + 1):
-            self._corestats[ret_thresh]['n_gt'][cls] += n_gt[cls]
-            self._corestats[ret_thresh]['tp'][cls] += tp[cls]
-            self._corestats[ret_thresh]['fp'][cls] += fp[cls]
+            self._stats[ret_thresh]['n_gt'][cls] += n_gt[cls]
+            self._stats[ret_thresh]['tp'][cls] += tp[cls]
+            self._stats[ret_thresh]['fp'][cls] += fp[cls]
         return
 
+    @contract(n_thresholds='int,>0')
     def _init_stats(self, n_thresholds):
         """
         Init the dict of dicts of dict to collect all the basic stats for specified amount of
@@ -169,18 +174,19 @@ class EvaluatorFrozenGraph(DetectionGraph):
         self._thresholds = thresh_keys
         stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec')
         cls_keys = list(range(1, self._num_classes + 1))
-        self._corestats = {t: {s: {c: 0 for c in cls_keys} for s in stats_keys} for t in
-                           thresh_keys}
+        self._stats = {t: {s: {c: 0 for c in cls_keys} for s in stats_keys} for t in
+                       thresh_keys}
         return
 
     def plot_performance_metrics(self, testname, relative_bar_chart=True):
         """
         Plots performance metrics using corestats and AP values
+        :param relative_bar_chart:
         :param testname:
         :return:
         """
         self._plot = plot_performance_metrics(
-                [self._corestats], [self._AP],
+                [self._stats], [self._AP],
                 self._labels_output_dict,
                 testname, relative_bar_chart=relative_bar_chart)
 
@@ -205,7 +211,7 @@ class EvaluatorFrozenGraph(DetectionGraph):
         pickle_file = os.path.join(self.output_dir,
                                    self._network_name + '_' + filename + '.pickle')
         with open(pickle_file, 'wb') as fp:
-            pickle.dump(self._corestats, fp)
+            pickle.dump(self._stats, fp)
 
         # also upload a copy to google sheets
         sheet_interface = GoogleSheetsInterface()
@@ -215,7 +221,7 @@ class EvaluatorFrozenGraph(DetectionGraph):
 
     def print_performance(self):
         print('\nCorestats:')
-        pprint(self._corestats)
+        pprint(self._stats)
         print('AP per Class:')
         pprint(self._AP)
         print('mAP:\t%.2f' % self._mAP)

@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.visualisation.static_helper import add_text_overlay
+from objdetection.meta.visual.static_helper import add_text_overlay
 
 
 class LFImageBlender:

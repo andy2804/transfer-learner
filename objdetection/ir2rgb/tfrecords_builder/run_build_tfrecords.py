@@ -65,7 +65,7 @@ flags.DEFINE_integer('lf_score_thresh', 0,
 
 # ================ VISUALIZATION AND PLOTS
 flags.DEFINE_bool('verbose', False,
-                  'Activates verbose mode with visualisation')
+                  'Activates verbose mode with visual')
 flags.DEFINE_bool('generate_plots', True,
                   'Generates and saves plots on the home folder')
 flags.DEFINE_bool('show_plots', False,

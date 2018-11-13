@@ -116,9 +116,8 @@ def run_evaluation(flags):
                             feed_dict={evaluator.image_tensor: img_in})
 
                     # Remove all difficult object if flags.eval_difficult == False
-                    gt_labels, gt_boxes, difficult_flag = _filter_difficult(gt_labels, gt_boxes,
-                                                                            difficult_flag,
-                                                                            flags.eval_difficult)
+                    gt_labels, gt_boxes, difficult_flag = _filter_difficult(
+                            gt_labels, gt_boxes, difficult_flag, flags.eval_difficult)
 
                     # Apply min object size filter
                     if flags.min_obj_size > 0:

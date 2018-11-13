@@ -13,10 +13,10 @@ PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
 sys.path.append(PROJECT_ROOT)
 
 from objdetection.meta.evaluator.eval_frozengraph import _normalize_image
-from objdetection.meta.visualisation.static_helper import \
+from objdetection.meta.visual.static_helper import \
     (visualize_boxes_and_labels_on_image_array,
      add_text_overlay)
-from objdetection.meta.visualisation.vis_helper import compose_media_from_frames
+from objdetection.meta.visual.vis_helper import compose_media_from_frames
 from objdetection.meta.utils_labeler.static_helper import load_labels
 from objdetection.meta.detector.objdet_frozengraph import DetectionGraph, ARCH_DICT
 

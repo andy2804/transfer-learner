@@ -10,8 +10,8 @@ from moviepy.editor import ImageSequenceClip
 from scipy.misc import imresize
 
 from rosbag_converter.utils_rosbag_converter.static_helper import copy_events_from_chunk
-from objdetection.meta.visualisation.static_helper import (create_overlay_from_images,
-                                                           add_text_overlay)
+from objdetection.meta.visual.static_helper import (create_overlay_from_images,
+                                                    add_text_overlay)
 
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)

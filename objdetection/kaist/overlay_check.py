@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.meta.detector.objdet_frozengraph import DetectionGraph
 from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.visualisation.static_helper import visualize_rgb_detections
+from objdetection.meta.visual.static_helper import visualize_rgb_detections
 
 
 def run(flags):

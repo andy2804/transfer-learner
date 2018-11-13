@@ -37,7 +37,7 @@ flags.DEFINE_integer('net_arch', -1,
                      'Passes argument to cuda visible devices, comma separeted values')
 # =========== Visualisation and verbose
 flags.DEFINE_bool('verbose', True,
-                  'Activates verbose mode with visualisation')
+                  'Activates verbose mode with visual')
 
 
 # ============================================================

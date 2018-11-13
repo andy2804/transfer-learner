@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from PIL import Image
 
-from objdetection.meta.visualisation.static_helper import \
+from objdetection.meta.visual.static_helper import \
     visualize_boxes_and_labels_on_image_array
 
 ROOT_DIR = "zauron/"

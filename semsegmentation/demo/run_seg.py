@@ -3,7 +3,6 @@ import os
 import matplotlib.animation as animation
 from PIL import Image
 from matplotlib import pyplot as plt, gridspec
-
 from semsegmentation.core.segmentator import Segmentator
 
 

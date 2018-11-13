@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.visualisation.static_helper import visualize_boxes_and_labels_on_image_array
+from objdetection.meta.visual.static_helper import visualize_boxes_and_labels_on_image_array
 from objdetection.rgb2events.tfrecords_builder.stats import TLStatistician
 from objdetection.rgb2ir.sheets_interface import GoogleSheetsInterface
 

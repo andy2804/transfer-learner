@@ -54,17 +54,16 @@ class metricsNpTest(unittest.TestCase):
         self.assertTrue(callable(gather_stats_on_single_batch))
 
     def test_stats_on_single_batch(self):
-        for i in range(len(self.pr_labels)):
-            n_gt_dict, tp_dict, fp_dict = gather_stats_on_single_batch(
-                    self.pr_labels, self.pr_scores, self.pr_bboxes, self.gt_labels,
-                    self.gt_bboxes, self.num_classes, self.cut_off_conf
-            )
-            with self.subTest("ground-truth dictionary"):
-                self.assertDictEqual(n_gt_dict, self.n_gt_d)
-            with self.subTest("true positive dictionary"):
-                self.assertDictEqual(tp_dict, self.tp_d)
-            with self.subTest("false positive dictionary"):
-                self.assertDictEqual(fp_dict, self.fp_d)
+        n_gt_dict, tp_dict, fp_dict = gather_stats_on_single_batch(
+                self.pr_labels, self.pr_scores, self.pr_bboxes, self.gt_labels,
+                self.gt_bboxes, self.num_classes, self.cut_off_conf
+        )
+        with self.subTest("ground-truth dictionary"):
+            self.assertDictEqual(n_gt_dict, self.n_gt_d)
+        with self.subTest("true positive dictionary"):
+            self.assertDictEqual(tp_dict, self.tp_d)
+        with self.subTest("false positive dictionary"):
+            self.assertDictEqual(fp_dict, self.fp_d)
 
 
 if __name__ == '__main__':

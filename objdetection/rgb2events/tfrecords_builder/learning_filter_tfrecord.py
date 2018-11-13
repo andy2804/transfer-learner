@@ -4,7 +4,7 @@ author: aa & az
 import numpy as np
 
 from objdetection.meta.observability.observer import MultiModalObserver
-from objdetection.meta.visualisation.static_helper import (draw_img_from_events)
+from objdetection.meta.visual.static_helper import (draw_img_from_events)
 from objdetection.rgb2events.tfrecords_builder.stats import TLStatistician
 
 
