@@ -3,6 +3,8 @@ author: az
 """
 import unittest
 
+from contracts import ContractNotRespected
+
 from objdetection.evaluator.evaluator import EvaluatorFrozenGraph
 
 
@@ -21,13 +23,16 @@ class EvaluatorFrozenGraphTest(unittest.TestCase):
     #    self.assertDictEqual(acc_rec, self.acc_rec)
 
     def test_wilson_ci(self):
-        ns = [10, 200]
-        n = [500, 400]
-        ci = [0.95] * len(n)
-        mean_gt = []
-        interval_gt = []
+        ns = [35, 9000]
+        n = [100, 15000]
+        ci = [.95, .9]
+        mean_gt = [.361968, .6]
+        interval_gt = [.09191, .0066]
         for i in range(len(n)):
-            with self.subTest("wilson {:d} subtest".format(i)):
+            with self.subTest("Wilson {:d} subtest [computation]".format(i + 1)):
                 mean, interval = EvaluatorFrozenGraph.wilson_ci(ns[i], n[i], ci[i])
-                print("mean: {:.2f}".format(mean))
-                print("mean: {:.4f}".format(interval))
+                self.assertAlmostEqual(mean, mean_gt[i], places=4)
+                self.assertAlmostEqual(interval, interval_gt[i], places=4)
+        with self.subTest("Wilson [args validity]"):
+            with self.assertRaises(ContractNotRespected):
+                EvaluatorFrozenGraph.wilson_ci(1, -1)
