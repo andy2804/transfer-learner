@@ -10,9 +10,6 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from contracts import contract
-
-# import matplotlib
-# matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 from scipy import stats
 
@@ -105,10 +102,11 @@ class EvaluatorFrozenGraph(Detector):
         self._AP, self._mAP = self.compute_ap(self._stats, self._thresholds)
 
     @staticmethod
-    def compute_acc_rec(corestats, num_classes, confidence=None):
+    def compute_acc_rec(corestats, num_classes, confindence_level=False):
         """
         Evaluate statistics of detected objects and calculate performance metrics
         according to M. Everingham et. al (https://doi.org/10.1007/s11263-014-0733-5)
+        :param confindence_level: If 0< value<1 will calculate with Wilson confidence interval
         :return:
         """
         for thresh in corestats:
@@ -121,17 +119,22 @@ class EvaluatorFrozenGraph(Detector):
                     gt = corestats[thresh]['n_gt'][cls]
                     tp = corestats[thresh]['tp'][cls]
                     fp = corestats[thresh]['fp'][cls]
-                    accuracy = EvaluatorFrozenGraph.safe_div(tp, tp + fp)
-                    recall = EvaluatorFrozenGraph.safe_div(tp, gt)
+                    if confindence_level is None:
+                        accuracy = [EvaluatorFrozenGraph.safe_div(tp, tp + fp), None]
+                        recall = [EvaluatorFrozenGraph.safe_div(tp, gt), None]
+                    else:
+                        # todo wilson
+                        accuracy = EvaluatorFrozenGraph.wilson_ci(tp, tp + fp, ci=confindence_level)
+                        recall = EvaluatorFrozenGraph.wilson_ci(tp, gt, ci=confindence_level)
+
                     corestats[thresh]['acc'][cls] = accuracy
                     corestats[thresh]['rec'][cls] = recall
         return corestats
 
     @staticmethod
-    def compute_ap(corestats, thresholds, equal_class_weight=False):
+    def compute_ap(corestats, thresholds):
         """
         Calculates the per class average precision
-        :param equal_class_weight:
         :return:
         """
         # todo check this function
