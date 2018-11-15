@@ -11,7 +11,7 @@ labels_out: zauron_label_map.json
 dataset_dir: /media/sdc/andya/wormhole_learning/dataset/testing
 
 # Filter keywords that needs to be contained in the path
-filter_keywords: ["dusk"]
+filter_keywords: ["day"]
 
 # Name of the sub-directory containing images of the main sensor
 main_sensor: RGB
@@ -20,7 +20,7 @@ main_sensor: RGB
 aux_sensor: RGB
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: ZAURON_TESTING_DUSK
+tfrecord_name_prefix: ZAURON_TESTING_DAY
 
 # Additionally generated files during transfer_learning will be saved here
 output_dir: /media/sdc/andya/wormhole_learning/dataset/testing

@@ -1,35 +1,28 @@
 """
 author: aa
 """
+
 import os
 import pickle
 import sys
 import time
 from datetime import timedelta
-from pprint import pprint
 
-from objdetection.meta.detector.detector import ARCH_DICT
-from objdetection.rgb2ir.sheets_interface import GoogleSheetsInterface
-
-PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
+PROJECT_ROOT = os.getcwd()[:os.getcwd().index('transferlearning')]
 sys.path.append(PROJECT_ROOT)
 
-from objdetection.meta.evaluator.evaluator import EvaluatorFrozenGraph
-from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.visual.plot_mAP_evaluation import plot_performance_metrics
+from transferlearning.filter.stats import TLStatistician
+from utils.sheets_interface import GoogleSheetsInterface
+from utils.static_helper import load_labels
 
-INPUT_DIR = '/shared_experiments/kaist/results/evaluation/'
-OUTPUT_DIR = '/shared_experiments/kaist/results/'
-TESTNAME = ['ssd_inception_v2_kaist_dayonly_1_kaist_night_rgb',
-            'ssd_inception_v2_kaist_ir035_rgb050_RGB_3_kaist_night']
-PLOTTITLE = "1_Original vs 3_Enhanced_050 at Night_TEST"
-LABELS = 'kaist_label_map.json'
+INPUT_DIR = '/home/andya/external_ssd/wormhole_learning/dataset/testing'
+OUTPUT_DIR = '/home/andya/external_ssd/wormhole_learning/dataset/testing'
+TESTNAME = ['ZAURON_DAYONLY_ROI_CLIPPED']
+LABELS = 'zauron_label_map.json'
+WORKSHEET = 'zauron_dataset'
 
-# To plot all classes, set LABEL_FILTER = None
-LABEL_FILTER = [3, 6]
-
-RECREATE_ALL_PLOTS = False
-UPLOAD_TO_SHEETS = False
+RECREATE_ALL_PLOTS = True
+UPLOAD_TO_SHEETS = True
 
 """
 #
@@ -50,87 +43,36 @@ UPLOAD_TO_SHEETS = False
 """
 
 
-def print_stats(corestat, AP, mAP):
-    print('\nCorestats:')
-    pprint(corestat)
-    print('AP per Class:')
-    pprint(AP)
-    print('mAP:\t%.2f' % mAP)
-
-
-def save_plot(plot, testname):
-    # Save the plot as pdf
-    try:
-        if plot is not None:
-            plot.savefig('{}.pdf'.format(testname))
-    except PermissionError:
-        print("\n Permission error during saving plots!")
-
-
-def load_corestats_from_files(files):
-    # corestats = []
-    # for file in files:
-    # Load Data
-    # corestats.append(pickle.load(open(file, 'rb')))
-    # return corestats
+def load_stats_from_files(files):
     return [pickle.load(open(file, 'rb')) for file in files]
 
 
-def compute_scores_from_corestats(corestats):
-    AP = []
-    mAP = []
-    for corestat in corestats:
-        thresholds = sorted(corestat.keys())
-        ap, map = EvaluatorFrozenGraph.compute_ap(corestat, thresholds)
-        AP.append(ap)
-        mAP.append(map)
-    return AP, mAP
-
-
-def upload_results(testname, AP, mAP, corestats):
-    for key, value in ARCH_DICT.items():
-        if value in testname:
-            network = value
-            testname = testname.replace(network + '_', '')
-            break
+def upload_results(sheets, stats, testname, labels):
+    # Prepare data for upload to google sheets result page
+    values = []
+    for idx in range(len(labels)):
+        number = len(stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=1))
+        diff = len(stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=0))
+        values.append('%d (%d)' % (number, diff))
+    values.append(len(stats.get_tlscores()))
 
     try:
-        SHEETS.upload_evaluation_stats(network, testname, AP, mAP, corestats)
+        sheets.upload_data(WORKSHEET, 'B', 'I', testname, values)
     except:
         print("\nUpload Error!")
 
 
-def plot_from_corestats(corestats, files, comparison_plot=False):
+def plot_from_stats(corestats, files):
     labels = load_labels(LABELS)
-    AP, mAP = compute_scores_from_corestats(corestats)
-    if comparison_plot:
-        if PLOTTITLE is None:
-            testnames = [os.path.splitext(os.path.basename(file))[0] for file in files]
-            testname = '\n'
-            testname = testname.join(testnames)
-        else:
-            testname = PLOTTITLE
-        plot = plot_performance_metrics(corestats, AP, labels, testname,
-                                        relative_bar_chart=True, label_filter=LABEL_FILTER)
-        for idx in range(len(corestats)):
-            print_stats(corestats[idx], AP[idx], mAP[idx])
-        pdf_file = os.path.join(OUTPUT_DIR, testname)
-        save_plot(plot, pdf_file)
+    stats = TLStatistician(tl_score_threshold=0, labels_file=LABELS)
+    sheets = GoogleSheetsInterface()
+    for idx in range(len(corestats)):
+        testname = os.path.basename(files[idx]).strip("_objstats.pickle")
+        print("Evaluating %s" % testname)
+        stats.load(corestats[idx])
+        stats.make_plots(save_plots=True, output_dir=OUTPUT_DIR, filename=testname, show_plots=True)
         if UPLOAD_TO_SHEETS:
-            global SHEETS
-            SHEETS = GoogleSheetsInterface()
-            upload_results(testname, AP[idx], mAP[idx], corestats[idx])
-    else:
-        for idx in range(len(corestats)):
-            if PLOTTITLE is None:
-                testname = os.path.splitext(os.path.basename(files[idx]))[0]
-            else:
-                testname = PLOTTITLE
-            plot = plot_performance_metrics([corestats[idx]], [AP[idx]], labels, testname,
-                                            relative_bar_chart=True, label_filter=LABEL_FILTER)
-            print_stats(corestats[idx], AP[idx], mAP[idx])
-            pdf_file = os.path.join(OUTPUT_DIR, testname)
-            save_plot(plot, pdf_file)
+            upload_results(sheets, stats, testname, labels)
 
 
 def main():
@@ -149,18 +91,12 @@ def main():
                  '.pickle' in file]
     else:
         for file in TESTNAME:
-            files.append(os.path.join(INPUT_DIR, file + '.pickle'))
+            files.append(os.path.join(INPUT_DIR, file + '_objstats.pickle'))
 
     # Load all corresponding corestats
-    corestats = load_corestats_from_files(files)
+    corestats = load_stats_from_files(files)
 
-    # Initialize GoogleSheetInterface
-
-    if RECREATE_ALL_PLOTS:
-        plot_from_corestats(corestats, files, comparison_plot=False)
-    else:
-        plot_from_corestats(corestats, files, comparison_plot=True)
-
+    plot_from_stats(corestats, files, )
     deltatime = timedelta(seconds=time.time() - t0)
     print("\nPlotting completed in:\t", deltatime)
 
