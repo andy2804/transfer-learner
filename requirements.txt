@@ -9,3 +9,6 @@ numpy
 
 # tensorflow		# CPU Version of TensorFlow.
 tensorflow-gpu	# GPU version of TensorFlow.
+
+################################################################
+pycontracts
