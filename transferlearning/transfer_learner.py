@@ -7,22 +7,22 @@ import os
 import time
 
 import cv2
-import matplotlib
 import numpy as np
 import tensorflow as tf
 from PIL import Image, ImageStat
 
+# Uncomment if you want to use verbose
+import matplotlib
+matplotlib.use('Agg')
+
+from matplotlib import pyplot as plt
+from objdetection.detector.detector import Detector
+from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
+from transferlearning.filter.learning_filter import LearningFilter
+from utils.io.io_utils import read_filenames
+from utils.static_helper import load_labels
 # Use different back-end to circumvent check for Display variable
 from utils.visualisation.static_helper import visualize_detections
-
-matplotlib.use('Agg')
-from matplotlib import pyplot as plt
-
-from utils.io.io_utils import read_filenames
-from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
-from objdetection.detector.detector import Detector
-from utils.static_helper import load_labels
-from transferlearning.filter.learning_filter import LearningFilter
 
 
 class TransferLearner:
@@ -71,7 +71,7 @@ class TransferLearner:
 
                 obj_detected = self._detector.run_inference_on_img(img_main)
 
-                classes_remapped, scores_remapped, boxes_remapped = self._detector.remap_labels_2(
+                classes_remapped, scores_remapped, boxes_remapped = self._detector.remap_labels(
                         obj_detected.classes, obj_detected.scores, obj_detected.boxes)
 
                 if len(boxes_remapped) > 0:

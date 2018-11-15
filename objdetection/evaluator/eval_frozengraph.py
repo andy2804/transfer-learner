@@ -138,7 +138,7 @@ def run_evaluation(flags):
                                                   scale_back_using_cv2=flags.scale_back_using_cv2)
 
                     # Remap labels to desired output label map
-                    classes_out, scores_out, boxes_out = evaluator.remap_labels_2(
+                    classes_out, scores_out, boxes_out = evaluator.remap_labels(
                             classes, scores, boxes)
 
                     # Show example if verbose == True

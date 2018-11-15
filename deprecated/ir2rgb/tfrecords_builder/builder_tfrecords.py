@@ -61,7 +61,7 @@ def run_conversion(flags):
                     img_ir = ((img_ir * stddev_scale) + mean_scale).clip(0, 255).astype(np.uint8)
 
             obj_detected = detector.run_inference_on_img(img_ir)
-            classes, scores, boxes = detector.remap_labels_2(
+            classes, scores, boxes = detector.remap_labels(
                     obj_detected.classes, obj_detected.scores, obj_detected.boxes)
 
             if len(boxes) > 0:

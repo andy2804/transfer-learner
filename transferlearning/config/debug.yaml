@@ -28,7 +28,7 @@ output_dir: /media/andya/EXTSSD_T3/crossmodal_mt/rosbags/zauron_eye_2.0/verbose/
 
 # ================ GPUS MASK
 # Passes argument to cuda visible devices, comma separated values
-cuda_visible_devices: "0"
+cuda_visible_devices: ""
 
 
 # ================ SEMI-SUPERVISED LABEL GENERATOR

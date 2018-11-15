@@ -15,7 +15,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from utils.static_helper import load_labels
-from utils.visualisation import visualize_stereo_images, \
+from utils.visualisation.static_helper import visualize_stereo_images, \
     draw_bounding_box_on_image_array, scale_to_box, add_text_overlay
 
 

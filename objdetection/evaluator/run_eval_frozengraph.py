@@ -18,23 +18,23 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # ================ DIRECTORIES
-flags.DEFINE_string('dataset_dir', "/shared_experiments/kaist/testing/day/",
+flags.DEFINE_string('dataset_dir', "/media/sdc/andya/wormhole_learning/dataset/training",
                     'The directory where the dataset files are stored as absolute path.')
 flags.DEFINE_string('output_dir', "/media/sdc/andya/wormhole_learning/results",
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME
-flags.DEFINE_list('testfiles', ["KAIST_TESTING_DAY_rgb.tfrecord", ],
+flags.DEFINE_list('testfiles', ["ZAURON_DAYONLY_ROI_CLIPPED.tfrecord", ],
                   'Names of the tfrecords containing the test data passed as a list')
-flags.DEFINE_string('testname', "1_ZAURON_DAY",
+flags.DEFINE_string('testname', "SSD_INCEPTION_V2_ORIGINAL",
                     'Used in the title of the plot: "Performance metrics on $(arg testname)"')
 
 # ================ NETWORK
-flags.DEFINE_integer('network_model', -10,
+flags.DEFINE_integer('network_model', 2,
                      'Network model as defined in the obj_detection class')
-flags.DEFINE_string('labels_net_arch', 'zauron_label_map.json',
+flags.DEFINE_string('labels_net_arch', 'mscoco_label_map.json',
                     'Labels on which the network has been trained')
-flags.DEFINE_string('labels_output', 'kaist_label_map.json',
+flags.DEFINE_string('labels_output', 'zauron_label_map.json',
                     'Labels against which we want to measure the performance, '
                     'they need to be the same mapping that has been used for the ground-truth.')
 
@@ -59,7 +59,7 @@ flags.DEFINE_bool('scale_back_using_cv2', False,
                   'back to range 0 to 255 using mean 127 and stddev derived from confidence_int')
 
 # ================ VERBOSE
-flags.DEFINE_bool('verbose', False,
+flags.DEFINE_bool('verbose', True,
                   'Whether or not to visualise the predictions against the ground truth')
 flags.DEFINE_bool('make_plot', True,
                   'Make plot out of the results')

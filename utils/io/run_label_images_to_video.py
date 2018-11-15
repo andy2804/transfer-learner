@@ -52,7 +52,7 @@ def main():
 
         # Run Object Detection
         obj_detected = detector.run_inference_on_img(img)
-        classes, scores, boxes = detector.remap_labels_2(
+        classes, scores, boxes = detector.remap_labels(
                 obj_detected.classes, obj_detected.scores, obj_detected.boxes)
 
         if len(classes) > 0:

@@ -38,7 +38,7 @@ def run(flags):
             im_ir = np.array(Image.open(file[1]))
             obj_detected = detector.run_inference_on_img(im_rgb)
 
-            classes_remapped, scores_remapped, boxes_remapped = detector.remap_labels_2(
+            classes_remapped, scores_remapped, boxes_remapped = detector.remap_labels(
                     obj_detected.classes, obj_detected.scores, obj_detected.boxes)
 
             if len(boxes_remapped) > 0:

@@ -4,7 +4,7 @@ cd $HOME/models/research
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 
 # Job_name can't have spaces and should match the ending of the config file
-job_name=dayonly_roi_clip
+job_name=dayonly
 
 # Actual call
 CUDA_VISIBLE_DEVICES=5,6,7 python3 object_detection/train.py \

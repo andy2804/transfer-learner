@@ -181,31 +181,14 @@ class Detector:
             self._labels_transform.update(transform)
         return new_labels_dict
 
-    def remap_labels(self, objdetected, new_labels):
-        """
-        :param objdetected:
-        :type new_labels: str path to .json file with new labels
-        :return:
-        """
-        # todo deprecated, should be replaced by remap_labels_2
-        if self._labels_transform is None:
-            self._init_labels_transform(new_labels)
-        if objdetected.classes.size != 0:
-            objdetected.classes = np.vectorize(self._labels_transform.get)(objdetected.classes)
-            idx_to_keep = np.where(objdetected.classes != 0)
-            objdetected.classes = objdetected.classes[idx_to_keep]
-            objdetected.scores = objdetected.scores[idx_to_keep]
-            objdetected.boxes = objdetected.boxes[idx_to_keep]
-        return objdetected
-
-    def remap_labels_2(self, classes, scores, boxes):
+    def remap_labels(self, classes, scores, boxes):
         """
         :param classes:
         :param scores:
         :param boxes:
         :return:
         """
-        # todo should replace remap_labels after appropriate testing
+        # TODO should replace remap_labels after appropriate testing
         if self._labels_transform is None:
             raise RuntimeError("Remapping labels requires labels_transform to be initialized")
         if classes.size != 0:

@@ -10,6 +10,9 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from contracts import contract
+
+# import matplotlib
+# matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
 from objdetection.detector.detector import ARCH_DICT, Detector

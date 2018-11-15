@@ -94,7 +94,7 @@ class LearningFilter(MultiModalObserver):
 
     @staticmethod
     def check_box_in_roi(box, roi):
-        if box[0] > roi[0] and box[1] > roi[1] and box[2] < roi[2] and box[3] < roi[3]:
+        if box[0] >= roi[0] and box[1] >= roi[1] and box[2] <= roi[2] and box[3] <= roi[3]:
             return True
         return False
 
