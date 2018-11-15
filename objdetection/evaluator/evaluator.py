@@ -14,6 +14,7 @@ from contracts import contract
 # import matplotlib
 # matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
+from scipy import stats
 
 from objdetection.detector.detector import ARCH_DICT, Detector
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
@@ -104,7 +105,7 @@ class EvaluatorFrozenGraph(Detector):
         self._AP, self._mAP = self.compute_ap(self._stats, self._thresholds)
 
     @staticmethod
-    def compute_acc_rec(corestats, num_classes):
+    def compute_acc_rec(corestats, num_classes, confidence=None):
         """
         Evaluate statistics of detected objects and calculate performance metrics
         according to M. Everingham et. al (https://doi.org/10.1007/s11263-014-0733-5)
@@ -257,6 +258,26 @@ class EvaluatorFrozenGraph(Detector):
         plt.yticks([])
         plt.show()
         return
+
+    @staticmethod
+    @contract
+    def wilson_ci(ns, n, ci=0.95):
+        """
+        Wilson score interval
+        :param ns: number of successes
+        :type ns: int,>=0
+        :param n: sample size
+        :type n: int,>=0
+        :param ci: confidence interval
+        :type ci: float,>0,<1
+        :return: symmetric value
+        """
+        if n == 0:
+            return 0
+        z = stats.norm.ppf(1 - (1 - ci) / 2)
+        mean = (ns + (z ** 2) / 2) / (n + 2)
+        interval = z / (n + z ** 2) * np.sqrt((ns * (n - ns)) / n + (z ** 2) / 4)
+        return mean, interval
 
     @property
     def detection_graph(self):
