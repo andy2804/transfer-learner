@@ -11,9 +11,10 @@ import numpy as np
 import tensorflow as tf
 from PIL import Image, ImageStat
 
+# Use different back-end to circumvent check for Display variable
 # Uncomment if you want to use verbose
-import matplotlib
-matplotlib.use('Agg')
+# import matplotlib
+# matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 from objdetection.detector.detector import Detector
@@ -21,7 +22,6 @@ from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleAp
 from transferlearning.filter.learning_filter import LearningFilter
 from utils.io.io_utils import read_filenames
 from utils.static_helper import load_labels
-# Use different back-end to circumvent check for Display variable
 from utils.visualisation.static_helper import visualize_detections
 
 

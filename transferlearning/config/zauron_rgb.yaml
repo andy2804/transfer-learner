@@ -8,10 +8,10 @@ labels_out: zauron_label_map.json
 
 # ================ DIRECTORIES
 # The directory where the dataset files are stored as absolute path
-dataset_dir: /media/sdc/andya/wormhole_learning/dataset/training
+dataset_dir: /media/sdc/andya/wormhole_learning/dataset/testing
 
 # Filter keywords that needs to be contained in the path
-filter_keywords: ["day"]
+filter_keywords: ["dusk"]
 
 # Name of the sub-directory containing images of the main sensor
 main_sensor: RGB
@@ -20,15 +20,15 @@ main_sensor: RGB
 aux_sensor: RGB
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: ZAURON_DAYONLY_ROI_CLIPPED
+tfrecord_name_prefix: ZAURON_TESTING_DUSK
 
 # Additionally generated files during transfer_learning will be saved here
-output_dir: /media/sdc/andya/wormhole_learning/dataset
+output_dir: /media/sdc/andya/wormhole_learning/dataset/testing
 
 
 # ================ GPUS MASK
 # Passes argument to cuda visible devices, comma separated values
-cuda_visible_devices: "0, 1"
+cuda_visible_devices: "1"
 
 
 # ================ SEMI-SUPERVISED LABEL GENERATOR
