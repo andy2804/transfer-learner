@@ -8,11 +8,11 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 
-from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
-from objdetection.meta.utils_labeler.static_helper import load_labels
-from objdetection.meta.visual.static_helper import visualize_boxes_and_labels_on_image_array
-from objdetection.rgb2events.tfrecords_builder.stats import TLStatistician
-from objdetection.rgb2ir.sheets_interface import GoogleSheetsInterface
+from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
+from transferlearning.filter.stats import TLStatistician
+from utils.sheets_interface import GoogleSheetsInterface
+from utils.static_helper import load_labels
+from utils.visualisation.static_helper import visualize_boxes_and_labels_on_image_array
 
 DECODER = EncoderTFrecGoogleApi()
 
@@ -48,7 +48,7 @@ def run_evaluation(flags):
     with tf.Session() as sess:
         # "Dataset"
         filenames_placeholder = tf.placeholder(tf.string, shape=[None])
-        testfiles = [os.path.join(flags.dataset_dir + flags.src_dir, flags.filename)]
+        testfiles = [os.path.join(flags.input_dir, flags.filename)]
         dataset = tf.data.TFRecordDataset(filenames_placeholder)
 
         # Parsing input function takes care of reading and formatting the TFrecords
@@ -113,5 +113,5 @@ def run_evaluation(flags):
             diff = len(stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=0))
             values.append('%d (%d)' % (number, diff))
         values.append(len(stats.get_tlscores()))
-        sheets.upload_data('datasets', 'B', 'H', output_name, values)
+        sheets.upload_data(flags.google_sheet, 'B', 'I', output_name, values)
     return

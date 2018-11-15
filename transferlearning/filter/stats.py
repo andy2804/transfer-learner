@@ -118,6 +118,10 @@ class TLStatistician:
             pickle.dump(self._objstats, fp)
         pass
 
+    def load(self, stats):
+        self._objstats = stats
+
+
     def make_plots(self, save_plots=False, output_dir='', filename='', show_plots=False,
                    labels_dict=None):
         # keep it modular, _make_plot_1(),_make_plot_2(), _make_plot_3()...

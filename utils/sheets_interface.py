@@ -24,7 +24,7 @@ SPREADSHEET_ID = '1ayYY_QUQqsv-FsqGZ7hMlHzPxh9ivbg3UgmHdKrtP9Y'  # TFRecords Bui
 class GoogleSheetsInterface:
     def __init__(self, credentials='google_sheets_credentials.json'):
         self._credentials = credentials
-        store = file.Storage('credentials.json')
+        store = file.Storage(credentials)
         creds = store.get()
         if not creds or creds.invalid:
             flow = client.flow_from_clientsecrets(

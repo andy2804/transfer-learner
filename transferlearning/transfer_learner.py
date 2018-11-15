@@ -10,19 +10,21 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from PIL import Image, ImageStat
+from matplotlib import pyplot as plt
+
+from objdetection.detector.detector import Detector
+from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
+from transferlearning.filter.learning_filter import LearningFilter
+from utils.io.io_utils import read_filenames
+from utils.sheets_interface import GoogleSheetsInterface
+from utils.static_helper import load_labels
+from utils.visualisation.static_helper import visualize_detections
+
 
 # Use different back-end to circumvent check for Display variable
 # Uncomment if you want to use verbose
 # import matplotlib
 # matplotlib.use('Agg')
-
-from matplotlib import pyplot as plt
-from objdetection.detector.detector import Detector
-from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
-from transferlearning.filter.learning_filter import LearningFilter
-from utils.io.io_utils import read_filenames
-from utils.static_helper import load_labels
-from utils.visualisation.static_helper import visualize_detections
 
 
 class TransferLearner:
@@ -48,7 +50,8 @@ class TransferLearner:
         # Initialize filter
         self._learning_filter = LearningFilter(score_threshold=flags.lf_score_thresh,
                                                min_img_perimeter=flags.min_obj_size,
-                                               logstats=True, mode=self.flags.lf_mode, verbose=False)
+                                               logstats=True, mode=self.flags.lf_mode,
+                                               verbose=False)
 
         # Analyze the dataset
         self._analysis = self._analyze_dataset(flags, self.files)
@@ -93,7 +96,8 @@ class TransferLearner:
                 instance = {"image":    img_main,
                             "boxes":    boxes_remapped,
                             "labels":   classes_remapped,
-                            "filename": file_main_sensor}
+                            "filename": file_main_sensor
+                            }
 
                 # Encode instance and write example to tfrecord
                 tf_example = self._encoder.encode(instance)
@@ -148,17 +152,27 @@ class TransferLearner:
                                                    output_dir=self.flags.output_dir,
                                                    filename=self.flags.tfrecord_name_prefix,
                                                    show_plots=self.flags.show_plots)
-
         # Save dataset stats
         if self.flags.normalize and not self.flags.per_image_normalization:
             stats_file = os.path.join(self.flags.dataset_dir,
                                       self.flags.tfrecord_name_prefix + "_stats.csv")
             data = [['data_type', 'r', 'g', 'b'],
-                    ['mean'].extend(self._analysis.mean),
-                    ['stddev'].extend(self._analysis.stddev)]
+                    ['mean'].extend(self._analysis["mean"]),
+                    ['stddev'].extend(self._analysis["stddev"])]
             with open(stats_file, 'w') as fs:
                 writer = csv.writer(fs)
                 writer.writerows(data)
+
+        # Prepare data for upload to google sheets result page
+        values = []
+        for idx in range(len(self.labels)):
+            number = len(
+                self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=1))
+            diff = len(self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=0))
+            values.append('%d (%d)' % (number, diff))
+        values.append(len(self._learning_filter.stats.get_tlscores()))
+        sheets = GoogleSheetsInterface()
+        sheets.upload_data('datasets', 'B', 'H', self.flags.tfrecord_name_prefix, values)
 
     @staticmethod
     def _visualize_transfer_step(obj_detected, img_main, img_aux, labels, use_cv2=False):

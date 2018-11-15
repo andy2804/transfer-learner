@@ -18,16 +18,16 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # ================ DIRECTORIES
-flags.DEFINE_string('dataset_dir', "/shared_experiments/kaist/",
+flags.DEFINE_string('input_dir', "/shared_experiments/kaist/",
                     'The directory where the dataset files are stored as absolute path.')
-flags.DEFINE_string('src_dir', "training/day_n_night/",
-                    'Relative path from dataset_dir to the source directory of *.tfrecords.')
 flags.DEFINE_string('output_dir', "/shared_experiments/kaist/results/datasets",
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME
 flags.DEFINE_string('filename', "KAIST_TRAINING_NIGHT_rgb_from_ir035_scorethresh_015.tfrecord",
                     'Names of the tfrecords containing the test data passed as a list')
+flags.DEFINE_string('google_sheet', "zauron_dataset",
+                    'Title of the worksheet in Google Sheets to upload the results to')
 
 # ================ GPUS MASK
 flags.DEFINE_string('cuda_visible_devices', "",  # No GPUS needed for analysis
