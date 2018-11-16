@@ -102,7 +102,7 @@ class EvaluatorFrozenGraph(Detector):
         self._AP, self._mAP = self.compute_ap(self._stats, self._thresholds)
 
     @staticmethod
-    def compute_acc_rec(corestats, num_classes, confindence_level=False):
+    def compute_acc_rec(corestats, num_classes, confindence_level=None):
         """
         Evaluate statistics of detected objects and calculate performance metrics
         according to M. Everingham et. al (https://doi.org/10.1007/s11263-014-0733-5)
@@ -120,15 +120,18 @@ class EvaluatorFrozenGraph(Detector):
                     tp = corestats[thresh]['tp'][cls]
                     fp = corestats[thresh]['fp'][cls]
                     if confindence_level is None:
-                        accuracy = [EvaluatorFrozenGraph.safe_div(tp, tp + fp), None]
-                        recall = [EvaluatorFrozenGraph.safe_div(tp, gt), None]
+                        acc = EvaluatorFrozenGraph.safe_div(tp, tp + fp)
+                        rec = EvaluatorFrozenGraph.safe_div(tp, gt)
+                        acc_ci, rec_ci = None, None
                     else:
-                        # todo wilson
-                        accuracy = EvaluatorFrozenGraph.wilson_ci(tp, tp + fp, ci=confindence_level)
-                        recall = EvaluatorFrozenGraph.wilson_ci(tp, gt, ci=confindence_level)
+                        acc, acc_ci = EvaluatorFrozenGraph.wilson_ci(
+                                tp, tp + fp, ci=confindence_level)
+                        rec, rec_ci = EvaluatorFrozenGraph.wilson_ci(tp, gt, ci=confindence_level)
 
-                    corestats[thresh]['acc'][cls] = accuracy
-                    corestats[thresh]['rec'][cls] = recall
+                    corestats[thresh]['acc'][cls] = acc
+                    corestats[thresh]['rec'][cls] = rec
+                    corestats[thresh]['acc_ci'][cls] = acc_ci
+                    corestats[thresh]['rec_ci'][cls] = rec_ci
         return corestats
 
     @staticmethod
@@ -137,7 +140,6 @@ class EvaluatorFrozenGraph(Detector):
         Calculates the per class average precision
         :return:
         """
-        # todo check this function
         num_classes = len(corestats[0]['acc'])
         AP = {c: 0 for c in list(range(1, num_classes + 1))}
         for cls in AP:
@@ -149,7 +151,8 @@ class EvaluatorFrozenGraph(Detector):
                 ap += acc * (rec - last_rec)
                 last_rec = rec
             AP[cls] = ap
-        # todo introduce equal class weight or not
+        # todo add equal weight or proportional voting schemes
+        # equal weight to all the classes
         mAP = np.mean(list(AP.values()))
         return AP, mAP
 
@@ -180,7 +183,7 @@ class EvaluatorFrozenGraph(Detector):
         thresh_keys = np.linspace(0.0, 1.0, n_thresholds)
         np.round(thresh_keys, decimals=2, out=thresh_keys)
         self._thresholds = thresh_keys
-        stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec')
+        stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec', 'acc_conf_int', 'rec_conf_int')
         cls_keys = list(range(1, self._num_classes + 1))
         self._stats = {t: {s: {c: 0 for c in cls_keys} for s in stats_keys} for t in
                        thresh_keys}
@@ -214,12 +217,16 @@ class EvaluatorFrozenGraph(Detector):
                 self._plot.savefig(plot_file)
         except PermissionError as e:
             e.args += "\n Permission error during saving plots!"
+            print("Permission error trying to save plots!")
 
         # pickle corestats and ap results
-        pickle_file = os.path.join(self.output_dir,
-                                   self._network_name + '_' + filename + '.pickle')
+        pickle_file = os.path.join(
+                self.output_dir, self._network_name + '_' + filename + '.pickle')
         with open(pickle_file, 'wb') as fp:
-            pickle.dump(self._stats, fp)
+            try:
+                pickle.dump(self._stats, fp)
+            except:
+                print("Failed pickling")
 
         # also upload a copy to google sheets
         sheet_interface = GoogleSheetsInterface()
