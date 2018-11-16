@@ -37,7 +37,7 @@ class TransferLearner:
                                     flags.aux_sensor, 'png')
 
         # Load frozen rgb detector to create annotations
-        self._detector = Detector(arch=flags.net_arch,
+        self._detector = Detector(net_id=flags.net_arch,
                                   labels_net_arch=flags.labels_net,
                                   labels_output=flags.labels_out,
                                   retrieval_thresh=flags.retrieval_thresh)

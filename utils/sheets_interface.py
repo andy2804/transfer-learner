@@ -9,10 +9,9 @@ from httplib2 import Http
 from oauth2client import client, file, tools
 from redis import WatchError
 
-ROOT_DIR = "WormholeLearning/"
-CREDENTIALS_DIR = "resources/credentials/"
-CREDENTIALS_PATH = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR,
-                                CREDENTIALS_DIR)
+CREDENTIALS_PATH = os.path.join(os.getcwd()[:os.getcwd().index('WormholeLearning')],
+                                'WormholeLearning',
+                                "resources/credentials/")
 
 # Setup the Sheets API
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
@@ -24,7 +23,7 @@ SPREADSHEET_ID = '1ayYY_QUQqsv-FsqGZ7hMlHzPxh9ivbg3UgmHdKrtP9Y'  # TFRecords Bui
 class GoogleSheetsInterface:
     def __init__(self, credentials='google_sheets_credentials.json'):
         self._credentials = credentials
-        store = file.Storage(credentials)
+        store = file.Storage(os.path.join(CREDENTIALS_PATH, 'google_sheets_auth.json'))
         creds = store.get()
         if not creds or creds.invalid:
             flow = client.flow_from_clientsecrets(
@@ -72,7 +71,7 @@ class GoogleSheetsInterface:
         return len(self._sheets[sheet]) + 1
 
     # fixme deprecated
-    def upload_evaluation_stats(self, network, testset, aps, mAP, min_obj_size=0):
+    def upload_evaluation(self, network, testset, aps, mAP, min_obj_size=0):
         sheet = 'evaluation'
         row = self._get_result_row(sheet)
         net_range = '%s!A%i' % (sheet, row)
@@ -163,4 +162,4 @@ if __name__ == '__main__':
     sys.path.append(PROJECT_ROOT)
     from objdetection.rgb2ir.magic_constants import test_aps, test_corestats
 
-    sheet.upload_evaluation_stats('TEST_NN', 'TEST_DATASET', test_aps, test_mAP, test_corestats)
+    sheet.upload_evaluation('TEST_NN', 'TEST_DATASET', test_aps, test_mAP, test_corestats)

@@ -42,7 +42,7 @@ class EvaluatorFrozenGraph(Detector):
         :param labels_output:
         :param n_thresholds:
         """
-        super(EvaluatorFrozenGraph, self).__init__(arch=net_arch,
+        super(EvaluatorFrozenGraph, self).__init__(net_id=net_arch,
                                                    labels_net_arch=labels_net_arch,
                                                    labels_output=labels_output)
         self._plot = None
@@ -220,7 +220,7 @@ class EvaluatorFrozenGraph(Detector):
 
         # also upload a copy to google sheets
         sheet_interface = GoogleSheetsInterface()
-        sheet_interface.upload_evaluation_stats(
+        sheet_interface.upload_evaluation(
                 self._network_name, filename, self._AP, self._mAP, min_obj_size)
         return
 

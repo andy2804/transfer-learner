@@ -24,15 +24,9 @@ ObjectDetected = recordclass('ObjectDetected', ['source', 'boxes', 'scores', 'cl
 ROOT_DIR = "WormholeLearning/"
 
 ARCH_DICT = {
-    # -1x: nets trained at daytime only, -2x: ir nets, -3x: retrained nets with daytime + ir labels
-    -11: "ssd_inception_v2_zauron_roiclipped_dayonly_RGB",
-    -10: "ssd_inception_v2_zauron_dayonly_RGB",
-    1:   "ssd_mobilenet_v1_coco_11_06_2017",
-    2:   "ssd_inception_v2_coco_2018_01_28",
-    3:   "rfcn_resnet101_coco_11_06_2017",
-    4:   "faster_rcnn_resnet101_coco_11_06_2017",
-    5:   "faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28",
-    6:   "faster_rcnn_nas_coco_2018_01_28",
+    1:   "ssd_inception_v2_coco_2018_01_28",
+    2:   "faster_rcnn_nas_coco_2018_01_28",
+    10:  "ssd_inception_v2_zauron_dayonly_RGB"
 }
 NETS_CKPT_DIR = "resources/nets_ckpt/"
 LABELS_DIR = "resources/labels/"
@@ -43,13 +37,13 @@ LABELS_DIR = "resources/labels/"
 
 class Detector:
     def __init__(self,
-                 arch=2,
+                 net_id=2,
                  download_base='http://download.tensorflow.org/models/object_detection/',
                  labels_net_arch='mscoco_label_map.json',
                  labels_output=None,
                  retrieval_thresh=.5):
         """ Class obj detection from frozen graphs
-        :type arch: int
+        :type net_id: int
         :type download_base: str
         :type labels_net_arch: str
         :param labels_net_arch: labels map proper of the network (the one it has been trained on)
@@ -58,10 +52,10 @@ class Detector:
         step from the labels_net_arch to labels_output is performed
         :type retrieval_thresh: float
         """
-        assert arch in ARCH_DICT.keys()
+        assert net_id in ARCH_DICT.keys()
         self._download_base = download_base
-        self._model_name = ARCH_DICT[arch]
-        self._model_file = ARCH_DICT[arch] + '.tar.gz'
+        self._model_name = ARCH_DICT[net_id]
+        self._model_file = ARCH_DICT[net_id] + '.tar.gz'
         self._path_to_root = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR)
 
         # Path to frozen detection graph.
@@ -238,5 +232,5 @@ class Detector:
 
 if __name__ == '__main__':
     print("This is only for testing, do not run as main!")
-    det_graph = Detector(arch=2)
+    det_graph = Detector(net_id=2)
     print("Test ended")
