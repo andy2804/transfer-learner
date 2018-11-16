@@ -29,7 +29,11 @@ def _set_fonts():
     plt.rc('figure', titlesize=BIG)
 
 
-def plot_performance_metrics(corestats, ap, labels, filename='dataset', relative_bar_chart=True,
+def plot_performance_metrics(corestats,
+                             ap,
+                             labels,
+                             filename='dataset',
+                             relative_bar_chart=True,
                              label_filter=None):
     """
     Create subplots for each class with accuracy,
@@ -42,6 +46,7 @@ def plot_performance_metrics(corestats, ap, labels, filename='dataset', relative
     :param labels:
     :param filename:
     :param relative_bar_chart:
+    :param label_filter:
     :return:
     """
     _set_fonts()
@@ -106,15 +111,39 @@ def plot_performance_metrics(corestats, ap, labels, filename='dataset', relative
 
 
 def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh):
-    acc = []
-    rec = []
+    """
+     #todo
+     Confidence interval computed as displacement from nominal accuracy taking into account both
+     95% margin on recall value and on accuracy value.
+    :param ax:
+    :param corestats:
+    :param cls:
+    :param thresholds:
+    :param color:
+    :param mid_thresh:
+    :return:
+    """
+    acc, rec = [], []
+    _acc_ci, _rec_ci = [], []
+    acc_low, acc_high, rec_low, rec_high = [], [], [], []
     # thresholds = np.array(thresholds[::-1])
     for thresh in thresholds[::-1]:
         acc.append(corestats[thresh]['acc'][cls])
         rec.append(corestats[thresh]['rec'][cls])
+        if corestats[thresh]['acc_ci'][cls] is not None:
+            _acc_ci.append(corestats[thresh]['acc_ci'][cls])
+            _rec_ci.append(corestats[thresh]['rec_ci'][cls])
+            acc_low.append(acc[-1] - _acc_ci[-1])
+            acc_high.append(acc[-1] + _acc_ci[-1])
+            rec_low.append(rec[-1] - _rec_ci[-1])
+            rec_high.append(rec[-1] + _rec_ci[-1])
     rec_mid, acc_mid = corestats[mid_thresh]['rec'][cls], corestats[mid_thresh]['acc'][cls]
     ax.stackplot(rec, acc, color=color, alpha=ALPHA, zorder=2)
     ax.plot(rec, acc, '--', color=color, lw=1.5, zorder=3)
+    # if the conf bounds have been filled
+    if acc_low:
+        ax.plot(rec_low, acc_low, '--', color=color, lw=1.5, zorder=3)
+        ax.plot(rec_high, acc_high, '--', color=color, lw=1.5, zorder=3)
     ax.plot(rec_mid, acc_mid, color='dark' + color, marker='x', ms=6, mew=1.5, fillstyle='none',
             zorder=10)
 
