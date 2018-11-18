@@ -1,7 +1,12 @@
 import os
 
+import yaml
+
 __all__ = ["read_filenames"]
 
+ROOT_DIR = "WormholeLearning/"
+NETS_CKPT_DIR = "resources/nets_ckpt/"
+NETS_CKPT_PATH = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR, NETS_CKPT_DIR)
 
 def read_filenames(dir, filter_keywords, main_sensor_name, aux_sensor_name, filetype='png'):
     """
@@ -29,3 +34,15 @@ def read_filenames(dir, filter_keywords, main_sensor_name, aux_sensor_name, file
         return list(zip(main_sensor_images, aux_sensor_images))
     else:
         raise IOError("\tThe requested directory does not exists")
+
+
+def load_arch_dict(config_file):
+    """
+    Load labels from json file
+    :param json_file:
+    :return:
+    """
+    config_file = os.path.join(NETS_CKPT_PATH, config_file + ".yaml")
+    with open(config_file, "r") as fs:
+        arch_dict = yaml.load(fs)
+    return arch_dict

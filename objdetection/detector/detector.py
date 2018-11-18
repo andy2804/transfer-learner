@@ -1,5 +1,5 @@
 """
-author: az
+author: aa & az
 """
 
 import json
@@ -13,6 +13,8 @@ import six.moves.urllib as urllib
 import tensorflow as tf
 from recordclass import recordclass
 
+from utils.io.io_utils import load_arch_dict
+
 ObjectDetected = recordclass('ObjectDetected', ['source', 'boxes', 'scores', 'classes', 'ts'])
 
 # ======================
@@ -22,26 +24,6 @@ ObjectDetected = recordclass('ObjectDetected', ['source', 'boxes', 'scores', 'cl
 # the label map
 
 ROOT_DIR = "WormholeLearning/"
-
-ARCH_DICT = {
-    -42: "ssd_inception_v2_kaist_ir035_rgb050_nightonly_RGB",
-    -41: "ssd_inception_v2_kaist_ir035_rgb035_nightonly_RGB",
-    -40: "ssd_inception_v2_kaist_ir035_rgb015_nightonly_RGB",
-    -34: "ssd_inception_v2_kaist_ir035_rgb065_RGB",
-    -33: "ssd_inception_v2_kaist_ir035_rgb050_RGB",
-    -32: "ssd_inception_v2_kaist_ir035_rgb035_RGB",
-    -31: "ssd_inception_v2_kaist_ir035_rgb015_RGB",
-    -30: "ssd_inception_v2_kaist_ir050_rgb050_RGB",
-    -24: "ssd_inception_v2_kaist_ir035_norm_IR",
-    -23: "ssd_inception_v2_kaist_ir065_IR",
-    -22: "ssd_inception_v2_kaist_ir050_IR",
-    -21: "ssd_inception_v2_kaist_ir035_IR",
-    -20: "ssd_inception_v2_kaist_ir015_IR",
-    -10: "ssd_inception_v2_kaist_dayonly_RGB",
-    1:   "ssd_inception_v2_coco_2018_01_28",
-    2:   "faster_rcnn_nas_coco_2018_01_28",
-    10:  "ssd_inception_v2_zurich_dayonly_RGB"
-}
 NETS_CKPT_DIR = "resources/nets_ckpt/"
 LABELS_DIR = "resources/labels/"
 
@@ -52,6 +34,7 @@ LABELS_DIR = "resources/labels/"
 class Detector:
     def __init__(self,
                  net_id=2,
+                 arch_config='default',
                  download_base='http://download.tensorflow.org/models/object_detection/',
                  labels_net_arch='mscoco_label_map.json',
                  labels_output=None,
@@ -66,10 +49,11 @@ class Detector:
         step from the labels_net_arch to labels_output is performed
         :type retrieval_thresh: float
         """
-        assert net_id in ARCH_DICT.keys()
+        self._arch_dict = load_arch_dict(arch_config)
+        assert net_id in self._arch_dict.keys()
         self._download_base = download_base
-        self._model_name = ARCH_DICT[net_id]
-        self._model_file = ARCH_DICT[net_id] + '.tar.gz'
+        self._model_name = self._arch_dict[net_id]
+        self._model_file = self._arch_dict[net_id] + '.tar.gz'
         self._path_to_root = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR)
 
         # Path to frozen detection graph.

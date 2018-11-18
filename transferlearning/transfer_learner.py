@@ -21,12 +21,6 @@ from utils.static_helper import load_labels
 from utils.visualisation.static_helper import visualize_detections
 
 
-# Use different back-end to circumvent check for Display variable
-# Uncomment if you want to use verbose
-# import matplotlib
-# matplotlib.use('Agg')
-
-
 class TransferLearner:
     def __init__(self, flags):
         # Set all flags
@@ -38,6 +32,7 @@ class TransferLearner:
 
         # Load frozen rgb detector to create annotations
         self._detector = Detector(net_id=flags.net_arch,
+                                  arch_config=flags.arch_config,
                                   labels_net_arch=flags.labels_net,
                                   labels_output=flags.labels_out,
                                   retrieval_thresh=flags.retrieval_thresh)
@@ -167,7 +162,7 @@ class TransferLearner:
         values = []
         for idx in range(len(self.labels)):
             number = len(
-                self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=1))
+                    self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=1))
             diff = len(self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=0))
             values.append('%d (%d)' % (number, diff))
         values.append(len(self._learning_filter.stats.get_tlscores()))

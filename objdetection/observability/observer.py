@@ -231,7 +231,7 @@ class MultiModalObserver:
         return events_cropped
 
     @staticmethod
-    def _filter_img(img_in, filter='gradient', normalize=True):
+    def _filter_img(img_in, filter='gradient', normalize=True, mode='rgb'):
         """
         Filters the given image with the filter specified
         and normalizes the image to 0 - 255
@@ -241,6 +241,8 @@ class MultiModalObserver:
         :return:
         """
         img = cv2.cvtColor(np.copy(img_in), code=cv2.COLOR_RGB2GRAY)
+        if mode == 'events':
+            img = MultiModalObserver._compute_absolute_events(img)
         if filter == 'gradient':
             output = MultiModalObserver._compute_gradient(img)
         elif filter == 'laplacian':
@@ -257,6 +259,7 @@ class MultiModalObserver:
                                    beta=255,
                                    norm_type=cv2.NORM_MINMAX,
                                    dtype=cv2.CV_8U)
+
         return output
 
     @staticmethod
@@ -293,3 +296,15 @@ class MultiModalObserver:
                              ksize=3,
                              scale=1,
                              delta=0)
+
+    @staticmethod
+    def _compute_absolute_events(img_in):
+        """
+        Shifts the grayscale events image mean by -127.5 and then takes all absolute values,
+        which are normalized back to a range of 0-255.
+        Turns image black and all location where events occur to white pixels.
+        :param img_in:
+        :return:
+        """
+        img = np.copy(img_in.astype(np.float64))
+        return (np.abs((img - 127.5)) * 2).astype(np.uint8)

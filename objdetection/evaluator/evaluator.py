@@ -13,7 +13,7 @@ from contracts import contract
 from matplotlib import pyplot as plt
 from scipy import stats
 
-from objdetection.detector.detector import ARCH_DICT, Detector
+from objdetection.detector.detector import Detector
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.metrics import metrics_np
 from utils.sheets_interface import GoogleSheetsInterface
@@ -26,6 +26,7 @@ from utils.visualisation.static_helper import visualize_stereo_images
 class EvaluatorFrozenGraph(Detector):
     def __init__(self,
                  net_arch,
+                 arch_config,
                  output_dir,
                  labels_net_arch,
                  labels_output=None,
@@ -40,6 +41,7 @@ class EvaluatorFrozenGraph(Detector):
         :param n_thresholds:
         """
         super(EvaluatorFrozenGraph, self).__init__(net_id=net_arch,
+                                                   arch_config=arch_config,
                                                    labels_net_arch=labels_net_arch,
                                                    labels_output=labels_output)
         self._plot = None
@@ -47,7 +49,7 @@ class EvaluatorFrozenGraph(Detector):
         self.output_dir = output_dir
         self.decoder = EncoderTFrecGoogleApi()
         self._num_classes = len(self._labels_output_dict)
-        self._network_name = ARCH_DICT.get(net_arch)
+        self._network_name = self._arch_dict.get(net_arch)
         # stats
         self._stats = None
         self._mAP = 0

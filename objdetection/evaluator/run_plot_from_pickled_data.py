@@ -8,10 +8,11 @@ import time
 from datetime import timedelta
 from pprint import pprint
 
+from utils.io.io_utils import load_arch_dict
+
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
 sys.path.append(PROJECT_ROOT)
 
-from objdetection.detector.detector import ARCH_DICT
 from objdetection.evaluator.evaluator import EvaluatorFrozenGraph
 from utils.sheets_interface import GoogleSheetsInterface
 from utils.static_helper import load_labels
@@ -21,7 +22,8 @@ INPUT_DIR = '/media/sdc/datasets/kaist/results/evaluation'
 OUTPUT_DIR = '/media/sdc/datasets/kaist/results/evaluation'
 TESTNAME = ['ssd_inception_v2_kaist_dayonly_1_kaist_night_rgb',
             'ssd_inception_v2_kaist_ir035_rgb050_RGB_3_kaist_night']
-LABELS = 'kaist_label_map.json'
+LABELS = 'zauron_label_map.json'
+ARCH_DICT = load_arch_dict('zurich_networks')
 
 # To plot all classes, set LABEL_FILTER = None
 LABEL_FILTER = None

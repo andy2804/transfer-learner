@@ -1,6 +1,6 @@
 # ================ LABELS
 # Labels on which the network has been trained
-labels_net: mscoco_label_map.json
+labels_net: zauron_label_map.json
 
 # Labels to be used as output --> labels_net is remapped to labels_out
 labels_out: zauron_label_map.json
@@ -8,22 +8,22 @@ labels_out: zauron_label_map.json
 
 # ================ DIRECTORIES
 # The directory where the dataset files are stored as absolute path
-dataset_dir: /media/andya/EXTSSD_T3/crossmodal_mt/rosbags/zauron_eye_2.0/verbose/day
+dataset_dir: /media/andya/EXTSSD_T3/crossmodal_mt/rosbags/zauron_eye_2.0/converted
 
 # Filter keywords that needs to be contained in the path
-filter_keywords: ["day"]
+filter_keywords: ["dusk"]
 
 # Name of the sub-directory containing images of the main sensor
 main_sensor: RGB
 
 # Name of the sub-directory containing images of the auxiliary sensor
-aux_sensor: RGB
+aux_sensor: EVENTS
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: ZAURON_DAYONLY_TEST
+tfrecord_name_prefix: ZURICH_EVENTS_TEST
 
 # Additionally generated files during transfer_learning will be saved here
-output_dir: /media/andya/EXTSSD_T3/crossmodal_mt/rosbags/zauron_eye_2.0/verbose/day
+output_dir: /media/andya/EXTSSD_T3/crossmodal_mt/rosbags/zauron_eye_2.0/converted
 
 
 # ================ GPUS MASK
@@ -33,7 +33,7 @@ cuda_visible_devices: ""
 
 # ================ SEMI-SUPERVISED LABEL GENERATOR
 # Passes argument to cuda visible devices, comma separated values
-net_arch: 2
+net_arch: 10
 
 # Retrieval Threshold of the Detector used in generating the labels
 retrieval_thresh: 0.5
@@ -60,14 +60,14 @@ scale_back_using_cv2: False
 # Multimodal Observer mode. Use 'rgb' if you are feeding normal images and want to calculate
 # the observability score through the shannon entropy or use 'events' if you want to use
 # proprietary observability calculation specifically for event-based frames
-lf_mode: rgb
+lf_mode: events
 
 # Min Object perimeter needed for learning filter. Set to 0 to turn it off
-min_obj_size: 0
+min_obj_size: 80
 
 # Min Learning Filter Observability Score. Objects below will be discarded
 # or flagged as difficult. Set to 0 to disable the learning filter
-lf_score_thresh: 0
+lf_score_thresh: 12
 
 # ROI of bboxes that shall be removed. Set to None to turn it off. Same tuple structure as bbox
 remove_roi: [0.60, 0.00, 1.00, 1.00]

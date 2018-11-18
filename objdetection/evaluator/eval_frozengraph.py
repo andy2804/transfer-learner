@@ -76,6 +76,7 @@ def run_evaluation(flags):
     :return:
     """
     evaluator = EvaluatorFrozenGraph(net_arch=flags.network_model,
+                                     arch_config=flags.arch_config,
                                      labels_net_arch=flags.labels_net_arch,
                                      labels_output=flags.labels_output,
                                      output_dir=flags.output_dir,

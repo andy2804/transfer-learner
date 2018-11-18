@@ -23,6 +23,10 @@ CONFIG = 'zauron_rgb2events.yaml'
 
 flags = load_config(flags, CONFIG)
 
+# Define which architecture dictionary to use for the detector
+flags.DEFINE_string('arch_config', 'zurich_networks',
+                    'Which architecture dictionary to load in nets_ckpt')
+
 def main(_):
     os.environ["CUDA_VISIBLE_DEVICES"] = FLAGS.cuda_visible_devices
     t0 = time.time()

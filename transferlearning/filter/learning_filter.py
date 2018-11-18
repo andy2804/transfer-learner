@@ -33,8 +33,9 @@ class LearningFilter(MultiModalObserver):
         boxes_to_keep = np.empty((0, 4), dtype=np.float)
 
         img_main, img_aux, boxes = list(map(np.copy, [img_main_in, img_aux_in, boxes]))
-        img_main_grad = self._filter_img(img_main, filter='gradient')
-        img_aux_grad = self._filter_img(img_aux, filter='gradient')
+        img_main_grad = self._filter_img(img_main, filter='gradient', normalize=True, mode='rgb')
+        img_aux_grad = self._filter_img(img_aux, filter='grayscale', normalize=False,
+                                        mode=self._observability_mode)
         for box_abs, class_id in zip(
                 [self._box_norm_to_abs(box, img_main_grad) for box in boxes], classes):
             if class_id:

@@ -32,6 +32,8 @@ flags.DEFINE_string('testname', "ZAURON_DAYONLY",
 # ================ NETWORK
 flags.DEFINE_integer('network_model', 10,
                      'Network model as defined in the obj_detection class')
+flags.DEFINE_string('arch_config', 'zurich_networks',
+                    'Which architecture dictionary to load in nets_ckpt')
 flags.DEFINE_string('labels_net_arch', 'zauron_label_map.json',
                     'Labels on which the network has been trained')
 flags.DEFINE_string('labels_output', 'zauron_label_map.json',

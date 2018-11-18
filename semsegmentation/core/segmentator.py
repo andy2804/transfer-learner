@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 
 from semsegmentation.datasets.cityscapes import Cityscapes
 
-ARCH_DICT = {
+arch_dict = {
     0: ("deeplabv3_mnv2_cityscapes_train", "_2018_02_05"),
     1: ("deeplabv3_cityscapes_train", "_2018_02_06")
 }
@@ -36,10 +36,10 @@ class Segmentator:
                 len(self._dataset.labels), 1)
         self._full_color_map = self._label_to_color_image(self._full_label_map)
         self._input_size = input_size
-        assert arch in ARCH_DICT
+        assert arch in arch_dict
         self._download_base = download_base
-        self._model_name = ARCH_DICT[arch][0]
-        self._model_file = ARCH_DICT[arch][0] + ARCH_DICT[arch][1] + '.tar.gz'
+        self._model_name = arch_dict[arch][0]
+        self._model_file = arch_dict[arch][0] + arch_dict[arch][1] + '.tar.gz'
         self._path_to_root = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR)
 
         # Path to frozen detection graph.
