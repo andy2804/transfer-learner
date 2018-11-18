@@ -15,8 +15,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from utils.static_helper import load_labels
-from utils.visualisation.static_helper import visualize_stereo_images, \
-    draw_bounding_box_on_image_array, scale_to_box, add_text_overlay
+from utils.visualisation.static_helper import add_text_overlay, draw_bounding_box_on_image_array, \
+    scale_to_box, visualize_stereo_images
 
 
 class MultiModalObserver:
@@ -100,29 +100,29 @@ class MultiModalObserver:
         :return:
         """
         if type == 'rgb':
-            return MultiModalObserver._calc_rgb_entropy(input_crops[0], verbose)
+            return MultiModalObserver._calc_rgb_entropy(input_crops, verbose)
         elif type == 'events':
-            return MultiModalObserver._calc_events_overlap(input_crops[0], input_crops[1])
+            return MultiModalObserver._calc_events_overlap(input_crops, verbose)
         else:
             print('Undefined type was specified!')
 
     @staticmethod
-    def _calc_events_overlap(rgb_crop, events_crop):
+    def _calc_events_overlap(input_crops, verbose=False):
         """ Observability of events inferred from rgb frames
         Calculates score how well event frame overlaps with rgb frame
         to determine the activity in the event frame
-        :param rgb_crop:
-        :param events_crop:
+        :param input_crops[0]:
+        :param input_crops[1]:
         :return: score
         """
         # Activity score
-        activity_score = 1 + (abs(1 - (np.sum(events_crop) / np.sum(rgb_crop))) * -1)
+        activity_score = 1 + (abs(1 - (np.sum(input_crops[1]) / np.sum(input_crops[0]))) * -1)
 
         # Overlap score
-        img_box = np.empty_like(rgb_crop, dtype=np.float64)
-        cv2.normalize(rgb_crop, img_box, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
-        img_events_box = np.empty_like(events_crop, dtype=np.float64)
-        img_events_box_blur = cv2.GaussianBlur(events_crop, (3, 3), 0)
+        img_box = np.empty_like(input_crops[0], dtype=np.float64)
+        cv2.normalize(input_crops[0], img_box, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
+        img_events_box = np.empty_like(input_crops[1], dtype=np.float64)
+        img_events_box_blur = cv2.GaussianBlur(input_crops[1], (3, 3), 0)
         cv2.normalize(img_events_box_blur, img_events_box,
                       norm_type=cv2.NORM_MINMAX,
                       dtype=cv2.CV_64F)
@@ -130,19 +130,38 @@ class MultiModalObserver:
 
         # Weighting
         score = min(max((activity_score + 2 * overlap_score) / 3.0, 0.0), 1.0)
+
+        # Verbose Image
+        if verbose:
+            img_box = scale_to_box((img_box * 255).astype(np.uint8), (200, 300))
+            img_events_box = scale_to_box((img_events_box * 255).astype(np.uint8), (200, 300))
+            img_box = add_text_overlay(img_box, "Main Sensor", overlay=False)
+            img_events_box = add_text_overlay(img_events_box, "Aux Sensor", overlay=False)
+            img_stack = np.hstack((img_box, img_events_box))
+            img_stack = add_text_overlay(img_stack, "Score: %.2f" % score, overlay=True)
+            plt.figure("figure", figsize=(8, 4))
+            plt.imshow(img_stack)
+            plt.xticks([])
+            plt.yticks([])
+            plt.show()
+
         return int(np.nan_to_num(score) * 100.0)
 
     @staticmethod
-    def _calc_rgb_entropy(rgb_crop, verbose=False):
+    def _calc_rgb_entropy(input_crops, verbose=False):
         """
         Calculates the Shannon Entropy of an Image
-        :param rgb_crop: rgb image or a cropped section
+        :param input_crops[1: rgb image or a cropped section
         :return: entropy score
         """
         # todo rename this method, decouple observability from entropy
-        hist = cv2.calcHist([rgb_crop], [0], None, [256], [0, 256])
+
+        # Calc histogram
+        hist = cv2.calcHist([input_crops[1]], [0], None, [256], [0, 256])
         hist = cv2.normalize(hist, None)
         entropy = 0
+
+        # Calc Entropy
         for hist_val in hist:
             if hist_val > 0:
                 # Shannon Entropy for discrete random variable
@@ -150,9 +169,11 @@ class MultiModalObserver:
 
                 # Shannon differential Entropy for continuous random variable
                 entropy -= hist_val * np.log2(hist_val)
+
+        # Verbose Image
         if verbose:
             fig, axs = plt.subplots(2, 1, figsize=(4, 6))
-            img_scaled = scale_to_box(rgb_crop, (200, 300))
+            img_scaled = scale_to_box(input_crops[1], (200, 300))
             axs[0].imshow(img_scaled)
             axs[0].get_xaxis().set_ticks([])
             axs[0].get_yaxis().set_ticks([])
@@ -160,6 +181,7 @@ class MultiModalObserver:
             axs[1].text(0.95, 0.90, 'Entropy: %.2f' % entropy, size=10, weight='bold',
                         horizontalalignment='right', transform=plt.gca().transAxes)
             plt.show()
+
         return entropy
 
     @staticmethod

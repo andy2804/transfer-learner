@@ -17,17 +17,17 @@ from utils.sheets_interface import GoogleSheetsInterface
 from utils.static_helper import load_labels
 from utils.visualisation.plot_mAP_evaluation import plot_performance_metrics
 
-INPUT_DIR = '/home/andya/external_ssd/wormhole_learning/results'
-OUTPUT_DIR = '/home/andya/external_ssd/wormhole_learning/results'
+INPUT_DIR = '/media/sdc/datasets/kaist/results/evaluation'
+OUTPUT_DIR = '/media/sdc/datasets/kaist/results/evaluation'
 TESTNAME = ['ssd_inception_v2_kaist_dayonly_1_kaist_night_rgb',
             'ssd_inception_v2_kaist_ir035_rgb050_RGB_3_kaist_night']
-LABELS = 'zauron_label_map.json'
+LABELS = 'kaist_label_map.json'
 
 # To plot all classes, set LABEL_FILTER = None
 LABEL_FILTER = None
 
-RECREATE_ALL_PLOTS = True
-UPLOAD_TO_SHEETS = True
+RECREATE_ALL_PLOTS = False
+UPLOAD_TO_SHEETS = False
 
 """
 #
@@ -69,11 +69,28 @@ def load_corestats_from_files(files):
     return [pickle.load(open(file, 'rb')) for file in files]
 
 
+def migrate_old_corestats(corestat, num_classes):
+    """
+    Migrate older corestats to contain keys to hold wilson_ci scores
+    :param corestat:
+    :return:
+    """
+    cls_keys = list(range(1, num_classes + 1))
+    for thresh in corestat:
+        corestat[thresh]['acc_ci'] = {c: 0 for c in cls_keys}
+        corestat[thresh]['rec_ci'] = {c: 0 for c in cls_keys}
+    return corestat
+
+
 def compute_scores_from_corestats(corestats):
     AP = []
     mAP = []
     for corestat in corestats:
+        num_classes = len(corestat[0]['acc'])
+        if not 'acc_ci' in corestat.keys():
+            corestat = migrate_old_corestats(corestat, num_classes)
         thresholds = sorted(corestat.keys())
+        corestat = EvaluatorFrozenGraph.compute_acc_rec(corestat, num_classes, confindence_level=0.95)
         ap, map = EvaluatorFrozenGraph.compute_ap(corestat, thresholds)
         AP.append(ap)
         mAP.append(map)
@@ -88,18 +105,26 @@ def upload_results(sheets, network, testset, AP, mAP):
 
 
 def split_testname(testname):
-    network = 'N/A'
-    testset = 'N/A'
     for key, value in ARCH_DICT.items():
         if value in testname:
             network = value
             testset = testname.replace(network + '_', '')
-            break
+            return (network, testset)
+    return (testname, '')
     return (network, testset)
 
 
 def plot_from_corestats(corestats, files, comparison_plot=False):
-    sheets = GoogleSheetsInterface()
+    """
+    Iterates through all corestats and generates filenames and plots
+    Uploads to google sheets if specified
+    :param corestats:
+    :param files:
+    :param comparison_plot:
+    :return:
+    """
+    if UPLOAD_TO_SHEETS:
+        sheets = GoogleSheetsInterface()
     labels = load_labels(LABELS)
     AP, mAP = compute_scores_from_corestats(corestats)
     if comparison_plot:

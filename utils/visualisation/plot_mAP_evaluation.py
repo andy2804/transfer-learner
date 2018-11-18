@@ -140,10 +140,11 @@ def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh):
     rec_mid, acc_mid = corestats[mid_thresh]['rec'][cls], corestats[mid_thresh]['acc'][cls]
     ax.stackplot(rec, acc, color=color, alpha=ALPHA, zorder=2)
     ax.plot(rec, acc, '--', color=color, lw=1.5, zorder=3)
+
     # if the conf bounds have been filled
     if acc_low:
-        ax.plot(rec_low, acc_low, '--', color=color, lw=1.5, zorder=3)
-        ax.plot(rec_high, acc_high, '--', color=color, lw=1.5, zorder=3)
+        ax.plot(rec_low, acc_low, ':', color=color, lw=1.5, zorder=3)
+        ax.plot(rec_high, acc_high, ':', color=color, lw=1.5, zorder=3)
     ax.plot(rec_mid, acc_mid, color='dark' + color, marker='x', ms=6, mew=1.5, fillstyle='none',
             zorder=10)
 

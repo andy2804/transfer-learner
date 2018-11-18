@@ -19,7 +19,7 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # Change this line to load your desired transfer learning configuration
-CONFIG = 'zauron_rgb.yaml'
+CONFIG = 'zauron_rgb2events.yaml'
 
 flags = load_config(flags, CONFIG)
 

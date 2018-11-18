@@ -41,14 +41,12 @@ class LearningFilter(MultiModalObserver):
                 img_main_grad_box = self._get_box_crop(img_main_grad, box_abs)
                 img_aux_grad_box = self._get_box_crop(img_aux_grad, box_abs)
                 perimeter = 2 * sum(img_main_grad_box.shape[:2])
-                main_sensor_score = self._compute_observability_score([img_main_grad_box],
-                                                                      type='rgb',
-                                                                      verbose=self._verbose)
-                aux_sensor_score = self._compute_observability_score([img_aux_grad_box],
-                                                                     type=self._observability_mode,
-                                                                     verbose=self._verbose)
-                tl_keep = main_sensor_score > self._keep_thresh and aux_sensor_score > \
-                          self._keep_thresh and perimeter >= self._min_img_perimeter
+                aux_sensor_score = self._compute_observability_score(
+                        [img_main_grad_box, img_aux_grad_box],
+                        type=self._observability_mode,
+                        verbose=self._verbose)
+                tl_keep = aux_sensor_score > self._keep_thresh and perimeter >= \
+                          self._min_img_perimeter
 
                 # Record statistics
                 if self.stats is not None:
@@ -58,8 +56,7 @@ class LearningFilter(MultiModalObserver):
                             xmin=box_abs[1] / img_main.shape[1],
                             h=img_main_grad_box.shape[0] / img_main.shape[0],
                             w=img_main_grad_box.shape[1] / img_main.shape[1],
-                            tl_score=(main_sensor_score if main_sensor_score < aux_sensor_score else
-                                aux_sensor_score),
+                            tl_score=aux_sensor_score,
                             tl_difficult=tl_keep)
                 if tl_keep:
                     classes_to_keep = np.concatenate(([class_id], classes_to_keep), axis=0)

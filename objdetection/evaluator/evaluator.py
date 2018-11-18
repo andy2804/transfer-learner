@@ -30,7 +30,7 @@ class EvaluatorFrozenGraph(Detector):
                  labels_net_arch,
                  labels_output=None,
                  plot_title="Performance metrics test",
-                 n_thresholds=20):
+                 n_thresholds=51):
         """
         #todo
         :param net_arch:
@@ -183,7 +183,7 @@ class EvaluatorFrozenGraph(Detector):
         thresh_keys = np.linspace(0.0, 1.0, n_thresholds)
         np.round(thresh_keys, decimals=2, out=thresh_keys)
         self._thresholds = thresh_keys
-        stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec', 'acc_conf_int', 'rec_conf_int')
+        stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec', 'acc_ci', 'rec_ci')
         cls_keys = list(range(1, self._num_classes + 1))
         self._stats = {t: {s: {c: 0 for c in cls_keys} for s in stats_keys} for t in
                        thresh_keys}
@@ -283,7 +283,7 @@ class EvaluatorFrozenGraph(Detector):
         :return: symmetric value
         """
         if n == 0:
-            return 0
+            return 0, 0
         z = stats.norm.ppf(1 - (1 - ci) / 2)
         mean = (ns + (z ** 2) / 2) / (n + 2)
         interval = z / (n + z ** 2) * np.sqrt((ns * (n - ns)) / n + (z ** 2) / 4)

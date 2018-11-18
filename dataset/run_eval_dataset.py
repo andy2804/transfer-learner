@@ -18,15 +18,15 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # ================ DIRECTORIES
-flags.DEFINE_string('input_dir', "/shared_experiments/kaist/",
+flags.DEFINE_string('input_dir', "/home/andya/external_ssd/wormhole_learning/dataset/training",
                     'The directory where the dataset files are stored as absolute path.')
-flags.DEFINE_string('output_dir', "/shared_experiments/kaist/results/datasets",
+flags.DEFINE_string('output_dir', "/home/andya/external_ssd/wormhole_learning/dataset/training",
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME
-flags.DEFINE_string('filename', "KAIST_TRAINING_NIGHT_rgb_from_ir035_scorethresh_015.tfrecord",
+flags.DEFINE_string('filename', "ZURICH_TRAINING_DAY_events.tfrecord",
                     'Names of the tfrecords containing the test data passed as a list')
-flags.DEFINE_string('google_sheet', "zauron_dataset",
+flags.DEFINE_string('google_sheet', "zurich_dataset",
                     'Title of the worksheet in Google Sheets to upload the results to')
 
 # ================ GPUS MASK
@@ -34,7 +34,7 @@ flags.DEFINE_string('cuda_visible_devices', "",  # No GPUS needed for analysis
                     'Passes argument to cuda visible devices, comma separated values')
 
 # ================ NETWORK
-flags.DEFINE_string('labels_output', 'kaist_label_map.json',
+flags.DEFINE_string('labels_output', 'zauron_label_map.json',
                     'Labels against which we want to measure the performance, '
                     'they need to be the same mapping that has been used for the ground-truth.')
 

@@ -24,9 +24,23 @@ ObjectDetected = recordclass('ObjectDetected', ['source', 'boxes', 'scores', 'cl
 ROOT_DIR = "WormholeLearning/"
 
 ARCH_DICT = {
+    -42: "ssd_inception_v2_kaist_ir035_rgb050_nightonly_RGB",
+    -41: "ssd_inception_v2_kaist_ir035_rgb035_nightonly_RGB",
+    -40: "ssd_inception_v2_kaist_ir035_rgb015_nightonly_RGB",
+    -34: "ssd_inception_v2_kaist_ir035_rgb065_RGB",
+    -33: "ssd_inception_v2_kaist_ir035_rgb050_RGB",
+    -32: "ssd_inception_v2_kaist_ir035_rgb035_RGB",
+    -31: "ssd_inception_v2_kaist_ir035_rgb015_RGB",
+    -30: "ssd_inception_v2_kaist_ir050_rgb050_RGB",
+    -24: "ssd_inception_v2_kaist_ir035_norm_IR",
+    -23: "ssd_inception_v2_kaist_ir065_IR",
+    -22: "ssd_inception_v2_kaist_ir050_IR",
+    -21: "ssd_inception_v2_kaist_ir035_IR",
+    -20: "ssd_inception_v2_kaist_ir015_IR",
+    -10: "ssd_inception_v2_kaist_dayonly_RGB",
     1:   "ssd_inception_v2_coco_2018_01_28",
     2:   "faster_rcnn_nas_coco_2018_01_28",
-    10:  "ssd_inception_v2_zauron_dayonly_RGB"
+    10:  "ssd_inception_v2_zurich_dayonly_RGB"
 }
 NETS_CKPT_DIR = "resources/nets_ckpt/"
 LABELS_DIR = "resources/labels/"

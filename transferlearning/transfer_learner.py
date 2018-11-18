@@ -51,7 +51,7 @@ class TransferLearner:
         self._learning_filter = LearningFilter(score_threshold=flags.lf_score_thresh,
                                                min_img_perimeter=flags.min_obj_size,
                                                logstats=True, mode=self.flags.lf_mode,
-                                               verbose=False)
+                                               verbose=self.flags.verbose)
 
         # Analyze the dataset
         self._analysis = self._analyze_dataset(flags, self.files)
@@ -93,7 +93,7 @@ class TransferLearner:
                 img_aux = self._image_preprocessor(img_aux)
 
                 # Create instance dict
-                instance = {"image":    img_main,
+                instance = {"image":    img_aux,
                             "boxes":    boxes_remapped,
                             "labels":   classes_remapped,
                             "filename": file_main_sensor
@@ -172,7 +172,9 @@ class TransferLearner:
             values.append('%d (%d)' % (number, diff))
         values.append(len(self._learning_filter.stats.get_tlscores()))
         sheets = GoogleSheetsInterface()
-        sheets.upload_data('datasets', 'B', 'H', self.flags.tfrecord_name_prefix, values)
+
+        # TODO modularize to which worksheet it should be uploaded to
+        sheets.upload_data('zurich_dataset', 'B', 'I', self.flags.tfrecord_name_prefix, values)
 
     @staticmethod
     def _visualize_transfer_step(obj_detected, img_main, img_aux, labels, use_cv2=False):
