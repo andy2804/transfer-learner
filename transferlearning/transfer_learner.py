@@ -46,7 +46,7 @@ class TransferLearner:
         self._learning_filter = LearningFilter(score_threshold=flags.lf_score_thresh,
                                                min_img_perimeter=flags.min_obj_size,
                                                logstats=True, mode=self.flags.lf_mode,
-                                               verbose=self.flags.verbose)
+                                               verbose=False)
 
         # Analyze the dataset
         self._analysis = self._analyze_dataset(flags, self.files)
