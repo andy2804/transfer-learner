@@ -13,7 +13,7 @@ import six.moves.urllib as urllib
 import tensorflow as tf
 from recordclass import recordclass
 
-from utils.io.io_utils import load_arch_dict
+from utils.files.io_utils import load_arch_dict
 
 ObjectDetected = recordclass('ObjectDetected', ['source', 'boxes', 'scores', 'classes', 'ts'])
 

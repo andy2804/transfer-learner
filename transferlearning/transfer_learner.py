@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 from objdetection.detector.detector import Detector
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from transferlearning.filter.learning_filter import LearningFilter
-from utils.io.io_utils import read_filenames
+from utils.files.io_utils import read_filenames
 from utils.sheets_interface import GoogleSheetsInterface
 from utils.static_helper import load_labels
 from utils.visualisation.static_helper import visualize_detections
@@ -91,7 +91,7 @@ class TransferLearner:
                 instance = {"image":    img_aux,
                             "boxes":    boxes_remapped,
                             "labels":   classes_remapped,
-                            "filename": file_main_sensor
+                            "filename": file_aux_sensor
                             }
 
                 # Encode instance and write example to tfrecord
@@ -99,7 +99,7 @@ class TransferLearner:
                 writer.write(tf_example.SerializeToString())
                 t_loop = (time.time() - t_start) * 1000
                 print("\r[ %i / %i ] Encoded %s in %.1f ms" % (
-                    count, len(self.files), os.path.basename(file_main_sensor), t_loop), end="")
+                    count, len(self.files), os.path.basename(file_aux_sensor), t_loop), end="")
 
                 # Stats
                 self._encoded_mean.append(img_aux.mean())

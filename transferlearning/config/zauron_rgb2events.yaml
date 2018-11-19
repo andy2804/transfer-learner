@@ -20,7 +20,7 @@ main_sensor: RGB
 aux_sensor: EVENTS
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: ZURICH_TRAINING_DAY_V2_events
+tfrecord_name_prefix: ZURICH_TRAINING_DAY_LF_V2_events_TEST
 
 # Additionally generated files during transfer_learning will be saved here
 output_dir: /media/sdc/andya/wormhole_learning/dataset/training
@@ -63,11 +63,11 @@ scale_back_using_cv2: False
 lf_mode: events
 
 # Min Object perimeter needed for learning filter. Set to 0 to turn it off
-min_obj_size: 0
+min_obj_size: 80
 
 # Min Learning Filter Observability Score. Objects below will be discarded
 # or flagged as difficult. Set to 0 to disable the learning filter
-lf_score_thresh: 0
+lf_score_thresh: 20
 
 # ROI of bboxes that shall be removed. Set to None to turn it off. Same tuple structure as bbox
 remove_roi: [0.60, 0.00, 1.00, 1.00]

@@ -8,7 +8,7 @@ import time
 from datetime import timedelta
 from pprint import pprint
 
-from utils.io.io_utils import load_arch_dict
+from utils.files.io_utils import load_arch_dict
 
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
 sys.path.append(PROJECT_ROOT)
