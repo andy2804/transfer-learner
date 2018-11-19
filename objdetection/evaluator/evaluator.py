@@ -4,6 +4,7 @@ author: aa & az
 
 import os
 import pickle
+from collections import namedtuple
 from pprint import pprint
 
 import numpy as np
@@ -121,19 +122,20 @@ class EvaluatorFrozenGraph(Detector):
                     gt = corestats[thresh]['n_gt'][cls]
                     tp = corestats[thresh]['tp'][cls]
                     fp = corestats[thresh]['fp'][cls]
-                    if confindence_level is None:
-                        acc = EvaluatorFrozenGraph.safe_div(tp, tp + fp)
-                        rec = EvaluatorFrozenGraph.safe_div(tp, gt)
-                        acc_ci, rec_ci = None, None
-                    else:
-                        acc, acc_ci = EvaluatorFrozenGraph.wilson_ci(
-                                tp, tp + fp, ci=confindence_level)
-                        rec, rec_ci = EvaluatorFrozenGraph.wilson_ci(tp, gt, ci=confindence_level)
+                    acc = EvaluatorFrozenGraph.safe_div(tp, tp + fp)
+                    rec = EvaluatorFrozenGraph.safe_div(tp, gt)
+                    if 1:
+                        # todo update with lb ub from conf thresh
+                        acc_lb, acc_ub = EvaluatorFrozenGraph.wilson_ci(
+                                tp, tp + fp, confidence=confindence_level)
+                        rec_lb, rec_ub = EvaluatorFrozenGraph.wilson_ci(
+                                tp, gt, confidence=confindence_level)
 
                     corestats[thresh]['acc'][cls] = acc
                     corestats[thresh]['rec'][cls] = rec
-                    corestats[thresh]['acc_ci'][cls] = acc_ci
-                    corestats[thresh]['rec_ci'][cls] = rec_ci
+                    # todo
+                    # corestats[thresh]['acc_ci'][cls] = acc_ci
+                    # corestats[thresh]['rec_ci'][cls] = rec_ci
         return corestats
 
     @staticmethod
@@ -273,23 +275,49 @@ class EvaluatorFrozenGraph(Detector):
 
     @staticmethod
     @contract
-    def wilson_ci(ns, n, ci=0.95):
+    def wilson_ci(ns, n, confidence=0.95):
         """
-        Wilson score interval
+        Wilson score interval with continuity correction
         :param ns: number of successes
         :type ns: int,>=0
         :param n: sample size
         :type n: int,>=0
-        :param ci: confidence interval
-        :type ci: float,>0,<1
+        :param confidence: confidence interval
+        :type confidence: float,>0,<1
         :return: symmetric value
         """
         if n == 0:
             return 0, 0
-        z = stats.norm.ppf(1 - (1 - ci) / 2)
-        mean = (ns + (z ** 2) / 2) / (n + 2)
-        interval = z / (n + z ** 2) * np.sqrt((ns * (n - ns)) / n + (z ** 2) / 4)
-        return mean, interval
+        z = stats.norm.ppf(1 - (1 - confidence) / 2)
+        p = ns / n
+        # compute partial results for more readable final formula
+        mean = 2 * n * p + z ** 2
+        int_lb = - z * np.sqrt(z ** 2 - 1 / n + 4 * n * p * (1 - p) + (4 * p - 2) + 1)
+        int_ub = z * np.sqrt(z ** 2 - 1 / n + 4 * n * p * (1 - p) - (4 * p - 2) + 1)
+        # final lower and upper bound
+        lb = (mean + int_lb) / (2 * (n + z ** 2))
+        ub = (mean + int_ub) / (2 * (n + z ** 2))
+        return max(0, lb), min(1, ub)
+
+    @staticmethod
+    @contract
+    def clopper_pearson_ci(ns, n, confidence=0.95):
+        """
+        Clopper–Pearson interval based on the beta inverse function
+        :param ns: number of successes
+        :type ns: int,>=0
+        :param n: sample size
+        :type n: int,>=0
+        :param confidence: confidence interval
+        :type confidence: float,>0,<1
+        :return: lower bound, upper bound
+        """
+        if n == 0:
+            return 0, 0
+        a = 1 - confidence
+        lb = 1 - stats.beta.cdf(1 - a / 2, n - ns, ns + 1)
+        ub = 1 - stats.beta.cdf(a / 2, n - ns + 1, ns)
+        return lb, ub
 
     @property
     def detection_graph(self):
@@ -318,3 +346,14 @@ class EvaluatorFrozenGraph(Detector):
     @staticmethod
     def safe_div(x, y):
         return 0 if y == 0 else x / y
+
+
+class Estimate(namedtuple('Val', 'val lb ub conf method')):
+
+    @property
+    def interval_length(self, ):
+        return self.ub - self.lb
+
+    def __str__(self):
+        return 'Val: estimate={:3f}  \nlower bound={:3f}  upper bound=%6.3f\n' \
+               'method={}'.format(self.val, self.lb, self.ub, self.method)
