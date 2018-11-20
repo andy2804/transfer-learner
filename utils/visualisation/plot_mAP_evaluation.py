@@ -128,16 +128,16 @@ def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh):
     acc_low, acc_high, rec_low, rec_high = [], [], [], []
     # thresholds = np.array(thresholds[::-1])
     for thresh in thresholds[::-1]:
-        acc.append(corestats[thresh]['acc'][cls])
-        rec.append(corestats[thresh]['rec'][cls])
-        if corestats[thresh]['acc_ci'][cls] is not None:
+        acc.append(corestats[thresh]['acc'][cls].est)
+        rec.append(corestats[thresh]['rec'][cls].est)
+        if corestats[thresh]['acc'][cls].conf is not None:
             _acc_ci.append(corestats[thresh]['acc_ci'][cls])
             _rec_ci.append(corestats[thresh]['rec_ci'][cls])
-            acc_low.append(acc[-1] - _acc_ci[-1])
-            acc_high.append(acc[-1] + _acc_ci[-1])
-            rec_low.append(rec[-1] - _rec_ci[-1])
-            rec_high.append(rec[-1] + _rec_ci[-1])
-    rec_mid, acc_mid = corestats[mid_thresh]['rec'][cls], corestats[mid_thresh]['acc'][cls]
+            acc_low.append(_acc_ci[-1].lb)
+            acc_high.append(_acc_ci[-1].ub)
+            rec_low.append(_rec_ci[-1].lb)
+            rec_high.append(_rec_ci[-1].ub)
+    rec_mid, acc_mid = corestats[mid_thresh]['rec'][cls].est, corestats[mid_thresh]['acc'][cls].est
     ax.stackplot(rec, acc, color=color, alpha=ALPHA, zorder=2)
     ax.plot(rec, acc, '--', color=color, lw=1.5, zorder=3)
 

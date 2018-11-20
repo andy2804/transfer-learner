@@ -5,7 +5,7 @@ import unittest
 
 from contracts import ContractNotRespected
 
-from objdetection.evaluator.evaluator import EvaluatorFrozenGraph
+from utils.stats.bernoulli import bernoulli_conf_int
 
 
 class EvaluatorFrozenGraphTest(unittest.TestCase):
@@ -36,14 +36,14 @@ class EvaluatorFrozenGraphTest(unittest.TestCase):
         ub_gt = [.3445, .4526, .6078]
         for i in range(len(self.n)):
             with self.subTest("Wilson {:d} subtest [computation]".format(i + 1)):
-                lb, ub = EvaluatorFrozenGraph.wilson_ci(
-                        self.ns[i], self.n[i], self.confidence[i])
+                lb, ub = bernoulli_conf_int(
+                        self.ns[i], self.n[i], self.confidence[i], "wilson")
                 print(lb, "+-", ub)
                 self.assertAlmostEqual(lb, lb_gt[i], places=4)
                 self.assertAlmostEqual(ub, ub_gt[i], places=4)
         with self.subTest("Wilson [args validity]"):
             with self.assertRaises(ContractNotRespected):
-                EvaluatorFrozenGraph.wilson_ci(1, -1, .9)
+                bernoulli_conf_int(1, -1, .9, "wilson")
 
     def test_clopper_pearson_ci(self):
         # todo

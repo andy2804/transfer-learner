@@ -4,7 +4,6 @@ author: aa & az
 
 import os
 import pickle
-from collections import namedtuple
 from pprint import pprint
 
 import numpy as np
@@ -12,12 +11,12 @@ import pandas as pd
 import tensorflow as tf
 from contracts import contract
 from matplotlib import pyplot as plt
-from scipy import stats
 
 from objdetection.detector.detector import Detector
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.metrics import metrics_np
 from utils.sheets_interface import GoogleSheetsInterface
+from utils.stats.bernoulli import bernoulli_conf_int, Estimate
 from utils.visualisation.plot_mAP_evaluation import plot_performance_metrics
 from utils.visualisation.static_helper import \
     visualize_boxes_and_labels_on_image_array
@@ -105,11 +104,14 @@ class EvaluatorFrozenGraph(Detector):
         self._AP, self._mAP = self.compute_ap(self._stats, self._thresholds)
 
     @staticmethod
-    def compute_acc_rec(corestats, num_classes, confindence_level=None):
+    def compute_acc_rec(corestats, num_classes, conf_level=None, conf_method="wilson"):
         """
         Evaluate statistics of detected objects and calculate performance metrics
         according to M. Everingham et. al (https://doi.org/10.1007/s11263-014-0733-5)
-        :param confindence_level: If 0< value<1 will calculate with Wilson confidence interval
+        :param conf_method:
+        :param conf_level:
+        :param num_classes:
+        :param corestats:
         :return:
         """
         for thresh in corestats:
@@ -122,20 +124,19 @@ class EvaluatorFrozenGraph(Detector):
                     gt = corestats[thresh]['n_gt'][cls]
                     tp = corestats[thresh]['tp'][cls]
                     fp = corestats[thresh]['fp'][cls]
-                    acc = EvaluatorFrozenGraph.safe_div(tp, tp + fp)
-                    rec = EvaluatorFrozenGraph.safe_div(tp, gt)
-                    if 1:
-                        # todo update with lb ub from conf thresh
-                        acc_lb, acc_ub = EvaluatorFrozenGraph.wilson_ci(
-                                tp, tp + fp, confidence=confindence_level)
-                        rec_lb, rec_ub = EvaluatorFrozenGraph.wilson_ci(
-                                tp, gt, confidence=confindence_level)
 
+                    if conf_level is not None:
+                        # overwrites acc, rec with Estimate
+                        acc, rec = bernoulli_conf_int(
+                                ns=(tp, tp),
+                                n=(tp + fp, gt),
+                                conf_level=(conf_level, conf_level),
+                                conf_method=conf_method)
+                    else:
+                        acc = Estimate(EvaluatorFrozenGraph.safe_div(tp, tp + fp))
+                        rec = Estimate(EvaluatorFrozenGraph.safe_div(tp, gt))
                     corestats[thresh]['acc'][cls] = acc
                     corestats[thresh]['rec'][cls] = rec
-                    # todo
-                    # corestats[thresh]['acc_ci'][cls] = acc_ci
-                    # corestats[thresh]['rec_ci'][cls] = rec_ci
         return corestats
 
     @staticmethod
@@ -150,8 +151,8 @@ class EvaluatorFrozenGraph(Detector):
             last_rec = 0.0
             ap = 0.0
             for thresh in thresholds[::-1]:
-                acc = corestats[thresh]['acc'][cls]
-                rec = corestats[thresh]['rec'][cls]
+                acc = corestats[thresh]['acc'][cls].est
+                rec = corestats[thresh]['rec'][cls].est
                 ap += acc * (rec - last_rec)
                 last_rec = rec
             AP[cls] = ap
@@ -187,7 +188,7 @@ class EvaluatorFrozenGraph(Detector):
         thresh_keys = np.linspace(0.0, 1.0, n_thresholds)
         np.round(thresh_keys, decimals=2, out=thresh_keys)
         self._thresholds = thresh_keys
-        stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec', 'acc_ci', 'rec_ci')
+        stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec')
         cls_keys = list(range(1, self._num_classes + 1))
         self._stats = {t: {s: {c: 0 for c in cls_keys} for s in stats_keys} for t in
                        thresh_keys}
@@ -213,6 +214,7 @@ class EvaluatorFrozenGraph(Detector):
         :return:
         """
         # Save the plot as pdf
+        # todo check compatibility with new Estimate
         try:
             if self._plot is not None:
                 plot_file = os.path.join(
@@ -273,52 +275,6 @@ class EvaluatorFrozenGraph(Detector):
         plt.show()
         return
 
-    @staticmethod
-    @contract
-    def wilson_ci(ns, n, confidence=0.95):
-        """
-        Wilson score interval with continuity correction
-        :param ns: number of successes
-        :type ns: int,>=0
-        :param n: sample size
-        :type n: int,>=0
-        :param confidence: confidence interval
-        :type confidence: float,>0,<1
-        :return: symmetric value
-        """
-        if n == 0:
-            return 0, 0
-        z = stats.norm.ppf(1 - (1 - confidence) / 2)
-        p = ns / n
-        # compute partial results for more readable final formula
-        mean = 2 * n * p + z ** 2
-        int_lb = - z * np.sqrt(z ** 2 - 1 / n + 4 * n * p * (1 - p) + (4 * p - 2) + 1)
-        int_ub = z * np.sqrt(z ** 2 - 1 / n + 4 * n * p * (1 - p) - (4 * p - 2) + 1)
-        # final lower and upper bound
-        lb = (mean + int_lb) / (2 * (n + z ** 2))
-        ub = (mean + int_ub) / (2 * (n + z ** 2))
-        return max(0, lb), min(1, ub)
-
-    @staticmethod
-    @contract
-    def clopper_pearson_ci(ns, n, confidence=0.95):
-        """
-        Clopper–Pearson interval based on the beta inverse function
-        :param ns: number of successes
-        :type ns: int,>=0
-        :param n: sample size
-        :type n: int,>=0
-        :param confidence: confidence interval
-        :type confidence: float,>0,<1
-        :return: lower bound, upper bound
-        """
-        if n == 0:
-            return 0, 0
-        a = 1 - confidence
-        lb = 1 - stats.beta.cdf(1 - a / 2, n - ns, ns + 1)
-        ub = 1 - stats.beta.cdf(a / 2, n - ns + 1, ns)
-        return lb, ub
-
     @property
     def detection_graph(self):
         return self._detection_graph
@@ -346,14 +302,3 @@ class EvaluatorFrozenGraph(Detector):
     @staticmethod
     def safe_div(x, y):
         return 0 if y == 0 else x / y
-
-
-class Estimate(namedtuple('Val', 'val lb ub conf method')):
-
-    @property
-    def interval_length(self, ):
-        return self.ub - self.lb
-
-    def __str__(self):
-        return 'Val: estimate={:3f}  \nlower bound={:3f}  upper bound=%6.3f\n' \
-               'method={}'.format(self.val, self.lb, self.ub, self.method)
