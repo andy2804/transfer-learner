@@ -93,4 +93,4 @@ class Bernoulli(namedtuple('Ber', 'ns n')):
         a = 1 - confidence
         lb = 1 - stats.beta.ppf(1 - a / 2, n - ns, ns + 1)
         ub = 1 - stats.beta.ppf(a / 2, n - ns + 1, ns)
-        return lb, ub
+        return max(0, lb), min(1, ub)

@@ -151,6 +151,7 @@ def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh, conf_level=
 
     # if the conf bounds have been filled
     if acc_low:
+        # todo can be improved with filling the areas but plt.fill_between() requires same x
         ax.plot(rec_low, acc_low, ':', color=color, lw=1.5, zorder=3)
         ax.plot(rec_high, acc_high, ':', color=color, lw=1.5, zorder=3)
     ax.plot(rec_mid, acc_mid, color='dark' + color, marker='x', ms=6, mew=1.5, fillstyle='none',
