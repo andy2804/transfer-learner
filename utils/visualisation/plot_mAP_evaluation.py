@@ -110,7 +110,8 @@ def plot_performance_metrics(corestats,
     return fig
 
 
-def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh):
+def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh, conf_level=.95,
+                  conf_method="wilson"):
     """
      #todo
      Confidence interval computed as displacement from nominal accuracy taking into account both
@@ -128,16 +129,23 @@ def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh):
     acc_low, acc_high, rec_low, rec_high = [], [], [], []
     # thresholds = np.array(thresholds[::-1])
     for thresh in thresholds[::-1]:
-        acc.append(corestats[thresh]['acc'][cls].est)
-        rec.append(corestats[thresh]['rec'][cls].est)
-        if corestats[thresh]['acc'][cls].conf is not None:
-            _acc_ci.append(corestats[thresh]['acc_ci'][cls])
-            _rec_ci.append(corestats[thresh]['rec_ci'][cls])
-            acc_low.append(_acc_ci[-1].lb)
-            acc_high.append(_acc_ci[-1].ub)
-            rec_low.append(_rec_ci[-1].lb)
-            rec_high.append(_rec_ci[-1].ub)
-    rec_mid, acc_mid = corestats[mid_thresh]['rec'][cls].est, corestats[mid_thresh]['acc'][cls].est
+        acc.append(corestats[thresh]['acc'][cls].estimate)
+        rec.append(corestats[thresh]['rec'][cls].estimate)
+        if conf_level is not None:
+            try:
+                _acc_ci.append(corestats[thresh]['acc_ci'][cls].get_confidence_interval(
+                        conf_level, conf_method))
+                _rec_ci.append(corestats[thresh]['rec_ci'][cls].get_confidence_interval(
+                        conf_level, conf_method))
+                acc_low.append(_acc_ci[-1][0])
+                acc_high.append(_acc_ci[-1][1])
+                rec_low.append(_rec_ci[-1][0])
+                rec_high.append(_rec_ci[-1][1])
+            except ValueError:
+                print("Failed to compute accuracy intervals, skipping plots")
+                acc_low = []
+    acc_mid = corestats[mid_thresh]['acc'][cls].estimate
+    rec_mid = corestats[mid_thresh]['rec'][cls].estimate
     ax.stackplot(rec, acc, color=color, alpha=ALPHA, zorder=2)
     ax.plot(rec, acc, '--', color=color, lw=1.5, zorder=3)
 
