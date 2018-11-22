@@ -16,7 +16,7 @@ from objdetection.detector.detector import Detector
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.metrics import metrics_np
 from utils.sheets_interface import GoogleSheetsInterface
-from utils.stats.bernoulli import bernoulli_conf_int, Estimate
+from utils.stats.bernoulli import Bernoulli
 from utils.visualisation.plot_mAP_evaluation import plot_performance_metrics
 from utils.visualisation.static_helper import \
     visualize_boxes_and_labels_on_image_array
@@ -104,14 +104,12 @@ class EvaluatorFrozenGraph(Detector):
         self._AP, self._mAP = self.compute_ap(self._stats, self._thresholds)
 
     @staticmethod
-    def compute_acc_rec(corestats, num_classes, conf_level=None, conf_method="wilson"):
+    def compute_acc_rec(corestats, num_classes):
         """
         Evaluate statistics of detected objects and calculate performance metrics
         according to M. Everingham et. al (https://doi.org/10.1007/s11263-014-0733-5)
-        :param conf_method:
-        :param conf_level:
         :param num_classes:
-        :param corestats:
+        :param corestats:, Accuracy and Recall are considered Bernoulli experiments
         :return:
         """
         for thresh in corestats:
@@ -124,19 +122,8 @@ class EvaluatorFrozenGraph(Detector):
                     gt = corestats[thresh]['n_gt'][cls]
                     tp = corestats[thresh]['tp'][cls]
                     fp = corestats[thresh]['fp'][cls]
-
-                    if conf_level is not None:
-                        # overwrites acc, rec with Estimate
-                        acc, rec = bernoulli_conf_int(
-                                ns=(tp, tp),
-                                n=(tp + fp, gt),
-                                conf_level=(conf_level, conf_level),
-                                conf_method=conf_method)
-                    else:
-                        acc = Estimate(EvaluatorFrozenGraph.safe_div(tp, tp + fp))
-                        rec = Estimate(EvaluatorFrozenGraph.safe_div(tp, gt))
-                    corestats[thresh]['acc'][cls] = acc
-                    corestats[thresh]['rec'][cls] = rec
+                    corestats[thresh]['acc'][cls] = Bernoulli(tp, tp + fp)
+                    corestats[thresh]['rec'][cls] = Bernoulli(tp, gt)
         return corestats
 
     @staticmethod
@@ -151,8 +138,8 @@ class EvaluatorFrozenGraph(Detector):
             last_rec = 0.0
             ap = 0.0
             for thresh in thresholds[::-1]:
-                acc = corestats[thresh]['acc'][cls].est
-                rec = corestats[thresh]['rec'][cls].est
+                acc = corestats[thresh]['acc'][cls].estimate
+                rec = corestats[thresh]['rec'][cls].estimate
                 ap += acc * (rec - last_rec)
                 last_rec = rec
             AP[cls] = ap
