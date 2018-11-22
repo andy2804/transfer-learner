@@ -20,15 +20,15 @@ main_sensor: RGB
 aux_sensor: EVENTS
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: ZURICH_TRAINING_DAY_LF_V2_events_TEST
+tfrecord_name_prefix: ZURICH_TRAINING_DAY_V2_events_VERBOSE
 
 # Additionally generated files during transfer_learning will be saved here
-output_dir: /media/sdc/andya/wormhole_learning/dataset/training
+output_dir: /media/sdc/andya/wormhole_learning/dataset/statistics
 
 
 # ================ GPUS MASK
 # Passes argument to cuda visible devices, comma separated values
-cuda_visible_devices: "3"
+cuda_visible_devices: "7"
 
 
 # ================ SEMI-SUPERVISED LABEL GENERATOR
@@ -63,11 +63,11 @@ scale_back_using_cv2: False
 lf_mode: events
 
 # Min Object perimeter needed for learning filter. Set to 0 to turn it off
-min_obj_size: 80
+min_obj_size: 0
 
 # Min Learning Filter Observability Score. Objects below will be discarded
 # or flagged as difficult. Set to 0 to disable the learning filter
-lf_score_thresh: 20
+lf_score_thresh: 0
 
 # ROI of bboxes that shall be removed. Set to None to turn it off. Same tuple structure as bbox
 remove_roi: [0.60, 0.00, 1.00, 1.00]
@@ -78,8 +78,9 @@ remove_shape: [0.33, 0.99]
                      
 
 # ================ VISUALIZATION AND PLOTS
-# Activates verbose mode with visualisation
-verbose: False
+# Activates verbose mode with visualisation and sets the mode for verbose
+# Currently implemented are 'plot', 'cv2' and 'export'
+verbose: "export"
 
 # Generates and saves plots on the home folder
 generate_plots: True

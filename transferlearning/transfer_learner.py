@@ -12,10 +12,10 @@ import tensorflow as tf
 from PIL import Image, ImageStat
 from matplotlib import pyplot as plt
 
-from objdetection.detector.detector import Detector
+from objdetection.detector.detector import Detector, ObjectDetected
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from transferlearning.filter.learning_filter import LearningFilter
-from utils.files.io_utils import read_filenames
+from utils.files.io_utils import export_transfer_step_img, read_filenames
 from utils.sheets_interface import GoogleSheetsInterface
 from utils.static_helper import load_labels
 from utils.visualisation.static_helper import visualize_detections
@@ -78,10 +78,10 @@ class TransferLearner:
                     scores_remapped = np.squeeze(scores_remapped, axis=0)
 
                 # Apply learning filter and boxes from ROI removal if specified
-                classes_remapped, boxes_remapped = self._learning_filter.apply(
+                classes_filtered, boxes_filtered = self._learning_filter.apply(
                         img_main, img_aux, classes_remapped, boxes_remapped)
-                classes_remapped, boxes_remapped = self._learning_filter.remove_boxes_from_roi(
-                        classes_remapped, boxes_remapped, self.flags.remove_roi,
+                classes_filtered, boxes_filtered = self._learning_filter.remove_boxes_from_roi(
+                        classes_filtered, boxes_filtered, self.flags.remove_roi,
                         self.flags.remove_shape)
 
                 # Apply preprocessing to the auxiliary image to be encoded
@@ -89,8 +89,8 @@ class TransferLearner:
 
                 # Create instance dict
                 instance = {"image":    img_aux,
-                            "boxes":    boxes_remapped,
-                            "labels":   classes_remapped,
+                            "boxes":    boxes_filtered,
+                            "labels":   classes_filtered,
                             "filename": file_aux_sensor
                             }
 
@@ -99,17 +99,21 @@ class TransferLearner:
                 writer.write(tf_example.SerializeToString())
                 t_loop = (time.time() - t_start) * 1000
                 print("\r[ %i / %i ] Encoded %s in %.1f ms" % (
-                    count, len(self.files), os.path.basename(file_aux_sensor), t_loop), end="")
+                    count + 1, len(self.files), os.path.basename(file_aux_sensor), t_loop), end="")
 
                 # Stats
                 self._encoded_mean.append(img_aux.mean())
                 self._encoded_std.append(img_aux.std())
 
                 if self.flags.verbose:
-                    obj_detected.classes = classes_remapped
-                    obj_detected.boxes = boxes_remapped
-                    obj_detected.scores = scores_remapped
-                    self._visualize_transfer_step(obj_detected, img_main, img_aux, self.labels)
+                    objects_main = ObjectDetected(source='detect_from_rgb', boxes=boxes_remapped,
+                                                  scores=scores_remapped, classes=classes_remapped,
+                                                  ts=0)
+                    objects_aux = ObjectDetected(source='transfer_from_rgb', boxes=boxes_filtered,
+                                                 scores=None, classes=classes_filtered, ts=0)
+                    self._visualize_transfer_step((objects_main, objects_aux), (img_main, img_aux),
+                                                  self.labels, self.flags, count,
+                                                  mode=self.flags.verbose)
 
         # Print Mean & Std of all encoded images
         print('\n================ STATS OF ENCODED IMAGES ================')
@@ -166,34 +170,38 @@ class TransferLearner:
             diff = len(self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=0))
             values.append('%d (%d)' % (number, diff))
         values.append(len(self._learning_filter.stats.get_tlscores()))
+        values.append(len(self.files))
         sheets = GoogleSheetsInterface()
 
         # TODO modularize to which worksheet it should be uploaded to
-        sheets.upload_data('zurich_dataset', 'B', 'I', self.flags.tfrecord_name_prefix, values)
+        sheets.upload_data('zurich_dataset', 'B', 'J', self.flags.tfrecord_name_prefix, values)
 
     @staticmethod
-    def _visualize_transfer_step(obj_detected, img_main, img_aux, labels, use_cv2=False):
+    def _visualize_transfer_step(obj_detected, images, labels, flags, count, mode='plot'):
         """
         Verbose method
         :param obj_detected:
-        :param img_main:
-        :param img_aux:
+        :param images:
         :param labels:
-        :param use_cv2:
+        :param mode:
         :return:
         """
-        img_main_labeled = visualize_detections(img_main, obj_detected, labels=labels)
-        img_aux_labeled = visualize_detections(img_aux, obj_detected, labels=labels)
+        img_main_labeled = visualize_detections(images[0], obj_detected[0], labels=labels)
+        img_aux_labeled = visualize_detections(images[1], obj_detected[1], labels=labels)
         img_stack = np.hstack((img_main_labeled, img_aux_labeled))
-        if use_cv2:
+        if mode == 'cv2':
             cv2.imshow('Transfer Learning Step', cv2.cvtColor(img_stack, cv2.COLOR_BGR2RGB))
             cv2.waitKey(1)
-        else:
+        elif mode == 'plot':
             plt.figure("figure", figsize=(16, 8))
             plt.xticks([])
             plt.yticks([])
             plt.imshow(img_stack)
             plt.show()
+        elif mode == 'export' and count % 4 == 0:
+            export_transfer_step_img(img_stack,
+                                     os.path.join(flags.output_dir, flags.tfrecord_name_prefix),
+                                     count)
 
     @staticmethod
     def _analyze_dataset(flags, files):

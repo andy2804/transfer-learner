@@ -6,30 +6,33 @@ from random import sample
 import numpy as np
 from PIL import Image
 
-PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
+PROJECT_ROOT = os.getcwd()[:os.getcwd().index('utils')]
 sys.path.append(PROJECT_ROOT)
-from deprecated.kaist.utils_readio import read_filenames
-from objdetection.meta.detector.detector import Detector
+
+from utils.files.io_utils import read_filenames
+from objdetection.detector.detector import Detector
 
 
 def main():
     """
-    Extract pairs of rgb and ir images from the kaist dataset. A pretrained net can be run
+    Extract pairs of rgb and ir images from the given dataset. A pretrained net can be run
     over the images to check if there is supposed to be something. This option is available via
     "only_rich_imgs" and the parameter "p_empty_imgs" which controls the ratio of samples from the
     allegedly empty ones. No checks on the number of samples are performed, make sure you require
     a reasonable amount.
     :return:
     """
-    img_pairs = read_filenames(dataset_dir)
+    img_pairs = read_filenames(dataset_dir, filter, main_sensor, aux_sensor)
     img_pairs_empty, img_pairs_full = [], []
 
     if biased_sampling:
-        detector = Detector(arch=2)
+        detector = Detector(labels_output='zauron_label_map.json')
         for img_pair in img_pairs[:]:
             img = np.array(Image.open(img_pair[0]))
             obj_detected = detector.run_inference_on_img(img)
-            if not obj_detected.scores.size:
+            classes_remapped, scores_remapped, boxes_remapped = detector.remap_labels(
+                    obj_detected.classes, obj_detected.scores, obj_detected.boxes)
+            if not classes_remapped.size:
                 img_pairs_empty.append(img_pair)
             else:
                 img_pairs_full.append(img_pair)
@@ -45,22 +48,25 @@ def main():
 
     for i, pair in enumerate(img_pairs_full + img_pairs_empty):
         for im in pair:
-            dst_basename = "I{:06d}".format(i)
-            if "lwir" in im:
-                dst_basename += "_ir"
-            dst_basename += ".png"
+            if main_sensor in im:
+                dst_basename = "%s_%05d.png" % (main_sensor, i)
+            else:
+                dst_basename = "%s_%05d.png" % (aux_sensor, i)
             dst = os.path.join(output_dir, dst_basename)
             shutil.copyfile(im, dst)
 
 
 if __name__ == '__main__':
     # Give absolute paths
-    output_dir = "/shared_experiments/kaist/tmp"
-    dataset_dir = "/shared_experiments/kaist/testing/night"
-    n_samples = 2000
-    biased_sampling = False
+    output_dir = "/home/andya/external_ssd/wormhole_learning/dataset/validation"
+    dataset_dir = "/home/andya/external_ssd/wormhole_learning/dataset/training"
+    main_sensor = "RGB"
+    aux_sensor = "EVENTS"
+    filter = ['day']
+    n_samples = 100
+    biased_sampling = True
     # Percentage of images which can contain no detectable objects if biased_sampling
-    p_empty_images = 0.1
+    p_empty_images = 0
     # Mask devices
     cuda_visible_devices = "3"
     os.environ["CUDA_VISIBLE_DEVICES"] = cuda_visible_devices

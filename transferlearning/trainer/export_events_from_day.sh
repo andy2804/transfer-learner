@@ -5,7 +5,7 @@ export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 
 # Job_name can't have spaces
 job_name=events
-ckpt_number=201342
+ckpt_number=216878
 
 # Actual call
 CUDA_VISIBLE_DEVICES=0 python3 object_detection/export_inference_graph.py \

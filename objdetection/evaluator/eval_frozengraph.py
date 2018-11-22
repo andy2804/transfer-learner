@@ -4,7 +4,10 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
+from matplotlib import pyplot as plt
+from objdetection.detector.detector import ObjectDetected
 from objdetection.evaluator.evaluator import EvaluatorFrozenGraph
+from utils.visualisation.static_helper import visualize_detections
 
 
 def _filter_difficult(gt_labels_in, gt_boxes_in, difficult_flag_in, eval_difficult=False):
@@ -144,13 +147,17 @@ def run_evaluation(flags):
 
                     # Show example if verbose == True
                     if flags.verbose:
-                        evaluator.show_example(img_in[0, :],
-                                               classes_out[0, :],
-                                               scores_out[0, :],
-                                               boxes_out[0, :],
-                                               gt_labels[0, :],
-                                               gt_boxes[0, :],
-                                               difficult_flag[0, :])
+                        obj_gt = ObjectDetected('ground-truth', gt_boxes[0, :], None, gt_labels[0, :], 0)
+                        obj_pred = ObjectDetected('prediction', boxes_out[0, :], scores_out[0, :], classes_out[0, :], 0)
+                        _visualize_transfer_step((obj_gt, obj_pred), (img_in[0, :], img_in[0, :]),
+                                                 evaluator._labels_output_dict, flags.verbose)
+                        # evaluator.show_example(img_in[0, :],
+                        #                        classes_out[0, :],
+                        #                        scores_out[0, :],
+                        #                        boxes_out[0, :],
+                        #                        gt_labels[0, :],
+                        #                        gt_boxes[0, :],
+                        #                        difficult_flag[0, :])
 
                     # Update statistics from this batch
                     evaluator.update_evaluation_from_single_batch(
@@ -169,3 +176,26 @@ def run_evaluation(flags):
             evaluator.store_and_publish(filename=flags.testname, min_obj_size=flags.min_obj_size)
             evaluator.print_performance()
     return
+
+
+def _visualize_transfer_step(obj_detected, images, labels, mode='plot'):
+    """
+    Verbose method
+    :param obj_detected:
+    :param images:
+    :param labels:
+    :param mode:
+    :return:
+    """
+    img_main_labeled = visualize_detections(images[0], obj_detected[0], labels=labels)
+    img_aux_labeled = visualize_detections(images[1], obj_detected[1], labels=labels)
+    img_stack = np.hstack((img_main_labeled, img_aux_labeled))
+    if mode == 'cv2':
+        cv2.imshow('Prediction', img_stack)
+        cv2.waitKey(1)
+    elif mode == 'plot':
+        plt.figure("figure", figsize=(16, 8))
+        plt.xticks([])
+        plt.yticks([])
+        plt.imshow(img_stack)
+        plt.show()

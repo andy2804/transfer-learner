@@ -11,11 +11,11 @@ import os
 # ===================================================
 
 
-FROM_STRING = '_ir'
+FROM_STRING = 'RGB_'
 TO_STRING = ''
-EXCLUDE_STRING = ['RGB']
-FILETYPE = '.xml'
-FOLDER = '/shared_experiments/kaist/hand_labeling/hand_labeled'
+EXCLUDE_STRING = ['EVENTS']
+FILETYPE = '.png'
+FOLDER = '/home/andya/external_ssd/wormhole_learning/dataset/validation'
 MAYBE = False
 
 

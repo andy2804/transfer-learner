@@ -33,7 +33,7 @@ LABELS_DIR = "resources/labels/"
 
 class Detector:
     def __init__(self,
-                 net_id=2,
+                 net_id=1,
                  arch_config='default',
                  download_base='http://download.tensorflow.org/models/object_detection/',
                  labels_net_arch='mscoco_label_map.json',

@@ -30,7 +30,7 @@ flags.DEFINE_string('testname', "ZURICH_TESTING_DAY_LF_events",
                     'Used in the title of the plot: "Performance metrics on $(arg testname)"')
 
 # ================ NETWORK
-flags.DEFINE_integer('network_model', 20,
+flags.DEFINE_integer('network_model', 23,
                      'Network model as defined in the obj_detection class')
 flags.DEFINE_string('arch_config', 'zurich_networks',
                     'Which architecture dictionary to load in nets_ckpt')
@@ -41,7 +41,7 @@ flags.DEFINE_string('labels_output', 'zauron_label_map.json',
                     'they need to be the same mapping that has been used for the ground-truth.')
 
 # ================ CUDA DEVICES
-flags.DEFINE_string('cuda_visible_devices', "4",
+flags.DEFINE_string('cuda_visible_devices', "3",
                     'Passes argument to cuda visible devices, comma separated values')
 
 # ================ DATASET
@@ -61,7 +61,7 @@ flags.DEFINE_bool('scale_back_using_cv2', False,
                   'back to range 0 to 255 using mean 127 and stddev derived from confidence_int')
 
 # ================ VERBOSE
-flags.DEFINE_bool('verbose', False,
+flags.DEFINE_string('verbose', 'cv2',
                   'Whether or not to visualise the predictions against the ground truth')
 flags.DEFINE_bool('make_plot', True,
                   'Make plot out of the results')

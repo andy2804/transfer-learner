@@ -1,12 +1,14 @@
 import os
 
 import yaml
+from PIL import Image
 
 __all__ = ["read_filenames"]
 
 ROOT_DIR = "WormholeLearning/"
 NETS_CKPT_DIR = "resources/nets_ckpt/"
 NETS_CKPT_PATH = os.path.join(os.getcwd()[:os.getcwd().index(ROOT_DIR)], ROOT_DIR, NETS_CKPT_DIR)
+
 
 def read_filenames(dir, filter_keywords, main_sensor_name, aux_sensor_name, filetype='png'):
     """
@@ -46,3 +48,27 @@ def load_arch_dict(config_file):
     with open(config_file, "r") as fs:
         arch_dict = yaml.load(fs)
     return arch_dict
+
+
+def export_transfer_step_img(img_array, output_dir, count):
+    """
+    Exports verbose images from transfer step for visual inspection
+    :param img_array:
+    :param output_dir:
+    :param output_file:
+    :return:
+    """
+
+    # Check if output path exists
+    if os.path.isdir(output_dir):
+        pass
+    else:
+        try:
+            os.makedirs(output_dir)
+        except IOError as e:
+            e += ["Error attempting to create %s folder" % output_dir]
+
+    # Save image as png
+    img = Image.fromarray(img_array, 'RGB')
+    output_file = os.path.join(output_dir, "%06d.jpg" % count)
+    img.save(output_file, "JPEG", quality=90)

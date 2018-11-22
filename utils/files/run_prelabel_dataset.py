@@ -6,9 +6,9 @@ from PIL import Image
 
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
 sys.path.append(PROJECT_ROOT)
-from objdetection.meta.utils_labeler.static_helper import load_labels
+from utils.static_helper import load_labels
 
-from objdetection.meta.detector.detector import Detector
+from objdetection.detector.detector import Detector
 
 
 def _read_rgb_filenames(dir):
@@ -56,7 +56,7 @@ def _create_xml_pascal(img_path, img_rgb, classes_remapped, boxes_remapped, labe
 
 
 def main():
-    detector = Detector(arch=NET_ARCH, labels_net_arch=LABELS_NET, labels_output=LABELS_OUT)
+    detector = Detector(net_id=NET_ARCH, labels_net_arch=LABELS_NET, labels_output=LABELS_OUT)
     rgb_files = _read_rgb_filenames(DATASET_DIR)
     label_map = load_labels(LABELS_OUT)
 
@@ -77,9 +77,9 @@ def main():
 
 
 if __name__ == '__main__':
-    NET_ARCH = 2
+    NET_ARCH = 1
     LABELS_NET = "mscoco_label_map.json"
-    LABELS_OUT = "kaist_label_map.json"
+    LABELS_OUT = "zurich_label_map.json"
     DATASET_DIR = "/shared_experiments/kaist/tmp"
     CUDA_MASK = "3"
 

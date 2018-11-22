@@ -639,7 +639,7 @@ def visualize_boxes_and_labels_on_image_array(image, boxes, classes, scores, lab
 
     if not max_boxes_to_draw:
         max_boxes_to_draw = len(boxes)
-    for i in range(min(max_boxes_to_draw, len(boxes))):
+    for i in range(min(max_boxes_to_draw, classes.size)):
         if scores is None or scores[i] > min_score_thresh:
             box = tuple(boxes[i].tolist())
             if instance_masks is not None:
