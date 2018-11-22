@@ -36,12 +36,13 @@ class Bernoulli(namedtuple('Ber', 'ns n')):
         :param conf_method:
         :return:
         """
-        # actual func. implementation
-        available_methods = {"wilson": self._wilson_ci, "clopper_person": self._clopper_pearson_ci}
+        available_methods = {
+            "wilson":          self._wilson_ci,
+            "clopper_pearson": self._clopper_pearson_ci
+        }
+
         if conf_method in available_methods:
-
             return available_methods[conf_method](self.ns, self.n, conf_level)
-
         else:
             raise ValueError("The requested method for confidence intervals is not available")
 
@@ -60,15 +61,17 @@ class Bernoulli(namedtuple('Ber', 'ns n')):
         """
         if n == 0:
             return 0, 0
-        z = stats.norm.ppf(1 - (1 - confidence) / 2)
+        z = stats.norm.isf((1 - confidence) / 2)
+        print("z:", z)
         p = ns / n
         # compute partial results for more readable final formula
-        mean = 2 * n * p + z ** 2
-        int_lb = - z * np.sqrt(z ** 2 - 1 / n + 4 * n * p * (1 - p) + (4 * p - 2) + 1)
-        int_ub = z * np.sqrt(z ** 2 - 1 / n + 4 * n * p * (1 - p) - (4 * p - 2) + 1)
+        z2 = z ** 2
+        mean = 2 * n * p + z2
+        int_lb = - z * np.sqrt(z2 - 1 / n + 4 * n * p * (1 - p) + (4 * p - 2) + 1)
+        int_ub = z * np.sqrt(z2 - 1 / n + 4 * n * p * (1 - p) - (4 * p - 2) + 1)
         # final lower and upper bound
-        lb = (mean + int_lb) / (2 * (n + z ** 2))
-        ub = (mean + int_ub) / (2 * (n + z ** 2))
+        lb = (mean + int_lb) / (2 * (n + z2))
+        ub = (mean + int_ub) / (2 * (n + z2))
         return max(0, lb), min(1, ub)
 
     @staticmethod
@@ -88,6 +91,6 @@ class Bernoulli(namedtuple('Ber', 'ns n')):
         if n == 0:
             return 0, 0
         a = 1 - confidence
-        lb = 1 - stats.beta.cdf(1 - a / 2, n - ns, ns + 1)
-        ub = 1 - stats.beta.cdf(a / 2, n - ns + 1, ns)
+        lb = 1 - stats.beta.ppf(1 - a / 2, n - ns, ns + 1)
+        ub = 1 - stats.beta.ppf(a / 2, n - ns + 1, ns)
         return lb, ub
