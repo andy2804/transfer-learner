@@ -68,7 +68,7 @@ class LearningFilter(MultiModalObserver):
             self.stats.n_instances += 1
         return classes_to_keep, boxes_to_keep
 
-    def remove_boxes_from_roi(self, classes, boxes, roi=None, shape=None, tolerance=0.1):
+    def remove_boxes_from_roi(self, classes, boxes, roi=None, shape=None, tolerance=0.15):
         """
         If roi is defined, boxes with given shape lying within the roi will be removed
         :param classes:

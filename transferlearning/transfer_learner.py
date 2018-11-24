@@ -40,7 +40,7 @@ class TransferLearner:
         # Encoder for tfrecords
         self.labels = load_labels(flags.labels_out)
         self._encoder = EncoderTFrecGoogleApi()
-        self.output = os.path.join(flags.dataset_dir, flags.tfrecord_name_prefix + ".tfrecord")
+        self.output = os.path.join(flags.output_dir, flags.tfrecord_name_prefix + ".tfrecord")
 
         # Initialize filter
         self._learning_filter = LearningFilter(score_threshold=flags.lf_score_thresh,
@@ -145,10 +145,13 @@ class TransferLearner:
         Save collected statistics in the learning filter to pickled file and pdf
         :return:
         """
-        self._learning_filter.stats.save(self.flags.output_dir, self.flags.tfrecord_name_prefix)
+        output_dir = os.path.join(self.flags.output_dir, "stats")
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
+        self._learning_filter.stats.save(output_dir, self.flags.tfrecord_name_prefix)
         if self.flags.generate_plots:
             self._learning_filter.stats.make_plots(save_plots=self.flags.generate_plots,
-                                                   output_dir=self.flags.output_dir,
+                                                   output_dir=output_dir,
                                                    filename=self.flags.tfrecord_name_prefix,
                                                    show_plots=self.flags.show_plots)
         # Save dataset stats
@@ -172,8 +175,6 @@ class TransferLearner:
         values.append(len(self._learning_filter.stats.get_tlscores()))
         values.append(len(self.files))
         sheets = GoogleSheetsInterface()
-
-        # TODO modularize to which worksheet it should be uploaded to
         sheets.upload_data('zurich_dataset', 'B', 'J', self.flags.tfrecord_name_prefix, values)
 
     @staticmethod

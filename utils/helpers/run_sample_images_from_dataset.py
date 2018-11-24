@@ -47,24 +47,29 @@ def main():
                 len(img_pairs_full), sampling_step))
 
     for i, pair in enumerate(img_pairs_full + img_pairs_empty):
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
         for im in pair:
             if main_sensor in im:
-                dst_basename = "%s_%05d.png" % (main_sensor, i)
+                dst_basename = "%05d_%s.png" % (i, main_sensor)
             else:
-                dst_basename = "%s_%05d.png" % (aux_sensor, i)
+                dst_basename = "%05d_%s.png" % (i, aux_sensor)
             dst = os.path.join(output_dir, dst_basename)
             shutil.copyfile(im, dst)
+            print("\r[ %d / %d ] Copying %s" % (
+            i + 1, len(img_pairs_full + img_pairs_empty), dst_basename), end='')
+    print("\nDone!")
 
 
 if __name__ == '__main__':
     # Give absolute paths
-    output_dir = "/home/andya/external_ssd/wormhole_learning/dataset/validation"
-    dataset_dir = "/home/andya/external_ssd/wormhole_learning/dataset/training"
+    output_dir = "/home/andya/external_ssd/wormhole_learning/dataset_np/thehive_samples/day_sampled"
+    dataset_dir = "/home/andya/external_ssd/wormhole_learning/dataset_np/testing"
     main_sensor = "RGB"
     aux_sensor = "EVENTS"
     filter = ['day']
-    n_samples = 100
-    biased_sampling = True
+    n_samples = 2000
+    biased_sampling = False
     # Percentage of images which can contain no detectable objects if biased_sampling
     p_empty_images = 0
     # Mask devices

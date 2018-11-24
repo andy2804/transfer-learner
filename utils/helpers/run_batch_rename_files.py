@@ -11,11 +11,11 @@ import os
 # ===================================================
 
 
-FROM_STRING = 'RGB_'
-TO_STRING = ''
+FROM_STRING = 'ZAURON_'
+TO_STRING = 'day_cloudy_'
 EXCLUDE_STRING = ['EVENTS']
-FILETYPE = '.png'
-FOLDER = '/home/andya/external_ssd/wormhole_learning/dataset/validation'
+FILETYPE = '.bag'
+FOLDER = '/media/andya/EXTSSD_T3/crossmodal_mt/rosbags/zauron_eye_2.0'
 MAYBE = False
 
 

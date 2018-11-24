@@ -3,10 +3,11 @@ import os
 import cv2
 import numpy as np
 import tensorflow as tf
-
 from matplotlib import pyplot as plt
+
 from objdetection.detector.detector import ObjectDetected
 from objdetection.evaluator.evaluator import EvaluatorFrozenGraph
+from utils.files.io_utils import export_transfer_step_img
 from utils.visualisation.static_helper import visualize_detections
 
 
@@ -84,6 +85,7 @@ def run_evaluation(flags):
                                      labels_output=flags.labels_output,
                                      output_dir=flags.output_dir,
                                      n_thresholds=flags.n_thresholds)
+    network = evaluator._arch_dict[flags.network_model]
     with evaluator.detection_graph.as_default():
         with tf.Session(graph=evaluator.detection_graph) as sess:
             # "Dataset"
@@ -147,10 +149,13 @@ def run_evaluation(flags):
 
                     # Show example if verbose == True
                     if flags.verbose:
-                        obj_gt = ObjectDetected('ground-truth', gt_boxes[0, :], None, gt_labels[0, :], 0)
-                        obj_pred = ObjectDetected('prediction', boxes_out[0, :], scores_out[0, :], classes_out[0, :], 0)
-                        _visualize_transfer_step((obj_gt, obj_pred), (img_in[0, :], img_in[0, :]),
-                                                 evaluator._labels_output_dict, flags.verbose)
+                        obj_gt = ObjectDetected('ground-truth', gt_boxes[0, :], None,
+                                                gt_labels[0, :], 0)
+                        obj_pred = ObjectDetected('prediction', boxes_out[0, :], scores_out[0, :],
+                                                  classes_out[0, :], 0)
+                        _visualize_transfer_step(flags, network, (obj_gt, obj_pred),
+                                                 (img_in[0, :], img_in[0, :]),
+                                                 evaluator._labels_output_dict, batch_count)
                         # evaluator.show_example(img_in[0, :],
                         #                        classes_out[0, :],
                         #                        scores_out[0, :],
@@ -178,7 +183,7 @@ def run_evaluation(flags):
     return
 
 
-def _visualize_transfer_step(obj_detected, images, labels, mode='plot'):
+def _visualize_transfer_step(flags, network, obj_detected, images, labels, count):
     """
     Verbose method
     :param obj_detected:
@@ -190,12 +195,16 @@ def _visualize_transfer_step(obj_detected, images, labels, mode='plot'):
     img_main_labeled = visualize_detections(images[0], obj_detected[0], labels=labels)
     img_aux_labeled = visualize_detections(images[1], obj_detected[1], labels=labels)
     img_stack = np.hstack((img_main_labeled, img_aux_labeled))
-    if mode == 'cv2':
+    if flags.verbose == 'cv2':
         cv2.imshow('Prediction', img_stack)
         cv2.waitKey(1)
-    elif mode == 'plot':
+    elif flags.verbose == 'plot':
         plt.figure("figure", figsize=(16, 8))
         plt.xticks([])
         plt.yticks([])
         plt.imshow(img_stack)
         plt.show()
+    elif flags.verbose == 'export' and count % 4 == 0:
+        export_transfer_step_img(img_stack,
+                                 os.path.join(flags.output_dir, '%s_%s' % (network, flags.testname)),
+                                 count)

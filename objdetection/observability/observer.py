@@ -101,7 +101,7 @@ class MultiModalObserver:
         """
         if type == 'rgb':
             return MultiModalObserver._calc_rgb_entropy(input_crops, verbose)
-        elif type == 'events':
+        elif type == 'events' or 'events_np':
             return MultiModalObserver._calc_events_overlap(input_crops, verbose)
         else:
             print('Undefined type was specified!')
@@ -243,6 +243,8 @@ class MultiModalObserver:
         img = cv2.cvtColor(np.copy(img_in), code=cv2.COLOR_RGB2GRAY)
         if mode == 'events':
             img = MultiModalObserver._compute_absolute_events(img)
+        elif mode == 'events_np' or mode == 'rgb':
+            pass
         if filter == 'gradient':
             output = MultiModalObserver._compute_gradient(img)
         elif filter == 'laplacian':

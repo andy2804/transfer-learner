@@ -8,8 +8,8 @@ import numpy as np
 import tensorflow as tf
 from PIL import Image
 
-from objdetection.meta.datasets.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
-from objdetection.meta.utils_labeler.static_helper import load_labels
+from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
+from utils.static_helper import load_labels
 
 
 def dict_to_tf_instance(data, img_path, class_names):
@@ -134,7 +134,7 @@ def create_tfrecords_fromhandlabels(flags):
                 xml_tree = ET.parse(xml_file).getroot()
                 xml_data = _recursive_parse_xml_to_dict(xml_tree)
 
-                extension = '%s_%s.png' % (file, flags.image_type)
+                extension = '%s.png' % file
                 img_path = os.path.join(flags.image_src, extension)
                 instance = dict_to_tf_instance(xml_data['annotation'], img_path, class_names)
 

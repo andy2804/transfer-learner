@@ -20,12 +20,14 @@ def read_filenames(dir, filter_keywords, main_sensor_name, aux_sensor_name, file
     num = lambda x: int("".join(filter(str.isdigit, os.path.basename(x))))
     if os.path.exists(dir):
         main_sensor_images = [os.path.join(path_tuple[0], file) for path_tuple in os.walk(dir) for
-                              file in path_tuple[2] if main_sensor_name in file and all(
-                    [s in path_tuple[0] for s in filter_keywords]) and filetype in file]
-        aux_sensor_images = [os.path.join(path_tuple[0], file) for path_tuple in os.walk(dir) for
-                             file in path_tuple[2] if aux_sensor_name in file and all(
+                              file in path_tuple[2] if main_sensor_name in file and any(
                     [s in path_tuple[0] for s in filter_keywords]) and filetype in file]
         main_sensor_images.sort()
+        if aux_sensor_name is None:
+            return main_sensor_images
+        aux_sensor_images = [os.path.join(path_tuple[0], file) for path_tuple in os.walk(dir) for
+                             file in path_tuple[2] if aux_sensor_name in file and any(
+                    [s in path_tuple[0] for s in filter_keywords]) and filetype in file]
         aux_sensor_images.sort()
 
         # Sanity checks to make sure they have been read out with the same order
@@ -36,6 +38,12 @@ def read_filenames(dir, filter_keywords, main_sensor_name, aux_sensor_name, file
         return list(zip(main_sensor_images, aux_sensor_images))
     else:
         raise IOError("\tThe requested directory does not exists")
+
+
+def load_dict_from_yaml(yaml_file):
+    with open(yaml_file, "r") as fs:
+        yaml_dict = yaml.load(fs)
+    return yaml_dict
 
 
 def load_arch_dict(config_file):

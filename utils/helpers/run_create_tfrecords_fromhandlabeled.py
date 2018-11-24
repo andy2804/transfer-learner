@@ -13,11 +13,10 @@ from datetime import timedelta
 
 import tensorflow as tf
 
-PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
+PROJECT_ROOT = os.getcwd()[:os.getcwd().index('WormholeLearning')]
 sys.path.append(PROJECT_ROOT)
 
-from objdetection.meta.utils_labeler.tfrecords_fromhandlabels import \
-    create_tfrecords_fromhandlabels
+from utils.tfrecords_fromhandlabels import create_tfrecords_fromhandlabels
 
 """
  USAGE:
@@ -46,16 +45,16 @@ from objdetection.meta.utils_labeler.tfrecords_fromhandlabels import \
 
 flags = tf.flags
 FLAGS = flags.FLAGS
-AVAILABLE_IMAGE_TYPES = ("EVENTS_gauss80", "RGB", "IR")
+AVAILABLE_IMAGE_TYPES = ("RGB", "IR")
 
 # ================ DIRECTORIES
-flags.DEFINE_string('image_src', "/shared_experiments/kaist/hand_labeling/img",
+flags.DEFINE_string('image_src', "/home/andya/external_ssd/wormhole_learning/dataset_np/testing/day_hive_examples",
                     'The directory where the images are stored as absolute path.')
-flags.DEFINE_string('image_src_labels', "/shared_experiments/kaist/hand_labeling/hand_labeled",
+flags.DEFINE_string('image_src_labels', "/home/andya/external_ssd/wormhole_learning/dataset_np/testing/day_hive_examples",
                     'The directory where the image labels are stored as absolute path')
-flags.DEFINE_string('output_dir', "/shared_experiments/kaist/hand_labeling/",
+flags.DEFINE_string('output_dir', "/home/andya/external_ssd/wormhole_learning/dataset_np/testing/day_hive_examples",
                     'Absolute path for the storing of the generated "*.tfrecord" ')
-flags.DEFINE_string('output_file', "TEST.tfrecord", 'Output file name of *.tfrecord')
+flags.DEFINE_string('output_file', "EXAMPLE_SET.tfrecord", 'Output file name of *.tfrecord')
 
 # todo detangle illumination tags from ego-motion and amount of events
 flags.DEFINE_list('data_filter', None, 'Filter for the type of data we want to include')
@@ -65,7 +64,7 @@ flags.DEFINE_string('cuda_visible_devices', "3",
                     'Passes argument to cuda visible devices, comma separeted values')
 
 # ================ NETWORK
-flags.DEFINE_string('labels_map', 'kaist_label_map.json',
+flags.DEFINE_string('labels_map', 'zauron_label_map.json',
                     'Labels on which the network has been trained')
 
 # ================ OPTIONS
