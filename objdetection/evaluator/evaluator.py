@@ -11,12 +11,12 @@ import pandas as pd
 import tensorflow as tf
 from contracts import contract
 from matplotlib import pyplot as plt
-from scipy import stats
 
 from objdetection.detector.detector import Detector
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
 from objdetection.metrics import metrics_np
 from utils.sheets_interface import GoogleSheetsInterface
+from utils.stats.bernoulli import Bernoulli
 from utils.visualisation.plot_mAP_evaluation import plot_performance_metrics
 from utils.visualisation.static_helper import \
     visualize_boxes_and_labels_on_image_array
@@ -104,11 +104,12 @@ class EvaluatorFrozenGraph(Detector):
         self._AP, self._mAP = self.compute_ap(self._stats, self._thresholds)
 
     @staticmethod
-    def compute_acc_rec(corestats, num_classes, confindence_level=None):
+    def compute_acc_rec(corestats, num_classes):
         """
         Evaluate statistics of detected objects and calculate performance metrics
         according to M. Everingham et. al (https://doi.org/10.1007/s11263-014-0733-5)
-        :param confindence_level: If 0< value<1 will calculate with Wilson confidence interval
+        :param num_classes:
+        :param corestats:, Accuracy and Recall are considered Bernoulli experiments
         :return:
         """
         for thresh in corestats:
@@ -121,19 +122,8 @@ class EvaluatorFrozenGraph(Detector):
                     gt = corestats[thresh]['n_gt'][cls]
                     tp = corestats[thresh]['tp'][cls]
                     fp = corestats[thresh]['fp'][cls]
-                    if confindence_level is None:
-                        acc = EvaluatorFrozenGraph.safe_div(tp, tp + fp)
-                        rec = EvaluatorFrozenGraph.safe_div(tp, gt)
-                        acc_ci, rec_ci = None, None
-                    else:
-                        acc, acc_ci = EvaluatorFrozenGraph.wilson_ci(
-                                tp, tp + fp, ci=confindence_level)
-                        rec, rec_ci = EvaluatorFrozenGraph.wilson_ci(tp, gt, ci=confindence_level)
-
-                    corestats[thresh]['acc'][cls] = acc
-                    corestats[thresh]['rec'][cls] = rec
-                    corestats[thresh]['acc_ci'][cls] = acc_ci
-                    corestats[thresh]['rec_ci'][cls] = rec_ci
+                    corestats[thresh]['acc'][cls] = Bernoulli(tp, tp + fp)
+                    corestats[thresh]['rec'][cls] = Bernoulli(tp, gt)
         return corestats
 
     @staticmethod
@@ -148,8 +138,8 @@ class EvaluatorFrozenGraph(Detector):
             last_rec = 0.0
             ap = 0.0
             for thresh in thresholds[::-1]:
-                acc = corestats[thresh]['acc'][cls]
-                rec = corestats[thresh]['rec'][cls]
+                acc = corestats[thresh]['acc'][cls].estimate
+                rec = corestats[thresh]['rec'][cls].estimate
                 ap += acc * (rec - last_rec)
                 last_rec = rec
             AP[cls] = ap
@@ -185,7 +175,7 @@ class EvaluatorFrozenGraph(Detector):
         thresh_keys = np.linspace(0.0, 1.0, n_thresholds)
         np.round(thresh_keys, decimals=2, out=thresh_keys)
         self._thresholds = thresh_keys
-        stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec', 'acc_ci', 'rec_ci')
+        stats_keys = ('n_gt', 'tp', 'fp', 'acc', 'rec')
         cls_keys = list(range(1, self._num_classes + 1))
         self._stats = {t: {s: {c: 0 for c in cls_keys} for s in stats_keys} for t in
                        thresh_keys}
@@ -211,6 +201,7 @@ class EvaluatorFrozenGraph(Detector):
         :return:
         """
         # Save the plot as pdf
+        # todo check compatibility with new Estimate
         try:
             if self._plot is not None:
                 plot_file = os.path.join(
@@ -271,26 +262,6 @@ class EvaluatorFrozenGraph(Detector):
         plt.yticks([])
         plt.show()
         return
-
-    @staticmethod
-    @contract
-    def wilson_ci(ns, n, ci=0.95):
-        """
-        Wilson score interval
-        :param ns: number of successes
-        :type ns: int,>=0
-        :param n: sample size
-        :type n: int,>=0
-        :param ci: confidence interval
-        :type ci: float,>0,<1
-        :return: symmetric value
-        """
-        if n == 0:
-            return 0, 0
-        z = stats.norm.ppf(1 - (1 - ci) / 2)
-        mean = (ns + (z ** 2) / 2) / (n + 2)
-        interval = z / (n + z ** 2) * np.sqrt((ns * (n - ns)) / n + (z ** 2) / 4)
-        return mean, interval
 
     @property
     def detection_graph(self):

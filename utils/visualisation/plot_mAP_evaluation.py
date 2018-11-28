@@ -110,7 +110,8 @@ def plot_performance_metrics(corestats,
     return fig
 
 
-def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh):
+def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh, conf_level=.95,
+                  conf_method="wilson"):
     """
      #todo
      Confidence interval computed as displacement from nominal accuracy taking into account both
@@ -128,21 +129,29 @@ def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh):
     acc_low, acc_high, rec_low, rec_high = [], [], [], []
     # thresholds = np.array(thresholds[::-1])
     for thresh in thresholds[::-1]:
-        acc.append(corestats[thresh]['acc'][cls])
-        rec.append(corestats[thresh]['rec'][cls])
-        if corestats[thresh]['acc_ci'][cls] is not None:
-            _acc_ci.append(corestats[thresh]['acc_ci'][cls])
-            _rec_ci.append(corestats[thresh]['rec_ci'][cls])
-            acc_low.append(acc[-1] - _acc_ci[-1])
-            acc_high.append(acc[-1] + _acc_ci[-1])
-            rec_low.append(rec[-1] - _rec_ci[-1])
-            rec_high.append(rec[-1] + _rec_ci[-1])
-    rec_mid, acc_mid = corestats[mid_thresh]['rec'][cls], corestats[mid_thresh]['acc'][cls]
+        acc.append(corestats[thresh]['acc'][cls].estimate)
+        rec.append(corestats[thresh]['rec'][cls].estimate)
+        if conf_level is not None:
+            try:
+                _acc_ci.append(corestats[thresh]['acc_ci'][cls].get_confidence_interval(
+                        conf_level, conf_method))
+                _rec_ci.append(corestats[thresh]['rec_ci'][cls].get_confidence_interval(
+                        conf_level, conf_method))
+                acc_low.append(_acc_ci[-1][0])
+                acc_high.append(_acc_ci[-1][1])
+                rec_low.append(_rec_ci[-1][0])
+                rec_high.append(_rec_ci[-1][1])
+            except ValueError:
+                print("Failed to compute accuracy intervals, skipping plots")
+                acc_low = []
+    acc_mid = corestats[mid_thresh]['acc'][cls].estimate
+    rec_mid = corestats[mid_thresh]['rec'][cls].estimate
     ax.stackplot(rec, acc, color=color, alpha=ALPHA, zorder=2)
     ax.plot(rec, acc, '--', color=color, lw=1.5, zorder=3)
 
     # if the conf bounds have been filled
     if acc_low:
+        # todo can be improved with filling the areas but plt.fill_between() requires same x
         ax.plot(rec_low, acc_low, ':', color=color, lw=1.5, zorder=3)
         ax.plot(rec_high, acc_high, ':', color=color, lw=1.5, zorder=3)
     ax.plot(rec_mid, acc_mid, color='dark' + color, marker='x', ms=6, mew=1.5, fillstyle='none',
