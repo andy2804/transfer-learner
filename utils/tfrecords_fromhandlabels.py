@@ -9,6 +9,7 @@ import tensorflow as tf
 from PIL import Image
 
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
+from utils.files.io_utils import read_filenames
 from utils.static_helper import load_labels
 
 
@@ -105,13 +106,18 @@ def create_tfrecords_fromhandlabels(flags):
     :param flags:
     :return:
     """
+    images = [f for f in os.listdir(flags.image_src) if f.endswith(".png") and flags.filter_keyword in f]
     labels_xml = [f for f in os.listdir(flags.image_src_labels) if f.endswith(".xml")]
+    images.sort()
+    labels_xml.sort()
+    assert len(images) == len(labels_xml), \
+        "Uneven amounts of labels (%s) and images (%s) found!" % (len(labels_xml), len(images))
     print('Found %i labeled objects' % len(labels_xml))
     encoder = EncoderTFrecGoogleApi()
 
     # Check if object satisfies filter features
-    if flags.data_filter is not None:
-        labels_xml = _filter_input(labels_xml, flags.data_filter)
+    # if flags.filter_keyword is not None:
+    #     labels_xml = _filter_input(labels_xml, flags.filter_keyword)
     classes = load_labels(flags.labels_map)
     class_names = {classes[i]['name']: i for i in list(range(1, len(classes) + 1))}
     print('Found %i objects satisfying condition: %s' % (len(labels_xml), flags.data_filter))
@@ -127,21 +133,18 @@ def create_tfrecords_fromhandlabels(flags):
     try:
         with tf.python_io.TFRecordWriter(output) as writer:
             # Loop through objects and create tfrecords
-            for count, label_xml in enumerate(labels_xml):
-                file = os.path.splitext(label_xml)[0]
-
+            for count, (image, label_xml) in enumerate(zip(images, labels_xml)):
                 xml_file = os.path.join(flags.image_src_labels, label_xml)
                 xml_tree = ET.parse(xml_file).getroot()
                 xml_data = _recursive_parse_xml_to_dict(xml_tree)
 
-                extension = '%s.png' % file
-                img_path = os.path.join(flags.image_src, extension)
-                instance = dict_to_tf_instance(xml_data['annotation'], img_path, class_names)
+                img_file = os.path.join(flags.image_src, image)
+                instance = dict_to_tf_instance(xml_data['annotation'], img_file, class_names)
 
                 example = encoder.encode(instance, flags.difficult_flag)
                 writer.write(example.SerializeToString())
-                print('\r[ %i / %i ] %s' % (count + 1, len(labels_xml), os.path.basename(file)),
-                      end="")
+                print('\r[ %i / %i ] %s' % (count + 1, len(labels_xml), os.path.basename(img_file)),
+                      end='', flush=True)
     except IOError as e:
-        e.args += ('Failed attempting to serialize tfRecord file: %s' % file)
+        e.args += ('Failed attempting to serialize tfRecord file: %s' % img_file)
     return

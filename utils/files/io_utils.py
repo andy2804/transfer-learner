@@ -40,6 +40,13 @@ def read_filenames(dir, filter_keywords, main_sensor_name, aux_sensor_name, file
         raise IOError("\tThe requested directory does not exists")
 
 
+def list_files(input_dir, filter):
+    if os.path.isdir(input_dir):
+        files = [os.path.join(path_tuple[0], file) for path_tuple in os.walk(input_dir) for
+                 file in path_tuple[2] if all([s in file for s in filter]) and FILE_TYPE in file]
+        return files
+
+
 def load_dict_from_yaml(yaml_file):
     with open(yaml_file, "r") as fs:
         yaml_dict = yaml.load(fs)

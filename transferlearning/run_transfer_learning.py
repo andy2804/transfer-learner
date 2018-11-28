@@ -23,7 +23,7 @@ FLAGS = flags.FLAGS
 # Change this line to load your desired transfer learning configuration
 CONFIG = 'zauron_rgb2events.yaml'
 DATASET = '/home/andya/external_ssd/wormhole_learning/dataset.yaml'
-SUBSET = ['testing', 'day']
+SUBSET = ['training', 'day']
 
 flags = load_config(flags, CONFIG)
 

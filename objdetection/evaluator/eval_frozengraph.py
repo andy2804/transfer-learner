@@ -176,9 +176,10 @@ def run_evaluation(flags):
                 except tf.errors.OutOfRangeError:
                     break
             evaluator.compute_stats()
+            evaluator.publish_results(filename=flags.testname, min_obj_size=flags.min_obj_size)
             if flags.make_plot:
                 evaluator.plot_performance_metrics(testname=flags.testname, relative_bar_chart=True)
-            evaluator.store_and_publish(filename=flags.testname, min_obj_size=flags.min_obj_size)
+            evaluator.store_results(filename=flags.testname, min_obj_size=flags.min_obj_size)
             evaluator.print_performance()
     return
 

@@ -9,7 +9,7 @@ from PIL import Image
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('utils')]
 sys.path.append(PROJECT_ROOT)
 
-from utils.files.io_utils import read_filenames
+from utils.files.io_utils import read_filenames, load_dict_from_yaml
 from objdetection.detector.detector import Detector
 
 
@@ -22,10 +22,10 @@ def main():
     a reasonable amount.
     :return:
     """
-    img_pairs = read_filenames(dataset_dir, filter, main_sensor, aux_sensor)
+    img_pairs = read_filenames(DATASET_DIR, FILTER_KEYWORDS, MAIN_SENSOR, AUX_SENSOR)
     img_pairs_empty, img_pairs_full = [], []
 
-    if biased_sampling:
+    if BIASED:
         detector = Detector(labels_output='zauron_label_map.json')
         for img_pair in img_pairs[:]:
             img = np.array(Image.open(img_pair[0]))
@@ -38,23 +38,23 @@ def main():
                 img_pairs_full.append(img_pair)
             print("\rSo far found {:d} empty images and {:d} with something".format(
                     len(img_pairs_empty), len(img_pairs_full)), end="", flush=True)
-        img_pairs_full = sample(img_pairs_full, int(n_samples * (1 - p_empty_images)))
-        img_pairs_empty = sample(img_pairs_empty, int(n_samples * p_empty_images))
+        img_pairs_full = sample(img_pairs_full, int(N_SAMPLES * (1 - P_EMPTY)))
+        img_pairs_empty = sample(img_pairs_empty, int(N_SAMPLES * P_EMPTY))
     else:
-        sampling_step = np.floor_divide(len(img_pairs), n_samples)
+        sampling_step = np.floor_divide(len(img_pairs), N_SAMPLES)
         img_pairs_full = img_pairs[::sampling_step]
         print("Selected {:d} images, one each {:d} frames".format(
                 len(img_pairs_full), sampling_step))
 
     for i, pair in enumerate(img_pairs_full + img_pairs_empty):
-        if not os.path.isdir(output_dir):
-            os.makedirs(output_dir)
+        if not os.path.isdir(OUTPUT_DIR):
+            os.makedirs(OUTPUT_DIR)
         for im in pair:
-            if main_sensor in im:
-                dst_basename = "%05d_%s.png" % (i, main_sensor)
+            if MAIN_SENSOR in im:
+                dst_basename = "%05d_%s.png" % (i, MAIN_SENSOR)
             else:
-                dst_basename = "%05d_%s.png" % (i, aux_sensor)
-            dst = os.path.join(output_dir, dst_basename)
+                dst_basename = "%05d_%s.png" % (i, AUX_SENSOR)
+            dst = os.path.join(OUTPUT_DIR, dst_basename)
             shutil.copyfile(im, dst)
             print("\r[ %d / %d ] Copying %s" % (
             i + 1, len(img_pairs_full + img_pairs_empty), dst_basename), end='')
@@ -63,16 +63,25 @@ def main():
 
 if __name__ == '__main__':
     # Give absolute paths
-    output_dir = "/home/andya/external_ssd/wormhole_learning/dataset_np/thehive_samples/day_sampled"
-    dataset_dir = "/home/andya/external_ssd/wormhole_learning/dataset_np/testing"
-    main_sensor = "RGB"
-    aux_sensor = "EVENTS"
-    filter = ['day']
-    n_samples = 2000
-    biased_sampling = False
+    OUTPUT_DIR = "/home/andya/external_ssd/wormhole_learning/dataset/thehive_samples/night_sampled"
+    DATASET_DIR = "/home/andya/external_ssd/wormhole_learning/converted_rosbags"
+    FILTER_KEYWORDS = ['night']
+
+    # Use dataset dictionary instead of filter keywords
+    DATASET = '/home/andya/external_ssd/wormhole_learning/dataset.yaml'
+    SUBSET = ['testing', 'night']
+
+    # Overwrite filter_keywords with dataset file
+    # Comment this line out if you want to use the normal keyword filter
+    FILTER_KEYWORDS = load_dict_from_yaml(DATASET)[SUBSET[0]][SUBSET[1]]
+
+    MAIN_SENSOR = "RGB"
+    AUX_SENSOR = "EVENTS"
+    N_SAMPLES = 2000
+    BIASED = False
     # Percentage of images which can contain no detectable objects if biased_sampling
-    p_empty_images = 0
+    P_EMPTY = 0
     # Mask devices
-    cuda_visible_devices = "3"
-    os.environ["CUDA_VISIBLE_DEVICES"] = cuda_visible_devices
+    CUDA_VISIBLE_DEVICES = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_VISIBLE_DEVICES
     main()

@@ -103,6 +103,8 @@ def run_evaluation(flags):
         # Create plots to be stored in output folder
         output_name = os.path.splitext(flags.filename)[0]
         if flags.make_plots:
+            if not os.path.isdir(flags.output_dir):
+                os.makedirs(flags.output_dir)
             stats.make_plots(save_plots=True, output_dir=flags.output_dir,
                              filename=output_name, show_plots=flags.verbose, labels_dict=labels)
 

@@ -105,7 +105,7 @@ class TransferLearner:
                 self._encoded_mean.append(img_aux.mean())
                 self._encoded_std.append(img_aux.std())
 
-                if self.flags.verbose:
+                if self.flags.verbose != "":
                     objects_main = ObjectDetected(source='detect_from_rgb', boxes=boxes_remapped,
                                                   scores=scores_remapped, classes=classes_remapped,
                                                   ts=0)
@@ -149,6 +149,19 @@ class TransferLearner:
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
         self._learning_filter.stats.save(output_dir, self.flags.tfrecord_name_prefix)
+
+        # Prepare data for upload to google sheets result page
+        values = []
+        for idx in range(len(self.labels)):
+            number = len(
+                    self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=1))
+            diff = len(self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=0))
+            values.append('%d (%d)' % (number, diff))
+        values.append(len(self._learning_filter.stats.get_tlscores()))
+        values.append(len(self.files))
+        sheets = GoogleSheetsInterface()
+        sheets.upload_data('zurich_dataset', 'B', 'J', self.flags.tfrecord_name_prefix, values)
+
         if self.flags.generate_plots:
             self._learning_filter.stats.make_plots(save_plots=self.flags.generate_plots,
                                                    output_dir=output_dir,
@@ -165,17 +178,6 @@ class TransferLearner:
                 writer = csv.writer(fs)
                 writer.writerows(data)
 
-        # Prepare data for upload to google sheets result page
-        values = []
-        for idx in range(len(self.labels)):
-            number = len(
-                    self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=1))
-            diff = len(self._learning_filter.stats.get_tlscores(label_filt=idx + 1, tl_keep_filt=0))
-            values.append('%d (%d)' % (number, diff))
-        values.append(len(self._learning_filter.stats.get_tlscores()))
-        values.append(len(self.files))
-        sheets = GoogleSheetsInterface()
-        sheets.upload_data('zurich_dataset', 'B', 'J', self.flags.tfrecord_name_prefix, values)
 
     @staticmethod
     def _visualize_transfer_step(obj_detected, images, labels, flags, count, mode='plot'):

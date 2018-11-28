@@ -4,7 +4,7 @@ import sys
 import numpy as np
 from PIL import Image
 
-PROJECT_ROOT = os.getcwd()[:os.getcwd().index('objdetection')]
+PROJECT_ROOT = os.getcwd()[:os.getcwd().index('WormholeLearning')]
 sys.path.append(PROJECT_ROOT)
 from utils.static_helper import load_labels
 
@@ -14,11 +14,11 @@ from objdetection.detector.detector import Detector
 def _read_rgb_filenames(dir):
     assert os.path.isdir(dir)
     return [os.path.join(dir, f) for f in os.listdir(dir) if
-            not f.endswith("_ir.png") and f.endswith(".png")]
+            FILTER_KEY in f and f.endswith(".png")]
 
 
 def _create_xml_pascal(img_path, img_rgb, classes_remapped, boxes_remapped, label_map):
-    base_filename = os.path.splitext(img_path)[0] + "_ir"
+    base_filename = os.path.splitext(img_path)[0]
     with open(base_filename + '.xml', 'w') as f:
         line = "<annotation>" + '\n'
         f.write(line)
@@ -58,9 +58,12 @@ def _create_xml_pascal(img_path, img_rgb, classes_remapped, boxes_remapped, labe
 def main():
     detector = Detector(net_id=NET_ARCH, labels_net_arch=LABELS_NET, labels_output=LABELS_OUT)
     rgb_files = _read_rgb_filenames(DATASET_DIR)
+    rgb_files.sort()
     label_map = load_labels(LABELS_OUT)
 
-    for img_path in rgb_files:
+    for idx, img_path in enumerate(rgb_files):
+        print("\r[ %d / %d ] Processing %s" % (idx, len(rgb_files), os.path.basename(img_path)),
+              end='', flush=True)
         img_rgb = np.array(Image.open(img_path))
         # run inference
         obj_detected = detector.run_inference_on_img(img_rgb)
@@ -77,10 +80,12 @@ def main():
 
 
 if __name__ == '__main__':
-    NET_ARCH = 1
+    NET_ARCH = 2
     LABELS_NET = "mscoco_label_map.json"
-    LABELS_OUT = "zurich_label_map.json"
-    DATASET_DIR = "/shared_experiments/kaist/tmp"
+    LABELS_OUT = "zauron_label_map.json"
+    DATASET_DIR = "/home/andya/external_ssd/wormhole_learning/dataset_np/thehive_samples" \
+                  "/night_sampled"
+    FILTER_KEY = 'RGB'
     CUDA_MASK = "3"
 
     # main

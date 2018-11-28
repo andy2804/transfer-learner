@@ -18,13 +18,13 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # ================ DIRECTORIES
-flags.DEFINE_string('input_dir', "/home/andya/external_ssd/wormhole_learning/dataset/testing",
+flags.DEFINE_string('input_dir', "/home/andya/external_ssd/wormhole_learning/dataset_np",
                     'The directory where the dataset files are stored as absolute path.')
-flags.DEFINE_string('output_dir', "/home/andya/external_ssd/wormhole_learning/dataset/testing",
+flags.DEFINE_string('output_dir', "/home/andya/external_ssd/wormhole_learning/dataset_np/stats",
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME
-flags.DEFINE_string('filename', "ZURICH_TESTING_DAY_rgb.tfrecord",
+flags.DEFINE_string('filename', "ZURICH_TRAINING_DAY_LF2_V3_events.tfrecord",
                     'Names of the tfrecords containing the test data passed as a list')
 flags.DEFINE_string('google_sheet', "zurich_dataset",
                     'Title of the worksheet in Google Sheets to upload the results to')

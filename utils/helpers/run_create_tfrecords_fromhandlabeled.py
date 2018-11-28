@@ -45,18 +45,17 @@ from utils.tfrecords_fromhandlabels import create_tfrecords_fromhandlabels
 
 flags = tf.flags
 FLAGS = flags.FLAGS
-AVAILABLE_IMAGE_TYPES = ("RGB", "IR")
 
 # ================ DIRECTORIES
-flags.DEFINE_string('image_src', "/home/andya/external_ssd/wormhole_learning/dataset_np/testing/day_hive_examples",
+flags.DEFINE_string('image_src', "/home/andya/external_ssd/wormhole_learning/dataset_np/thehive_samples/day_sampled",
                     'The directory where the images are stored as absolute path.')
-flags.DEFINE_string('image_src_labels', "/home/andya/external_ssd/wormhole_learning/dataset_np/testing/day_hive_examples",
+flags.DEFINE_string('image_src_labels', "/home/andya/external_ssd/wormhole_learning/dataset/thehive_samples/day_sampled",
                     'The directory where the image labels are stored as absolute path')
-flags.DEFINE_string('output_dir', "/home/andya/external_ssd/wormhole_learning/dataset_np/testing/day_hive_examples",
+flags.DEFINE_string('output_dir', "/home/andya/external_ssd/wormhole_learning/dataset/",
                     'Absolute path for the storing of the generated "*.tfrecord" ')
-flags.DEFINE_string('output_file', "EXAMPLE_SET.tfrecord", 'Output file name of *.tfrecord')
+flags.DEFINE_string('output_file', "ZURICH_TESTING_DAY_V3_LF0_events_handlabeled.tfrecord", 'Output file name of *.tfrecord')
 
-# todo detangle illumination tags from ego-motion and amount of events
+# TODO detangle illumination tags from ego-motion and amount of events
 flags.DEFINE_list('data_filter', None, 'Filter for the type of data we want to include')
 
 # ================ GPU MASK
@@ -68,7 +67,7 @@ flags.DEFINE_string('labels_map', 'zauron_label_map.json',
                     'Labels on which the network has been trained')
 
 # ================ OPTIONS
-flags.DEFINE_string('image_type', "RGB",
+flags.DEFINE_string('filter_keyword', "EVENTS",
                     'Image type to be stored in the "*.tfrecord", should be in '
                     'AVAILABLE_IMAGE_TYPES')
 flags.DEFINE_bool('difficult_flag', True,

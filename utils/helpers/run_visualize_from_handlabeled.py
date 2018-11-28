@@ -24,43 +24,44 @@ another folder (image_scr_labels) to create visualizations of the bounding boxes
 """
 
 
-def list_files(input_dir, filter):
-    if os.path.isdir(input_dir):
-        files = [os.path.join(path_tuple[0], file) for path_tuple in os.walk(input_dir) for
-                 file in path_tuple[2] if all([s in file for s in filter]) and FILE_TYPE in file]
-        return files
-
-
 def visualize():
     """
     Takes in images and xml labels in PASCAL VOC format. They must have the same filenames.
     Visualizes the bounding boxes on the images and saves them in the output folder.
     :return:
     """
-    image_files = list_files(INPUT_DIR, FILTER_KEYWORDS)
+    image_files = [f for f in os.listdir(IMG_INPUT_DIR) if
+                   f.endswith(".png") and all(key in f for key in FILTER_KEYWORDS)]
+    image_files.sort()
+    xml_files = [f for f in os.listdir(XML_INPUT_DIR) if f.endswith(".xml")]
+    xml_files.sort()
     classes = load_labels(LABEL_MAP)
     class_names = {classes[i]['name']: i for i in list(range(1, len(classes) + 1))}
     if not os.path.isdir(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-    for idx, img_path in enumerate(image_files):
+    for idx, (img_name, xml_name) in enumerate(zip(image_files, xml_files)):
         # Parse XML Files
-        xml_file = img_path.strip(FILE_TYPE) + '.xml'
+        xml_file = os.path.join(XML_INPUT_DIR, xml_name)
         xml_tree = ET.parse(xml_file).getroot()
         xml_data = _recursive_parse_xml_to_dict(xml_tree)
-        instance = dict_to_tf_instance(xml_data['annotation'], img_path, class_names)
+
+        # Create tfRecord dict instance
+        img_file = os.path.join(IMG_INPUT_DIR, img_name)
+        instance = dict_to_tf_instance(xml_data['annotation'], img_file, class_names)
         visualize_boxes_and_labels_on_image_array(instance['image'], instance['boxes'],
                                                   instance['labels'], None, classes,
                                                   use_normalized_coordinates=True, line_thickness=2)
 
         # Show Output
-        cv2.imshow('Visualization', cv2.cvtColor(instance['image'], cv2.COLOR_BGR2RGB))
-        cv2.waitKey(5)
-        print("\r[ %d / %d ] Showing %s" % (idx + 1, len(image_files), os.path.basename(img_path)),
+        if VERBOSE:
+            cv2.imshow('Visualization', cv2.cvtColor(instance['image'], cv2.COLOR_BGR2RGB))
+            cv2.waitKey(5)
+        print("\r[ %d / %d ] Processing %s" % (idx + 1, len(image_files), os.path.basename(img_file)),
               end='')
 
         # Save image as png
-        output_file = os.path.join(OUTPUT_DIR, os.path.basename(img_path))
+        output_file = os.path.join(OUTPUT_DIR, os.path.basename(img_file))
         img = Image.fromarray(instance['image'], 'RGB')
         img.save(output_file)
 
@@ -69,13 +70,19 @@ def visualize():
 
 if __name__ == '__main__':
     # Give absolute paths
-    INPUT_DIR = "/home/andya/external_ssd/wormhole_learning/dataset_np/thehive_samples/night_hive_examples"
-    OUTPUT_DIR = "/home/andya/external_ssd/wormhole_learning/dataset_np/thehive_samples/night_hive_examples/visualization"
-    FILTER_KEYWORDS = ['OVERLAY']
+    IMG_INPUT_DIR = "/home/andya/external_ssd/wormhole_learning/dataset/thehive_samples/day_sampled"
+    XML_INPUT_DIR = "/home/andya/external_ssd/wormhole_learning/dataset/thehive_samples" \
+                    "/thehive_day_labels"
+    OUTPUT_DIR = "/home/andya/external_ssd/wormhole_learning/dataset/thehive_samples/day_sampled" \
+                 "/visualization"
+    FILTER_KEYWORDS = ['RGB']
     FILE_TYPE = '.png'
 
     # Specify Label Map
     LABEL_MAP = 'zauron_label_map.json'
+
+    # Verbose
+    VERBOSE = False
 
     # Run Visualization
     visualize()

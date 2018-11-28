@@ -203,7 +203,7 @@ class EvaluatorFrozenGraph(Detector):
                 self._labels_output_dict,
                 testname, relative_bar_chart=relative_bar_chart)
 
-    def store_and_publish(self, filename, min_obj_size=0):
+    def store_results(self, filename, min_obj_size=0):
         """
         Saves corestats and AP dictionaries to serialized data and
         publishes evaluation results to the Google Sheet
@@ -229,12 +229,13 @@ class EvaluatorFrozenGraph(Detector):
                 pickle.dump(self._stats, fp)
             except:
                 print("Failed pickling")
+        return
 
+    def publish_results(self, filename, min_obj_size=0):
         # also upload a copy to google sheets
         sheet_interface = GoogleSheetsInterface()
         sheet_interface.upload_evaluation(
                 self._network_name, filename, self._AP, self._mAP, min_obj_size)
-        return
 
     def print_performance(self):
         print('\nCorestats:')

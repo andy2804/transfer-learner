@@ -132,7 +132,7 @@ def run_conversion(flags):
                 except tf.errors.OutOfRangeError:
                     if flags.generate_plots:
                         learning_filter.stats.make_plots()
-                    learning_filter.stats.store_and_publish()
+                    learning_filter.stats.store_results()
                     break
 
 

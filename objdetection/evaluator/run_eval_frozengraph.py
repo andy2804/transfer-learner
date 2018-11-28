@@ -30,7 +30,7 @@ flags.DEFINE_string('testname', "2_ZURICH_TESTING_DAY_LF_events",
                     'Used in the title of the plot: "Performance metrics on $(arg testname)"')
 
 # ================ NETWORK
-flags.DEFINE_integer('network_model', 25,
+flags.DEFINE_integer('network_model', 27,
                      'Network model as defined in the obj_detection class')
 flags.DEFINE_string('arch_config', 'zurich_networks',
                     'Which architecture dictionary to load in nets_ckpt')
