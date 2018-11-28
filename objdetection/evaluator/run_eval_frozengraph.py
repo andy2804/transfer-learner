@@ -18,15 +18,15 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # ================ DIRECTORIES
-flags.DEFINE_string('dataset_dir', "/media/sdc/andya/wormhole_learning/dataset/testing",
+flags.DEFINE_string('dataset_dir', "/media/sdc/andya/wormhole_learning/dataset",
                     'The directory where the dataset files are stored as absolute path.')
 flags.DEFINE_string('output_dir', "/media/sdc/andya/wormhole_learning/results",
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME
-flags.DEFINE_list('testfiles', ["ZURICH_TESTING_DAY_LF_events.tfrecord", ],
+flags.DEFINE_list('testfiles', ["ZURICH_TESTING_DAY_LF0_V2_events_handlabeled.tfrecord", ],
                   'Names of the tfrecords containing the test data passed as a list')
-flags.DEFINE_string('testname', "2_ZURICH_TESTING_DAY_LF_events",
+flags.DEFINE_string('testname', "2_ZURICH_TESTING_NIGHT_LF0_V2_events_handlabeled",
                     'Used in the title of the plot: "Performance metrics on $(arg testname)"')
 
 # ================ NETWORK
@@ -61,7 +61,7 @@ flags.DEFINE_bool('scale_back_using_cv2', False,
                   'back to range 0 to 255 using mean 127 and stddev derived from confidence_int')
 
 # ================ VERBOSE
-flags.DEFINE_string('verbose', 'export',
+flags.DEFINE_string('verbose', '',
                   'Whether or not to visualise the predictions against the ground truth')
 flags.DEFINE_bool('make_plot', True,
                   'Make plot out of the results')

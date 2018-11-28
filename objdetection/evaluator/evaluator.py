@@ -113,10 +113,13 @@ class EvaluatorFrozenGraph(Detector):
         :return:
         """
         for thresh in corestats:
+
+            # Manually set CI values for confidence threshold boundaries, that will otherwise
+            # cause errors in compute_ap method
             if thresh == 1.0:
                 for cls in range(1, num_classes + 1):
-                    corestats[thresh]['acc'][cls] = 1.0
-                    corestats[thresh]['rec'][cls] = 0.0
+                    corestats[thresh]['acc'][cls] = Bernoulli(1, 1)
+                    corestats[thresh]['rec'][cls] = Bernoulli(0, 0)
             else:
                 for cls in range(1, num_classes + 1):
                     gt = corestats[thresh]['n_gt'][cls]

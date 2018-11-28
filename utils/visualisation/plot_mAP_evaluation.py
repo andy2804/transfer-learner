@@ -133,9 +133,9 @@ def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh, conf_level=
         rec.append(corestats[thresh]['rec'][cls].estimate)
         if conf_level is not None:
             try:
-                _acc_ci.append(corestats[thresh]['acc_ci'][cls].get_confidence_interval(
+                _acc_ci.append(corestats[thresh]['acc'][cls].get_confidence_interval(
                         conf_level, conf_method))
-                _rec_ci.append(corestats[thresh]['rec_ci'][cls].get_confidence_interval(
+                _rec_ci.append(corestats[thresh]['rec'][cls].get_confidence_interval(
                         conf_level, conf_method))
                 acc_low.append(_acc_ci[-1][0])
                 acc_high.append(_acc_ci[-1][1])

@@ -148,7 +148,7 @@ def run_evaluation(flags):
                             classes, scores, boxes)
 
                     # Show example if verbose == True
-                    if flags.verbose:
+                    if flags.verbose != '':
                         obj_gt = ObjectDetected('ground-truth', gt_boxes[0, :], None,
                                                 gt_labels[0, :], 0)
                         obj_pred = ObjectDetected('prediction', boxes_out[0, :], scores_out[0, :],
