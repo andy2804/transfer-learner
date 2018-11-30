@@ -47,13 +47,13 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # ================ DIRECTORIES
-flags.DEFINE_string('image_src', "/home/andya/external_ssd/wormhole_learning/dataset_np/thehive_samples/day_sampled",
+flags.DEFINE_string('image_src', "/home/andya/external_ssd/wormhole_learning/dataset/thehive_samples/day_sampled",
                     'The directory where the images are stored as absolute path.')
 flags.DEFINE_string('image_src_labels', "/home/andya/external_ssd/wormhole_learning/dataset/thehive_samples/day_sampled",
                     'The directory where the image labels are stored as absolute path')
 flags.DEFINE_string('output_dir', "/home/andya/external_ssd/wormhole_learning/dataset/",
                     'Absolute path for the storing of the generated "*.tfrecord" ')
-flags.DEFINE_string('output_file', "ZURICH_TESTING_DAY_V3_LF0_events_handlabeled.tfrecord", 'Output file name of *.tfrecord')
+flags.DEFINE_string('output_file', "ZURICH_TESTING_DAY_V2_LF2_events_handlabeled.tfrecord", 'Output file name of *.tfrecord')
 
 # TODO detangle illumination tags from ego-motion and amount of events
 flags.DEFINE_list('data_filter', None, 'Filter for the type of data we want to include')
@@ -65,6 +65,18 @@ flags.DEFINE_string('cuda_visible_devices', "3",
 # ================ NETWORK
 flags.DEFINE_string('labels_map', 'zauron_label_map.json',
                     'Labels on which the network has been trained')
+
+# ================ LEARNING FILTER
+flags.DEFINE_bool('learning_filter', True,
+                  'Wether to use learning filter to determine if a labeled object is visible in the target domain')
+flags.DEFINE_string('lf_mode', 'events',
+                    'Determines the lf mode for the target image. Use "rgb" or "events"')
+flags.DEFINE_integer('min_obj_size', 80,
+                     'Determines the minimum object perimeter in pixels')
+flags.DEFINE_integer('lf_score_thresh', 20,
+                     'Determines the minimum score threshold to keep an object')
+flags.DEFINE_string('filter_lf_base_keyword', 'RGB',
+                    'Image type to load where the images from the target domain should be compared to')
 
 # ================ OPTIONS
 flags.DEFINE_string('filter_keyword', "EVENTS",

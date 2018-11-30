@@ -138,7 +138,7 @@ class MultiModalObserver:
             img_box = add_text_overlay(img_box, "Main Sensor", overlay=False)
             img_events_box = add_text_overlay(img_events_box, "Aux Sensor", overlay=False)
             img_stack = np.hstack((img_box, img_events_box))
-            img_stack = add_text_overlay(img_stack, "Score: %.2f" % score, overlay=True)
+            img_stack = add_text_overlay(img_stack, "Score: %d" % (score * 100), overlay=True)
             plt.figure("figure", figsize=(8, 4))
             plt.imshow(img_stack)
             plt.xticks([])

@@ -9,7 +9,7 @@ import tensorflow as tf
 from PIL import Image
 
 from objdetection.encoder.encoder_tfrecord_googleapi import EncoderTFrecGoogleApi
-from utils.files.io_utils import read_filenames
+from transferlearning.filter.learning_filter import LearningFilter
 from utils.static_helper import load_labels
 
 
@@ -106,8 +106,19 @@ def create_tfrecords_fromhandlabels(flags):
     :param flags:
     :return:
     """
-    images = [f for f in os.listdir(flags.image_src) if f.endswith(".png") and flags.filter_keyword in f]
-    labels_xml = [f for f in os.listdir(flags.image_src_labels) if f.endswith(".xml")]
+    if flags.learning_filter:
+        # Initialize filter
+        _learning_filter = LearningFilter(score_threshold=flags.lf_score_thresh,
+                                          min_img_perimeter=flags.min_obj_size,
+                                          logstats=True, mode=flags.lf_mode,
+                                          verbose=False)
+        lf_base_images = [os.path.join(flags.image_src, f) for f in os.listdir(flags.image_src) if
+                          f.endswith(".png") and flags.filter_lf_base_keyword in f]
+        lf_base_images.sort()
+    images = [os.path.join(flags.image_src, f) for f in os.listdir(flags.image_src) if
+              f.endswith(".png") and flags.filter_keyword in f]
+    labels_xml = [os.path.join(flags.image_src_labels, f) for f in
+                  os.listdir(flags.image_src_labels) if f.endswith(".xml")]
     images.sort()
     labels_xml.sort()
     assert len(images) == len(labels_xml), \
@@ -133,17 +144,23 @@ def create_tfrecords_fromhandlabels(flags):
     try:
         with tf.python_io.TFRecordWriter(output) as writer:
             # Loop through objects and create tfrecords
-            for count, (image, label_xml) in enumerate(zip(images, labels_xml)):
-                xml_file = os.path.join(flags.image_src_labels, label_xml)
+            for idx, (img_file, xml_file) in enumerate(zip(images, labels_xml)):
                 xml_tree = ET.parse(xml_file).getroot()
                 xml_data = _recursive_parse_xml_to_dict(xml_tree)
 
-                img_file = os.path.join(flags.image_src, image)
                 instance = dict_to_tf_instance(xml_data['annotation'], img_file, class_names)
+
+                # Apply learning filter if defined
+                if flags.learning_filter:
+                    img_main = np.array(Image.open(lf_base_images[idx]))
+                    classes_filtered, boxes_filtered = _learning_filter.apply(
+                            img_main, instance['image'], instance['labels'], instance['boxes'])
+                    instance['labels'] = classes_filtered
+                    instance['boxes'] = boxes_filtered
 
                 example = encoder.encode(instance, flags.difficult_flag)
                 writer.write(example.SerializeToString())
-                print('\r[ %i / %i ] %s' % (count + 1, len(labels_xml), os.path.basename(img_file)),
+                print('\r[ %i / %i ] %s' % (idx + 1, len(labels_xml), os.path.basename(img_file)),
                       end='', flush=True)
     except IOError as e:
         e.args += ('Failed attempting to serialize tfRecord file: %s' % img_file)
