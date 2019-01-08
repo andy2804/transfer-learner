@@ -19,22 +19,22 @@ from utils.visualisation.static_helper import \
 from utils.static_helper import load_labels
 from objdetection.detector.detector import Detector
 
-NET_ARCH = 26
+NET_ARCH = 90
 ARCH_DICT = load_arch_dict('zurich_networks')
-RET_THRESH = 0.5
+RET_THRESH = 0.1
 LABELS_NET = "zauron_label_map.json"
 LABELS_OUT = "zauron_label_map.json"
-INPUT_DIR = "/home/andya/external_ssd/wormhole_learning/converted_rosbags_np"
-OUTPUT_DIR = "/home/andya/external_ssd/wormhole_learning/results/day_visualization_np"
+INPUT_DIR = "/home/andya/external_ssd/wormhole_learning/converted_rosbags"
+OUTPUT_DIR = "/home/andya/external_ssd/wormhole_learning/results/daynight_testing_night_010"
 DATASET = "/home/andya/external_ssd/wormhole_learning/dataset.yaml"
-SENSOR_NAME = 'EVENTS'
-FILTER_KEYWORDS = load_dict_from_yaml(DATASET)['testing']['day']
+SENSOR_NAME = 'RGB'
+FILTER_KEYWORDS = load_dict_from_yaml(DATASET)['testing']['night']
 
 # If TESTNAME is None, the script will automatically infer the information
 TESTNAME = ARCH_DICT[NET_ARCH]
 NORMALIZE = False
 
-CUDA_MASK = "3"
+CUDA_MASK = "2"
 VERBOSE = False
 
 

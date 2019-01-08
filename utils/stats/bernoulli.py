@@ -63,7 +63,7 @@ class Bernoulli(namedtuple('Ber', 'ns n')):
             return 0, 0
         z = stats.norm.isf((1 - confidence) / 2)
         # print("z:", z)
-        p = ns / n
+        p = ns / n if ns / n <= 1.0 else 1.0
         # compute partial results for more readable final formula
         z2 = z ** 2
         mean = 2 * n * p + z2

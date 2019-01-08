@@ -20,7 +20,7 @@ main_sensor: RGB
 aux_sensor: EVENTS
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: ZURICH_TRAINING_DAY_V2_LF005_ext_events
+tfrecord_name_prefix: TEST
 
 # Output directory for saving the *.tfrecord
 output_dir: /media/sdc/andya/wormhole_learning/dataset
@@ -36,7 +36,7 @@ cuda_visible_devices: "7"
 net_arch: 10
 
 # Retrieval Threshold of the Detector used in generating the labels
-retrieval_thresh: 0.5
+retrieval_thresh: 0.20
 
 
 # ================ PREPROCESSING
@@ -68,7 +68,7 @@ min_obj_size: 40
 
 # Min Learning Filter Observability Score. Objects below will be discarded
 # or flagged as difficult. Set to 0 to disable the learning filter
-lf_score_thresh: 10
+lf_score_thresh: 35
 
 # ROI of bboxes that shall be removed. Set to None to turn it off. Same tuple structure as bbox
 remove_roi: [0.60, 0.00, 1.00, 1.00]
@@ -80,7 +80,7 @@ remove_shape: [0.33, 0.90]
 
 # ================ VISUALIZATION AND PLOTS
 # Choose verbose mode: "cv2", "plot" or "export". Enter "" to turn it off
-verbose: "plot"
+verbose: "export"
 
 # Generates and saves plots on the home folder
 generate_plots: True

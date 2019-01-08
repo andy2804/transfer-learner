@@ -20,7 +20,7 @@ main_sensor: EVENTS
 aux_sensor: RGB
 
 # Name of the output dataset *.tfrecord
-tfrecord_name_prefix: ZURICH_TRAINING_NIGHT_V2_ext_rgb_020
+tfrecord_name_prefix: ZURICH_TRAINING_NIGHT_LF05_V2_ext_rgb_035
 
 # Output directory for saving the *.tfrecord
 output_dir: /media/sdc/andya/wormhole_learning/dataset
@@ -33,10 +33,10 @@ cuda_visible_devices: "3"
 
 # ================ SEMI-SUPERVISED LABEL GENERATOR
 # Passes argument to cuda visible devices, comma separated values
-net_arch: 81
+net_arch: 30
 
 # Retrieval Threshold of the Detector used in generating the labels
-retrieval_thresh: 0.20
+retrieval_thresh: 0.35
 
 
 # ================ PREPROCESSING
@@ -80,7 +80,7 @@ remove_shape: [0.33, 0.90]
 
 # ================ VISUALIZATION AND PLOTS
 # Choose verbose mode: "cv2", "plot" or "export". Enter "" to turn it off
-verbose: "plot"
+verbose: "export"
 
 # Generates and saves plots on the home folder
 generate_plots: True

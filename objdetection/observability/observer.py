@@ -116,7 +116,7 @@ class MultiModalObserver:
         :return: score
         """
         # Activity score
-        activity_score = 1 + (abs(1 - (np.sum(input_crops[1]) / np.sum(input_crops[0]))) * -1)
+        # activity_score = 1 + (abs(1 - (np.sum(input_crops[1]) / np.sum(input_crops[0]))) * -1)
 
         # Overlap score
         img_box = np.empty_like(input_crops[0], dtype=np.float64)
@@ -126,10 +126,11 @@ class MultiModalObserver:
         cv2.normalize(img_events_box_blur, img_events_box,
                       norm_type=cv2.NORM_MINMAX,
                       dtype=cv2.CV_64F)
-        overlap_score = np.sum(np.multiply(img_box, img_events_box)) / np.sum(img_box)
+        overlap_score = np.sum(np.sqrt(np.multiply(img_box, img_events_box))) / np.sum(img_box)
 
         # Weighting
-        score = min(max((activity_score + 2 * overlap_score) / 3.0, 0.0), 1.0)
+        # score = min(max((activity_score + 2 * overlap_score) / 3.0, 0.0), 1.0)
+        score = int(np.nan_to_num(min(max(overlap_score, 0.0), 1.0)) * 100.0)
 
         # Verbose Image
         if verbose:
@@ -138,14 +139,14 @@ class MultiModalObserver:
             img_box = add_text_overlay(img_box, "Main Sensor", overlay=False)
             img_events_box = add_text_overlay(img_events_box, "Aux Sensor", overlay=False)
             img_stack = np.hstack((img_box, img_events_box))
-            img_stack = add_text_overlay(img_stack, "Score: %d" % (score * 100), overlay=True)
+            img_stack = add_text_overlay(img_stack, "Score: %d" % score, overlay=True)
             plt.figure("figure", figsize=(8, 4))
             plt.imshow(img_stack)
             plt.xticks([])
             plt.yticks([])
             plt.show()
 
-        return int(np.nan_to_num(score) * 100.0)
+        return score
 
     @staticmethod
     def _calc_rgb_entropy(input_crops, verbose=False):

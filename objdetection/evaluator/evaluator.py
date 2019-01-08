@@ -119,11 +119,11 @@ class EvaluatorFrozenGraph(Detector):
             if thresh == 1.0:
                 for cls in range(1, num_classes + 1):
                     corestats[thresh]['acc'][cls] = Bernoulli(1000000, 1000000)
-                    corestats[thresh]['rec'][cls] = Bernoulli(0, 0)
-            # elif thresh == 0.0:
-            #     for cls in range(1, num_classes + 1):
-            #         corestats[thresh]['acc'][cls] = Bernoulli(0, 0)
-            #         corestats[thresh]['rec'][cls] = Bernoulli(1000000, 1000000)
+                    corestats[thresh]['rec'][cls] = Bernoulli(0, 1000000)
+            elif thresh == 0.0:
+                for cls in range(1, num_classes + 1):
+                    corestats[thresh]['acc'][cls] = Bernoulli(0, 1000000)
+                    corestats[thresh]['rec'][cls] = Bernoulli(1000000, 1000000)
             else:
                 for cls in range(1, num_classes + 1):
                     gt = corestats[thresh]['n_gt'][cls]
