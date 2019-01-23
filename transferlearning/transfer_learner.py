@@ -10,6 +10,13 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from PIL import Image, ImageStat
+
+import matplotlib as mpl
+
+if os.environ.get('DISPLAY', '') == '':
+    print('no display found. Using non-interactive Agg backend')
+    mpl.use('Agg')
+
 from matplotlib import pyplot as plt
 
 from objdetection.detector.detector import Detector, ObjectDetected
@@ -160,7 +167,7 @@ class TransferLearner:
         values.append(len(self._learning_filter.stats.get_tlscores()))
         values.append(len(self.files))
         sheets = GoogleSheetsInterface()
-        sheets.upload_data('zurich_dataset', 'B', 'J', self.flags.tfrecord_name_prefix, values)
+        sheets.upload_data('zurich_rss_dataset', 'B', 'J', self.flags.tfrecord_name_prefix, values)
 
         if self.flags.generate_plots:
             self._learning_filter.stats.make_plots(save_plots=self.flags.generate_plots,

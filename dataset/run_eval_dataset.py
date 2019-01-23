@@ -24,9 +24,9 @@ flags.DEFINE_string('output_dir', "/home/andya/external_ssd/wormhole_learning/da
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME
-flags.DEFINE_string('filename', "ZURICH_TESTING_DAY_LF2_V2_events_handlabeled.tfrecord",
+flags.DEFINE_string('filename', "ZURICH_VALIDATION_DAY_RSS_rgb_handlabeled.tfrecord",
                     'Names of the tfrecords containing the test data passed as a list')
-flags.DEFINE_string('google_sheet', "zurich_dataset",
+flags.DEFINE_string('google_sheet', "zurich_rss_dataset",
                     'Title of the worksheet in Google Sheets to upload the results to')
 
 # ================ GPUS MASK

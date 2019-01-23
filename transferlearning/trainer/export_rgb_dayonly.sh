@@ -4,9 +4,9 @@ cd $HOME/models/research
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 
 # Job_name can't have spaces
-job_name=rgb_dayonly_ext
+job_name=rgb_dayonly_rss
 dataset=zurich
-ckpt_number=198824
+ckpt_number=612000
 
 # Actual call
 CUDA_VISIBLE_DEVICES=3 python3 object_detection/export_inference_graph.py \

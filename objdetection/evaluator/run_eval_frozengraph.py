@@ -24,15 +24,15 @@ flags.DEFINE_string('output_dir', "/media/sdc/andya/wormhole_learning/results",
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME
-flags.DEFINE_list('testfiles', ["ZURICH_TESTING_DAY_V2_rgb_handlabeled.tfrecord", ],
+flags.DEFINE_list('testfiles', ["ZURICH_TESTING_DAY_RSS_rgb_handlabeled.tfrecord", ],
                   'Names of the tfrecords containing the test data passed as a list')
-flags.DEFINE_string('testname', "1_ZURICH_TESTING_DAY_V2_rgb_handlabeled",
+flags.DEFINE_string('testname', "1_ZURICH_TESTING_DAY_RSS_rgb_handlabeled",
                     'Used in the title of the plot: "Performance metrics on $(arg testname)"')
 
 # ================ NETWORK
-flags.DEFINE_integer('network_model', 10,
+flags.DEFINE_integer('network_model', 12,
                      'Network model as defined in the obj_detection class')
-flags.DEFINE_string('arch_config', 'zurich_networks',
+flags.DEFINE_string('arch_config', 'zurich_rss_networks',
                     'Which architecture dictionary to load in nets_ckpt')
 flags.DEFINE_string('labels_net_arch', 'zauron_label_map.json',
                     'Labels on which the network has been trained')
@@ -61,7 +61,7 @@ flags.DEFINE_bool('scale_back_using_cv2', False,
                   'back to range 0 to 255 using mean 127 and stddev derived from confidence_int')
 
 # ================ VERBOSE
-flags.DEFINE_string('verbose', 'export',
+flags.DEFINE_string('verbose', '',
                   'Whether or not to visualise the predictions against the ground truth')
 flags.DEFINE_bool('make_plot', True,
                   'Make plot out of the results')
@@ -73,7 +73,7 @@ flags.DEFINE_integer('min_obj_size', 0,
                      'Minimum object size (circumference) in pixels, set to 0 to turn it off')
 flags.DEFINE_bool('eval_difficult', True,
                   'Whether or not to evaluate object with difficult flag == 1')
-flags.DEFINE_bool('publish_result', False,
+flags.DEFINE_bool('publish_result', True,
                   "Wether or not to publish to google sheets.")
 
 

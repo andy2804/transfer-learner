@@ -4,10 +4,12 @@ import sys
 import numpy as np
 from PIL import Image
 
+PROJECT_ROOT = os.getcwd()[:os.getcwd().index('utils')]
+sys.path.append(PROJECT_ROOT)
 PROJECT_ROOT = os.getcwd()[:os.getcwd().index('WormholeLearning')]
 sys.path.append(PROJECT_ROOT)
-from utils.static_helper import load_labels
 
+from utils.static_helper import load_labels
 from objdetection.detector.detector import Detector
 
 
@@ -83,10 +85,10 @@ if __name__ == '__main__':
     NET_ARCH = 2
     LABELS_NET = "mscoco_label_map.json"
     LABELS_OUT = "zauron_label_map.json"
-    DATASET_DIR = "/home/andya/external_ssd/wormhole_learning/dataset_np/thehive_samples" \
-                  "/night_sampled"
+    DATASET_DIR = "/home/andya/external_ssd/wormhole_learning/dataset/testing_handlabeling" \
+                  "/night_sampled_rss_additional"
     FILTER_KEY = 'RGB'
-    CUDA_MASK = "3"
+    CUDA_MASK = "0"
 
     # main
     os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_MASK

@@ -61,5 +61,6 @@ def load_config(flags, config_file):
     flags.DEFINE_string('verbose', config['verbose'], 'verbose')
     flags.DEFINE_bool('generate_plots', config['generate_plots'], 'generate_plots')
     flags.DEFINE_bool('show_plots', config['show_plots'], 'show_plots')
+    flags.DEFINE_string('google_sheets', config['google_sheets'], 'google_sheets')
 
     return flags

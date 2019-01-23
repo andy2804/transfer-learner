@@ -63,9 +63,9 @@ def main():
 
 if __name__ == '__main__':
     # Give absolute paths
-    OUTPUT_DIR = "/home/andya/external_ssd/wormhole_learning/dataset/thehive_samples/night_sampled"
+    OUTPUT_DIR = "/home/andya/external_ssd/wormhole_learning/dataset/testing_handlabeling/night_sampled_rss"
     DATASET_DIR = "/home/andya/external_ssd/wormhole_learning/converted_rosbags"
-    FILTER_KEYWORDS = ['night']
+    FILTER_KEYWORDS = ['day']
 
     # Use dataset dictionary instead of filter keywords
     DATASET = '/home/andya/external_ssd/wormhole_learning/dataset.yaml'
