@@ -56,6 +56,8 @@ def plot_performance_metrics(corestats,
         label_filter = labels
     else:
         num_labels = len(label_filter)
+
+    # Plot class-wise precision-recall curves
     fig, axs = plt.subplots(num_labels, 2, sharex='col', figsize=(6, num_labels * 2),
                             dpi=150, )  # gridspec_kw={'top':.9})
     fig.suptitle('Performance Metrics for\n{}'.format(filename))
@@ -107,7 +109,29 @@ def plot_performance_metrics(corestats,
                        verticalalignment='center', transform=ax[1].transAxes)
             curr_ax += 1
     fig.tight_layout(rect=[0, 0, 1, 0.76 + 0.02 * num_labels])
-    return fig
+
+    # Plot micro-averaged precision-recall curve
+    fig2 = plt.figure(figsize=(6, 4), dpi=150)
+    fig2.suptitle('Micro-Averaged Performance Metrics for\n{}'.format(filename))
+    for idx, corestat in enumerate(corestats):
+        micro_acc, micro_rec = [], []
+        mAP = np.mean(np.array([val for val in ap[idx]]))
+        for thresh in sorted(corestat.keys())[::-1]:
+            micro_acc.append(corestat[thresh]['micro_acc'])
+            micro_rec.append(corestat[thresh]['micro_rec'])
+        plt.stackplot(micro_rec, micro_acc, color=COLORS[idx], alpha=ALPHA, zorder=2)
+        plt.plot(micro_rec, micro_acc, color=COLORS[idx], lw=1.5, zorder=3)
+        ax = plt.gca()
+        ax.text(0.95, 0.86 - idx * 0.1, '$mAP: %.2f$' % mAP, size=9,
+                   color=COLORS[key],
+                   horizontalalignment='right',
+                   verticalalignment='center', transform=ax.transAxes)
+        ax.set_xlim(0.0, 1.0)
+        ax.set_ylim(0.0, 1.0)
+        ax.set_xlabel('Recall')
+        ax.set_ylabel('Precision')
+    fig2.tight_layout()
+    return fig, fig2
 
 
 def _plot_acc_rec(ax, corestats, cls, thresholds, color, mid_thresh, conf_level=.95,

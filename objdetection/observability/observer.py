@@ -92,7 +92,7 @@ class MultiModalObserver:
             return None
 
     @staticmethod
-    def _compute_observability_score(input_crops, type='rgb', verbose=False):
+    def _compute_observability_score(input_crops, type='rgb', verbose=''):
         """
         Call for observability computation depending on input type
         :param input_crops: Takes in a tuple of images cropped to the detected object
@@ -100,14 +100,14 @@ class MultiModalObserver:
         :return:
         """
         if type == 'rgb':
-            return MultiModalObserver._calc_rgb_entropy(input_crops, verbose)
+            return MultiModalObserver._compute_overlap(input_crops, 'rgb', verbose)
         elif type == 'events' or 'events_np':
-            return MultiModalObserver._calc_events_overlap(input_crops, verbose)
+            return MultiModalObserver._compute_overlap(input_crops, 'events', verbose)
         else:
             print('Undefined type was specified!')
 
     @staticmethod
-    def _calc_events_overlap(input_crops, verbose=False):
+    def _compute_overlap(input_crops, mode='events', verbose=''):
         """ Observability of events inferred from rgb frames
         Calculates score how well event frame overlaps with rgb frame
         to determine the activity in the event frame
@@ -126,25 +126,36 @@ class MultiModalObserver:
         cv2.normalize(img_events_box_blur, img_events_box,
                       norm_type=cv2.NORM_MINMAX,
                       dtype=cv2.CV_64F)
-        overlap_score = np.sum(np.sqrt(np.multiply(img_box, img_events_box))) / np.sum(img_box)
+        if mode == 'rgb':
+            img_sum = np.sum(img_box)
+        elif mode == 'events':
+            img_sum = np.sum(img_events_box)
+        else:
+            img_sum = np.sum(img_box)
+        overlap_score = np.sum(np.sqrt(np.multiply(img_box, img_events_box))) / img_sum
 
         # Weighting
         # score = min(max((activity_score + 2 * overlap_score) / 3.0, 0.0), 1.0)
         score = int(np.nan_to_num(min(max(overlap_score, 0.0), 1.0)) * 100.0)
 
         # Verbose Image
-        if verbose:
+        if verbose != '':
             img_box = scale_to_box((img_box * 255).astype(np.uint8), (200, 300))
             img_events_box = scale_to_box((img_events_box * 255).astype(np.uint8), (200, 300))
             img_box = add_text_overlay(img_box, "Main Sensor", overlay=False)
             img_events_box = add_text_overlay(img_events_box, "Aux Sensor", overlay=False)
             img_stack = np.hstack((img_box, img_events_box))
             img_stack = add_text_overlay(img_stack, "Score: %d" % score, overlay=True)
-            plt.figure("figure", figsize=(8, 4))
-            plt.imshow(img_stack)
-            plt.xticks([])
-            plt.yticks([])
-            plt.show()
+
+            if verbose == 'cv2':
+                cv2.imshow('Learning Filter Score', img_stack)
+                cv2.waitKey(1)
+            elif verbose == 'plot':
+                plt.figure("figure", figsize=(8, 4))
+                plt.imshow(img_stack)
+                plt.xticks([])
+                plt.yticks([])
+                plt.show()
 
         return score
 

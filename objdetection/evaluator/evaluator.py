@@ -44,7 +44,7 @@ class EvaluatorFrozenGraph(Detector):
                                                    arch_config=arch_config,
                                                    labels_net_arch=labels_net_arch,
                                                    labels_output=labels_output)
-        self._plot = None
+        self._plot, self._micro_plot = None, None
         self.plot_title = plot_title
         self.output_dir = output_dir
         self.decoder = EncoderTFrecGoogleApi()
@@ -116,21 +116,33 @@ class EvaluatorFrozenGraph(Detector):
 
             # Manually set CI values for confidence threshold boundaries, that will otherwise
             # cause errors in compute_ap method
+            # also calculates micro-averaged precision and recall due to imbalance of classes
             if thresh == 1.0:
                 for cls in range(1, num_classes + 1):
                     corestats[thresh]['acc'][cls] = Bernoulli(1000000, 1000000)
                     corestats[thresh]['rec'][cls] = Bernoulli(0, 1000000)
+                corestats[thresh]['micro_acc'] = 1.0
+                corestats[thresh]['micro_rec'] = 0.0
             elif thresh == 0.0:
                 for cls in range(1, num_classes + 1):
                     corestats[thresh]['acc'][cls] = Bernoulli(0, 1000000)
                     corestats[thresh]['rec'][cls] = Bernoulli(1000000, 1000000)
+                corestats[thresh]['micro_acc'] = 0.0
+                corestats[thresh]['micro_rec'] = 1.0
             else:
+                m_tp, m_fp, m_gt = 0.0, 0.0, 0.0
                 for cls in range(1, num_classes + 1):
                     gt = corestats[thresh]['n_gt'][cls]
                     tp = corestats[thresh]['tp'][cls]
                     fp = corestats[thresh]['fp'][cls]
                     corestats[thresh]['acc'][cls] = Bernoulli(tp, tp + fp)
                     corestats[thresh]['rec'][cls] = Bernoulli(tp, gt)
+                    m_tp += tp
+                    m_fp += (tp + fp)
+                    m_gt += gt
+                corestats[thresh]['micro_acc'] = m_tp / (m_tp + m_fp)
+                corestats[thresh]['micro_rec'] = m_tp / m_gt
+
         return corestats
 
     @staticmethod
@@ -195,7 +207,7 @@ class EvaluatorFrozenGraph(Detector):
         :param testname:
         :return:
         """
-        self._plot = plot_performance_metrics(
+        self._plot, self._micro_plot = plot_performance_metrics(
                 [self._stats], [self._AP],
                 self._labels_output_dict,
                 testname, relative_bar_chart=relative_bar_chart)
@@ -214,7 +226,11 @@ class EvaluatorFrozenGraph(Detector):
                 plot_file = os.path.join(
                         self.output_dir,
                         self._network_name + '_' + filename + '.pdf')
+                micro_plot_file = os.path.join(
+                        self.output_dir,
+                        self._network_name + '_' + filename + '_micro-average.pdf')
                 self._plot.savefig(plot_file)
+                self._micro_plot.savefig(micro_plot_file)
         except PermissionError as e:
             e.args += "\n Permission error during saving plots!"
             print("Permission error trying to save plots!")

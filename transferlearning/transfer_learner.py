@@ -14,7 +14,7 @@ from PIL import Image, ImageStat
 import matplotlib as mpl
 
 if os.environ.get('DISPLAY', '') == '':
-    print('no display found. Using non-interactive Agg backend')
+    print('matplotlib: No display found. Using non-interactive Agg backend')
     mpl.use('Agg')
 
 from matplotlib import pyplot as plt
@@ -53,7 +53,7 @@ class TransferLearner:
         self._learning_filter = LearningFilter(score_threshold=flags.lf_score_thresh,
                                                min_img_perimeter=flags.min_obj_size,
                                                logstats=True, mode=self.flags.lf_mode,
-                                               verbose=False)
+                                               verbose=self.flags.verbose)
 
         # Analyze the dataset
         self._analysis = self._analyze_dataset(flags, self.files)
@@ -112,7 +112,7 @@ class TransferLearner:
                 self._encoded_mean.append(img_aux.mean())
                 self._encoded_std.append(img_aux.std())
 
-                if self.flags.verbose != "":
+                if self.flags.verbose != "" and len(boxes_filtered) > 0:
                     objects_main = ObjectDetected(source='detect_from_rgb', boxes=boxes_remapped,
                                                   scores=scores_remapped, classes=classes_remapped,
                                                   ts=0)
@@ -187,7 +187,7 @@ class TransferLearner:
 
 
     @staticmethod
-    def _visualize_transfer_step(obj_detected, images, labels, flags, count, mode='plot'):
+    def _visualize_transfer_step(obj_detected, images, labels, flags, count, export_stride=4, mode='plot'):
         """
         Verbose method
         :param obj_detected:
@@ -201,17 +201,22 @@ class TransferLearner:
         img_stack = np.hstack((img_main_labeled, img_aux_labeled))
         if mode == 'cv2':
             cv2.imshow('Transfer Learning Step', cv2.cvtColor(img_stack, cv2.COLOR_BGR2RGB))
-            cv2.waitKey(1)
+            cv2.waitKey(0)
         elif mode == 'plot':
             plt.figure("figure", figsize=(16, 8))
             plt.xticks([])
             plt.yticks([])
             plt.imshow(img_stack)
             plt.show()
-        elif mode == 'export' and count % 4 == 0:
+        elif mode == 'export' and count % export_stride == 0:
             export_transfer_step_img(img_stack,
                                      os.path.join(flags.output_dir, flags.tfrecord_name_prefix),
                                      count)
+        elif mode == 'export_rejected':
+            if len(obj_detected[0].classes) > len(obj_detected[1].classes):
+                export_transfer_step_img(img_stack,
+                                         os.path.join(flags.output_dir, flags.tfrecord_name_prefix),
+                                         count)
 
     @staticmethod
     def _analyze_dataset(flags, files):

@@ -33,9 +33,16 @@ class LearningFilter(MultiModalObserver):
         boxes_to_keep = np.empty((0, 4), dtype=np.float)
 
         img_main, img_aux, boxes = list(map(np.copy, [img_main_in, img_aux_in, boxes]))
-        img_main_grad = self._filter_img(img_main, filter='gradient', normalize=True, mode='rgb')
-        img_aux_grad = self._filter_img(img_aux, filter='grayscale', normalize=False,
-                                        mode=self._observability_mode)
+
+        if self._observability_mode == 'rgb':
+            img_main_grad = self._filter_img(img_main, filter='grayscale', normalize=True,
+                                             mode='events')
+            img_aux_grad = self._filter_img(img_aux, filter='gradient', normalize=True,
+                                            mode=self._observability_mode)
+        else:
+            img_main_grad = self._filter_img(img_main, filter='gradient', normalize=True, mode='rgb')
+            img_aux_grad = self._filter_img(img_aux, filter='grayscale', normalize=True,
+                                            mode=self._observability_mode)
         for box_abs, class_id in zip(
                 [self._box_norm_to_abs(box, img_main_grad) for box in boxes], classes):
             if class_id:
@@ -46,7 +53,7 @@ class LearningFilter(MultiModalObserver):
                         [img_main_grad_box, img_aux_grad_box],
                         type=self._observability_mode,
                         verbose=self._verbose)
-                tl_keep = aux_sensor_score > self._keep_thresh and perimeter >= \
+                tl_keep = aux_sensor_score >= self._keep_thresh and perimeter >= \
                           self._min_img_perimeter
 
                 # Record statistics
