@@ -21,14 +21,17 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # Change this line to load your desired transfer learning configuration
-CONFIG = 'zauron_events2rgb.yaml'
-DATASET = '/home/andya/external_ssd/wormhole_learning/dataset.yaml'
-SUBSET = ['training', 'day']
+CONFIG = 'default.yaml'
+
+# Uncomment these two lines to use a dataset.yaml instead of the filter keyword
+# set in the run CONFIG file.
+# DATASET = 'dataset.yaml'
+# SUBSET = ['training', 'day']
 
 flags = load_config(flags, CONFIG)
 
 # Overwrite filter_keywords with dataset file
-FLAGS.filter_keywords = load_dict_from_yaml(DATASET)[SUBSET[0]][SUBSET[1]]
+# FLAGS.filter_keywords = load_dict_from_yaml(DATASET)[SUBSET[0]][SUBSET[1]]
 
 # Define which architecture dictionary to use for the detector
 flags.DEFINE_string('arch_config', 'zurich_rss_networks',

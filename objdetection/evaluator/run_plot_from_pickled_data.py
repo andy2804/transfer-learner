@@ -18,14 +18,13 @@ from utils.sheets_interface import GoogleSheetsInterface
 from utils.static_helper import load_labels
 from utils.visualisation.plot_mAP_evaluation import plot_performance_metrics
 
-INPUT_DIR = '/home/andya/external_ssd/wormhole_learning/results'
-OUTPUT_DIR = '/home/andya/external_ssd/wormhole_learning/results'
-TESTNAME = ['ssd_inception_v2_zurich_rgb_dayonly_rss_330_1_ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled',
-            'ssd_inception_v2_zurich_rgb_daynight_rss_408_3_ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled']
-LABELS = 'zauron_label_map.json'
-ARCH_DICT = load_arch_dict('zurich_rss_networks')
+INPUT_DIR = '/path/to/your/result/files'
+OUTPUT_DIR = 'path/to/your/output'
+TESTNAME = ['pickled_evaluation_results']
+LABELS = 'label_map.json'
+ARCH_DICT = load_arch_dict('default')
 NETWORK_TEXT_STRIP = ''
-FILE_SUFFIX = 'ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled'
+FILE_SUFFIX = 'output_file_suffix'
 
 # To plot all classes, set LABEL_FILTER = None
 LABEL_FILTER = None

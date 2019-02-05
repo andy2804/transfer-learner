@@ -17,7 +17,9 @@ CREDENTIALS_PATH = os.path.join(os.getcwd()[:os.getcwd().index('WormholeLearning
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 
 # Spreadsheet ID
-SPREADSHEET_ID = '1ayYY_QUQqsv-FsqGZ7hMlHzPxh9ivbg3UgmHdKrtP9Y'  # TFRecords Builder result
+# If this is a new empty sheet, the corresponding working sheets (you specify here)
+# need to be created first in the google spreadsheet web editor
+SPREADSHEET_ID = 'ENTER_YOUR_SHEET_ID_HERE'  # TFRecords Builder result
 
 
 class GoogleSheetsInterface:

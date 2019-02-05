@@ -18,25 +18,25 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # ================ DIRECTORIES
-flags.DEFINE_string('dataset_dir', "/media/sdc/andya/wormhole_learning/dataset",
+flags.DEFINE_string('dataset_dir', "/path/to/your/dataset",
                     'The directory where the dataset files are stored as absolute path.')
-flags.DEFINE_string('output_dir', "/media/sdc/andya/wormhole_learning/results",
+flags.DEFINE_string('output_dir', "/path/to/your/output",
                     'If any output is being generated it will be saved here')
 
 # ================ FILENAME
-flags.DEFINE_list('testfiles', ["ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled.tfrecord", ],
+flags.DEFINE_list('testfiles', ["TESTSET.tfrecord", ],
                   'Names of the tfrecords containing the test data passed as a list')
-flags.DEFINE_string('testname', "3_ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled",
+flags.DEFINE_string('testname', "NAME OF TEST RUN",
                     'Used in the title of the plot: "Performance metrics on $(arg testname)"')
 
 # ================ NETWORK
-flags.DEFINE_integer('network_model', 41,
+flags.DEFINE_integer('network_model', 1,
                      'Network model as defined in the obj_detection class')
-flags.DEFINE_string('arch_config', 'zurich_rss_networks',
+flags.DEFINE_string('arch_config', 'default',
                     'Which architecture dictionary to load in nets_ckpt')
-flags.DEFINE_string('labels_net_arch', 'zauron_label_map.json',
+flags.DEFINE_string('labels_net_arch', 'label_map.json',
                     'Labels on which the network has been trained')
-flags.DEFINE_string('labels_output', 'zauron_label_map.json',
+flags.DEFINE_string('labels_output', 'label_map.json',
                     'Labels against which we want to measure the performance, '
                     'they need to be the same mapping that has been used for the ground-truth.')
 
