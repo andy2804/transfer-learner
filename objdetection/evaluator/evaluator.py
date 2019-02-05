@@ -121,14 +121,14 @@ class EvaluatorFrozenGraph(Detector):
                 for cls in range(1, num_classes + 1):
                     corestats[thresh]['acc'][cls] = Bernoulli(1000000, 1000000)
                     corestats[thresh]['rec'][cls] = Bernoulli(0, 1000000)
-                corestats[thresh]['micro_acc'] = 1.0
-                corestats[thresh]['micro_rec'] = 0.0
+                corestats[thresh]['micro_acc'] = Bernoulli(1000000, 1000000)
+                corestats[thresh]['micro_rec'] = Bernoulli(0, 1000000)
             elif thresh == 0.0:
                 for cls in range(1, num_classes + 1):
                     corestats[thresh]['acc'][cls] = Bernoulli(0, 1000000)
                     corestats[thresh]['rec'][cls] = Bernoulli(1000000, 1000000)
-                corestats[thresh]['micro_acc'] = 0.0
-                corestats[thresh]['micro_rec'] = 1.0
+                corestats[thresh]['micro_acc'] = Bernoulli(0, 1000000)
+                corestats[thresh]['micro_rec'] = Bernoulli(1000000, 1000000)
             else:
                 m_tp, m_fp, m_gt = 0.0, 0.0, 0.0
                 for cls in range(1, num_classes + 1):
@@ -140,19 +140,23 @@ class EvaluatorFrozenGraph(Detector):
                     m_tp += tp
                     m_fp += (tp + fp)
                     m_gt += gt
-                corestats[thresh]['micro_acc'] = m_tp / (m_tp + m_fp)
-                corestats[thresh]['micro_rec'] = m_tp / m_gt
+                    m_tp = int(m_tp)
+                    m_fp = int(m_fp)
+                    m_gt = int(m_gt)
+                corestats[thresh]['micro_acc'] = Bernoulli(m_tp, m_tp + m_fp)
+                corestats[thresh]['micro_rec'] = Bernoulli(m_tp, m_gt)
 
         return corestats
 
     @staticmethod
-    def compute_ap(corestats, thresholds):
+    def compute_ap(corestats, thresholds, weighted=True):
         """
         Calculates the per class average precision
         :return:
         """
         num_classes = len(corestats[0]['acc'])
         AP = {c: 0 for c in list(range(1, num_classes + 1))}
+        GT = {c: 0 for c in list(range(1, num_classes + 1))}
         for cls in AP:
             last_rec = 0.0
             ap = 0.0
@@ -162,9 +166,14 @@ class EvaluatorFrozenGraph(Detector):
                 ap += acc * (rec - last_rec)
                 last_rec = rec
             AP[cls] = ap
-        # todo add equal weight or proportional voting schemes
-        # equal weight to all the classes
-        mAP = np.mean(list(AP.values()))
+            GT[cls] = corestats[thresh]['n_gt'][cls]
+
+        if weighted:
+            # weighted average on number of samples per class
+            mAP = np.average(list(AP.values()), weights=(list(GT.values())))
+        else:
+            # equal weight to all the classes
+            mAP = np.mean(list(AP.values()))
         return AP, mAP
 
     def _update_stats(self, ret_thresh, n_gt, tp, fp):
@@ -200,7 +209,7 @@ class EvaluatorFrozenGraph(Detector):
                        thresh_keys}
         return
 
-    def plot_performance_metrics(self, testname, relative_bar_chart=True):
+    def plot_performance_metrics(self, testname, plot_bars=False, relative_bar_chart=True):
         """
         Plots performance metrics using corestats and AP values
         :param relative_bar_chart:
@@ -208,9 +217,9 @@ class EvaluatorFrozenGraph(Detector):
         :return:
         """
         self._plot, self._micro_plot = plot_performance_metrics(
-                [self._stats], [self._AP],
+                [self._stats], [self._AP], [self._mAP],
                 self._labels_output_dict,
-                testname, relative_bar_chart=relative_bar_chart)
+                testname, plot_bars=plot_bars, relative_bar_chart=relative_bar_chart)
 
     def store_results(self, filename, min_obj_size=0):
         """
@@ -257,6 +266,7 @@ class EvaluatorFrozenGraph(Detector):
         print('AP per Class:')
         pprint(self._AP)
         print('mAP:\t%.2f' % self._mAP)
+        print('\nEvaluation for %s finished!' % self._network_name)
         return
 
     def show_example(self, frame, plabels, pscores, pbboxes, gtlabels, gtbboxes, difficult_flag):

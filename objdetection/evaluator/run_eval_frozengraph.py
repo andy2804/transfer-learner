@@ -30,7 +30,7 @@ flags.DEFINE_string('testname', "3_ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled",
                     'Used in the title of the plot: "Performance metrics on $(arg testname)"')
 
 # ================ NETWORK
-flags.DEFINE_integer('network_model', 46,
+flags.DEFINE_integer('network_model', 41,
                      'Network model as defined in the obj_detection class')
 flags.DEFINE_string('arch_config', 'zurich_rss_networks',
                     'Which architecture dictionary to load in nets_ckpt')
@@ -41,7 +41,7 @@ flags.DEFINE_string('labels_output', 'zauron_label_map.json',
                     'they need to be the same mapping that has been used for the ground-truth.')
 
 # ================ CUDA DEVICES
-flags.DEFINE_string('cuda_visible_devices', "2",
+flags.DEFINE_string('cuda_visible_devices', "0",
                     'Passes argument to cuda visible devices, comma separated values')
 
 # ================ DATASET

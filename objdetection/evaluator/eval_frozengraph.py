@@ -185,7 +185,10 @@ def run_evaluation(flags):
             if flags.publish_result:
                 evaluator.publish_results(filename=flags.testname, min_obj_size=flags.min_obj_size)
             if flags.make_plot:
-                evaluator.plot_performance_metrics(testname=flags.testname, relative_bar_chart=True)
+                try:
+                    evaluator.plot_performance_metrics(testname=flags.testname, relative_bar_chart=True)
+                except:
+                    print("Plotting failed!")
             evaluator.store_results(filename=flags.testname, min_obj_size=flags.min_obj_size)
             evaluator.print_performance()
     return

@@ -72,6 +72,9 @@ class GoogleSheetsInterface:
 
     # fixme deprecated
     def upload_evaluation(self, network, testset, aps, mAP, min_obj_size=0):
+        # Update Google Sheet Data
+        self._get_all_sheets()
+
         sheet = 'evaluation'
         row = self._get_result_row(sheet)
         net_range = '%s!A%i' % (sheet, row)

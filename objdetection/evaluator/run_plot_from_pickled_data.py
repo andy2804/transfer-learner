@@ -18,15 +18,14 @@ from utils.sheets_interface import GoogleSheetsInterface
 from utils.static_helper import load_labels
 from utils.visualisation.plot_mAP_evaluation import plot_performance_metrics
 
-INPUT_DIR = '/media/sdc/datasets/kaist/results/evaluation'
-OUTPUT_DIR = '/media/sdc/datasets/kaist/results/evaluation/replot'
-# TESTNAME = ['ssd_inception_v2_kaist_dayonly_1_kaist_day_rgb',
-TESTNAME = ['ssd_inception_v2_kaist_dayonly_1_kaist_night_rgb',
-            'ssd_inception_v2_kaist_ir035_rgb050_RGB_3_kaist_day']
-            # 'ssd_inception_v2_kaist_ir035_rgb050_RGB_3_kaist_night']
-LABELS = 'kaist_label_map.json'
-ARCH_DICT = load_arch_dict('kaist_networks')
-NETWORK_TEXT_STRIP = 'ssd_inception_v2_'
+INPUT_DIR = '/home/andya/external_ssd/wormhole_learning/results'
+OUTPUT_DIR = '/home/andya/external_ssd/wormhole_learning/results'
+TESTNAME = ['ssd_inception_v2_zurich_rgb_dayonly_rss_330_1_ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled',
+            'ssd_inception_v2_zurich_rgb_daynight_rss_408_3_ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled']
+LABELS = 'zauron_label_map.json'
+ARCH_DICT = load_arch_dict('zurich_rss_networks')
+NETWORK_TEXT_STRIP = ''
+FILE_SUFFIX = 'ZURICH_TESTING_NIGHT_RSS_rgb_handlabeled'
 
 # To plot all classes, set LABEL_FILTER = None
 LABEL_FILTER = None
@@ -54,21 +53,24 @@ COMPARISON_PLOT = True
 """
 
 
-def print_stats(corestat, AP, mAP):
-    print('\nCorestats:')
-    pprint(corestat)
+def print_stats(corestat, testname, AP, mAP):
+    print('\nTestname:')
+    print(testname)
+    # print('\nCorestats:')
+    # pprint(corestat)
     print('AP per Class:')
     pprint(AP)
     print('mAP:\t%.2f' % mAP)
 
 
-def save_plot(plot, testname):
+def save_plot(plots, testname):
     if not os.path.exists(os.path.dirname(testname)):
         os.makedirs(os.path.dirname(testname))
     # Save the plot as pdf
     try:
-        if plot is not None:
-            plot.savefig('{}.pdf'.format(testname))
+        if plots is not None:
+            plots[0].savefig('{}_{}.pdf'.format(testname, FILE_SUFFIX))
+            plots[1].savefig('{}_{}_micro_averaged.pdf'.format(testname, FILE_SUFFIX))
     except PermissionError:
         print("\n Permission error during saving plots!")
 
@@ -115,7 +117,7 @@ def upload_results(sheets, network, testset, AP, mAP):
 def split_testname(testname):
     for key, value in ARCH_DICT.items():
         if value in testname:
-            network = value.strip(NETWORK_TEXT_STRIP)
+            network = value.replace(NETWORK_TEXT_STRIP, '')
             testset = testname.replace(network + '_', '')
             return (network, testset)
     return (testname, '')
@@ -140,23 +142,23 @@ def plot_from_corestats(corestats, files, comparison_plot=False):
         for testname in testnames:
             network, _ = split_testname(testname)
             networks.append(network)
-        testname = '\nvs\n'
+        testname = ' & '
         testname = testname.join(networks)
-        plot = plot_performance_metrics(corestats, AP, labels, testname,
-                                        relative_bar_chart=True, label_filter=LABEL_FILTER)
+        plots = plot_performance_metrics(corestats, AP, mAP, labels, testname,
+                                        relative_bar_chart=True, label_filter=LABEL_FILTER, plot_bars=False)
         for idx in range(len(corestats)):
-            print_stats(corestats[idx], AP[idx], mAP[idx])
+            print_stats(corestats[idx], testnames[idx], AP[idx], mAP[idx])
         pdf_file = os.path.join(OUTPUT_DIR, testname)
-        save_plot(plot, pdf_file)
+        save_plot(plots, pdf_file)
     else:
         for idx in range(len(corestats)):
             testname = os.path.splitext(os.path.basename(files[idx]))[0]
             network, testset = split_testname(testname)
-            plot = plot_performance_metrics([corestats[idx]], [AP[idx]], labels, network,
-                                            relative_bar_chart=True, label_filter=LABEL_FILTER)
-            print_stats(corestats[idx], AP[idx], mAP[idx])
+            plots = plot_performance_metrics([corestats[idx]], [AP[idx]], [mAP[idx]], labels, network,
+                                            relative_bar_chart=True, label_filter=LABEL_FILTER, plot_bars=False)
+            print_stats(corestats[idx], testname, AP[idx], mAP[idx])
             pdf_file = os.path.join(OUTPUT_DIR, testname)
-            save_plot(plot, pdf_file)
+            save_plot(plots, pdf_file)
             if UPLOAD_TO_SHEETS:
                 upload_results(sheets, network, testset, AP[idx], mAP[idx])
 

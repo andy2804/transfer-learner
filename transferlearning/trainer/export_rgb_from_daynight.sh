@@ -4,7 +4,7 @@ cd $HOME/models/research
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 
 # Job_name can't have spaces
-job_name=rgb_daynight_rss
+job_name=rgb_daynight_lf2_rss
 dataset=zurich
 ckpt_number=630629
 gpu=3
