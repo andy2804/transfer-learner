@@ -27,7 +27,15 @@ def load_config(flags, config_file):
 
     # ================ DIRECTORIES
     flags.DEFINE_string('dataset_dir', config['dataset_dir'], 'dataset_dir')
-    flags.DEFINE_list('filter_keywords', config['filter_keywords'], 'filter_keywords')
+
+    # Check if a list of keywords or a dataset has been passed
+    filter_keywords = config['filter_keywords']
+    if not isinstance(config['filter_keywords'], str):
+        subset_list = config['filter_subset']
+        for index in subset_list:
+            filter_keywords = filter_keywords[index]
+    flags.DEFINE_list('filter_keywords', filter_keywords, 'filter_keywords')
+
     flags.DEFINE_string('main_sensor', config['main_sensor'], 'main_sensor')
     flags.DEFINE_string('aux_sensor', config['aux_sensor'], 'aux_sensor')
     flags.DEFINE_string('tfrecord_name_prefix', config['tfrecord_name_prefix'],
@@ -39,6 +47,7 @@ def load_config(flags, config_file):
                         'cuda_visible_devices')
 
     # ================ SEMI-SUPERVISED LABEL GENERATOR
+    flags.DEFINE_string('arch_config', 'zurich_rss_networks', 'arch_config')
     flags.DEFINE_integer('net_arch', config['net_arch'], 'net_arch')
     flags.DEFINE_float('retrieval_thresh', config['retrieval_thresh'], 'retrieval_thresh')
 
@@ -64,3 +73,9 @@ def load_config(flags, config_file):
     flags.DEFINE_string('google_sheets', config['google_sheets'], 'google_sheets')
 
     return flags
+
+
+def load_dict_from_yaml(yaml_file):
+    with open(yaml_file, "r") as fs:
+        yaml_dict = yaml.load(fs)
+    return yaml_dict

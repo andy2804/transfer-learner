@@ -10,8 +10,14 @@ labels_out: zauron_label_map.json
 # The directory where the dataset files are stored as absolute path
 dataset_dir: /media/sdc/andya/wormhole_learning/converted_rosbags
 
-# Filter keywords that needs to be contained in the path
+# Filter keywords that needs to be contained in the path or specify a dataset.yaml file
+# The file is placed in the same config subfolder as the example_rgb2events.yaml file
+# Example (dataset.yaml): filter_keywords: "dataset.yaml"
+# Example several keywords: filter_keywords: ["sunny", "day", "2019-01-16"]
 filter_keywords: ["day"]
+
+# Choose a subset if you specified a dataset.yaml file above, otherwise this will be ignored
+filter_subset: ["training", "day"]
 
 # Name of the sub-directory containing images of the main sensor
 main_sensor: RGB
@@ -32,6 +38,9 @@ cuda_visible_devices: "6"
 
 
 # ================ SEMI-SUPERVISED LABEL GENERATOR
+# Network architecture configuration list (as it can be found in /resources/nets_ckpt
+arch_config: "default.yaml"
+
 # Passes argument to cuda visible devices, comma separated values
 net_arch: 11
 
