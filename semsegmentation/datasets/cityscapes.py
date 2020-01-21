@@ -38,10 +38,17 @@ class Cityscapes(Dataset):
 
     @staticmethod
     def _get_default_labels():
+        """
+        Can be improved
+        https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/helpers/labels.py
+        :return:
+        """
         return np.asarray(["road", "sidewalk",
-                           "person", "rider",
-                           "car", "truck", "bus", "on rails", "motorcycle", " bicycle",
                            "building", " wall", " fence",
-                           "pole", "traffic sign", "traffic light",
+                           "pole", "traffic light", "traffic sign",
                            "vegetation", " terrain",
-                           "sky"])
+                           "sky",
+                           "person", "rider",
+                           "car", "truck", "bus",
+                           "train", "motorcycle", " bicycle"
+                           ])
